@@ -27,6 +27,7 @@
     "qrcode-reader": "^1.0.4",
     "sirv-cli": "^2.0.0",
     "svelte-carousel": "^1.0.25",
+    "svelte-french-toast": "^1.0.4-beta.0",
     "svelte-qr-scanner": "^1.1.0"
   }
 }

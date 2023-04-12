@@ -1,9 +1,15 @@
 
-(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35730/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 var app = (function () {
     'use strict';
 
     function noop() { }
+    function assign(tar, src) {
+        // @ts-ignore
+        for (const k in src)
+            tar[k] = src[k];
+        return tar;
+    }
     function add_location(element, file, line, column, char) {
         element.__svelte_meta = {
             loc: { file, line, column, char }
@@ -35,6 +41,72 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function validate_store(store, name) {
+        if (store != null && typeof store.subscribe !== 'function') {
+            throw new Error(`'${name}' is not a store with a 'subscribe' method`);
+        }
+    }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function get_store_value(store) {
+        let value;
+        subscribe(store, _ => value = _)();
+        return value;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
+    function create_slot(definition, ctx, $$scope, fn) {
+        if (definition) {
+            const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
+            return definition[0](slot_ctx);
+        }
+    }
+    function get_slot_context(definition, ctx, $$scope, fn) {
+        return definition[1] && fn
+            ? assign($$scope.ctx.slice(), definition[1](fn(ctx)))
+            : $$scope.ctx;
+    }
+    function get_slot_changes(definition, $$scope, dirty, fn) {
+        if (definition[2] && fn) {
+            const lets = definition[2](fn(dirty));
+            if ($$scope.dirty === undefined) {
+                return lets;
+            }
+            if (typeof lets === 'object') {
+                const merged = [];
+                const len = Math.max($$scope.dirty.length, lets.length);
+                for (let i = 0; i < len; i += 1) {
+                    merged[i] = $$scope.dirty[i] | lets[i];
+                }
+                return merged;
+            }
+            return $$scope.dirty | lets;
+        }
+        return $$scope.dirty;
+    }
+    function update_slot_base(slot, slot_definition, ctx, $$scope, slot_changes, get_slot_context_fn) {
+        if (slot_changes) {
+            const slot_context = get_slot_context(slot_definition, ctx, $$scope, get_slot_context_fn);
+            slot.p(slot_context, slot_changes);
+        }
+    }
+    function get_all_dirty_from_scope($$scope) {
+        if ($$scope.ctx.length > 32) {
+            const dirty = [];
+            const length = $$scope.ctx.length / 32;
+            for (let i = 0; i < length; i++) {
+                dirty[i] = -1;
+            }
+            return dirty;
+        }
+        return -1;
+    }
     function append(target, node) {
         target.appendChild(node);
     }
@@ -46,6 +118,12 @@ var app = (function () {
             node.parentNode.removeChild(node);
         }
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
@@ -54,6 +132,9 @@ var app = (function () {
     }
     function space() {
         return text(' ');
+    }
+    function empty() {
+        return text('');
     }
     function listen(node, event, handler, options) {
         node.addEventListener(event, handler, options);
@@ -65,8 +146,32 @@ var app = (function () {
         else if (node.getAttribute(attribute) !== value)
             node.setAttribute(attribute, value);
     }
+    function set_attributes(node, attributes) {
+        // @ts-ignore
+        const descriptors = Object.getOwnPropertyDescriptors(node.__proto__);
+        for (const key in attributes) {
+            if (attributes[key] == null) {
+                node.removeAttribute(key);
+            }
+            else if (key === 'style') {
+                node.style.cssText = attributes[key];
+            }
+            else if (key === '__value') {
+                node.value = node[key] = attributes[key];
+            }
+            else if (descriptors[key] && descriptors[key].set) {
+                node[key] = attributes[key];
+            }
+            else {
+                attr(node, key, attributes[key]);
+            }
+        }
+    }
     function children(element) {
         return Array.from(element.childNodes);
+    }
+    function set_input_value(input, value) {
+        input.value = value == null ? '' : value;
     }
     function set_style(node, key, value, important) {
         if (value === null) {
@@ -75,6 +180,9 @@ var app = (function () {
         else {
             node.style.setProperty(key, value, important ? 'important' : '');
         }
+    }
+    function toggle_class(element, name, toggle) {
+        element.classList[toggle ? 'add' : 'remove'](name);
     }
     function custom_event(type, detail, { bubbles = false, cancelable = false } = {}) {
         const e = document.createEvent('CustomEvent');
@@ -102,6 +210,17 @@ var app = (function () {
      */
     function onMount(fn) {
         get_current_component().$$.on_mount.push(fn);
+    }
+    /**
+     * Schedules a callback to run immediately before the component is unmounted.
+     *
+     * Out of `onMount`, `beforeUpdate`, `afterUpdate` and `onDestroy`, this is the
+     * only one that runs inside a server-side component.
+     *
+     * https://svelte.dev/docs#run-time-svelte-ondestroy
+     */
+    function onDestroy(fn) {
+        get_current_component().$$.on_destroy.push(fn);
     }
 
     const dirty_components = [];
@@ -155,7 +274,7 @@ var app = (function () {
                     const component = dirty_components[flushidx];
                     flushidx++;
                     set_current_component(component);
-                    update(component.$$);
+                    update$1(component.$$);
                 }
             }
             catch (e) {
@@ -189,7 +308,7 @@ var app = (function () {
         seen_callbacks.clear();
         set_current_component(saved_component);
     }
-    function update($$) {
+    function update$1($$) {
         if ($$.fragment !== null) {
             $$.update();
             run_all($$.before_update);
@@ -211,6 +330,19 @@ var app = (function () {
     }
     const outroing = new Set();
     let outros;
+    function group_outros() {
+        outros = {
+            r: 0,
+            c: [],
+            p: outros // parent group
+        };
+    }
+    function check_outros() {
+        if (!outros.r) {
+            run_all(outros.c);
+        }
+        outros = outros.p;
+    }
     function transition_in(block, local) {
         if (block && block.i) {
             outroing.delete(block);
@@ -242,6 +374,136 @@ var app = (function () {
         : typeof globalThis !== 'undefined'
             ? globalThis
             : global);
+    function outro_and_destroy_block(block, lookup) {
+        transition_out(block, 1, 1, () => {
+            lookup.delete(block.key);
+        });
+    }
+    function update_keyed_each(old_blocks, dirty, get_key, dynamic, ctx, list, lookup, node, destroy, create_each_block, next, get_context) {
+        let o = old_blocks.length;
+        let n = list.length;
+        let i = o;
+        const old_indexes = {};
+        while (i--)
+            old_indexes[old_blocks[i].key] = i;
+        const new_blocks = [];
+        const new_lookup = new Map();
+        const deltas = new Map();
+        const updates = [];
+        i = n;
+        while (i--) {
+            const child_ctx = get_context(ctx, list, i);
+            const key = get_key(child_ctx);
+            let block = lookup.get(key);
+            if (!block) {
+                block = create_each_block(key, child_ctx);
+                block.c();
+            }
+            else if (dynamic) {
+                // defer updates until all the DOM shuffling is done
+                updates.push(() => block.p(child_ctx, dirty));
+            }
+            new_lookup.set(key, new_blocks[i] = block);
+            if (key in old_indexes)
+                deltas.set(key, Math.abs(i - old_indexes[key]));
+        }
+        const will_move = new Set();
+        const did_move = new Set();
+        function insert(block) {
+            transition_in(block, 1);
+            block.m(node, next);
+            lookup.set(block.key, block);
+            next = block.first;
+            n--;
+        }
+        while (o && n) {
+            const new_block = new_blocks[n - 1];
+            const old_block = old_blocks[o - 1];
+            const new_key = new_block.key;
+            const old_key = old_block.key;
+            if (new_block === old_block) {
+                // do nothing
+                next = new_block.first;
+                o--;
+                n--;
+            }
+            else if (!new_lookup.has(old_key)) {
+                // remove old block
+                destroy(old_block, lookup);
+                o--;
+            }
+            else if (!lookup.has(new_key) || will_move.has(new_key)) {
+                insert(new_block);
+            }
+            else if (did_move.has(old_key)) {
+                o--;
+            }
+            else if (deltas.get(new_key) > deltas.get(old_key)) {
+                did_move.add(new_key);
+                insert(new_block);
+            }
+            else {
+                will_move.add(old_key);
+                o--;
+            }
+        }
+        while (o--) {
+            const old_block = old_blocks[o];
+            if (!new_lookup.has(old_block.key))
+                destroy(old_block, lookup);
+        }
+        while (n)
+            insert(new_blocks[n - 1]);
+        run_all(updates);
+        return new_blocks;
+    }
+    function validate_each_keys(ctx, list, get_context, get_key) {
+        const keys = new Set();
+        for (let i = 0; i < list.length; i++) {
+            const key = get_key(get_context(ctx, list, i));
+            if (keys.has(key)) {
+                throw new Error('Cannot have duplicate keys in a keyed each');
+            }
+            keys.add(key);
+        }
+    }
+
+    function get_spread_update(levels, updates) {
+        const update = {};
+        const to_null_out = {};
+        const accounted_for = { $$scope: 1 };
+        let i = levels.length;
+        while (i--) {
+            const o = levels[i];
+            const n = updates[i];
+            if (n) {
+                for (const key in o) {
+                    if (!(key in n))
+                        to_null_out[key] = 1;
+                }
+                for (const key in n) {
+                    if (!accounted_for[key]) {
+                        update[key] = n[key];
+                        accounted_for[key] = 1;
+                    }
+                }
+                levels[i] = n;
+            }
+            else {
+                for (const key in o) {
+                    accounted_for[key] = 1;
+                }
+            }
+        }
+        for (const key in to_null_out) {
+            if (!(key in update))
+                update[key] = undefined;
+        }
+        return update;
+    }
+    function get_spread_object(spread_props) {
+        return typeof spread_props === 'object' && spread_props !== null ? spread_props : {};
+    }
     function create_component(block) {
         block && block.c();
     }
@@ -422,10 +684,38 @@ var app = (function () {
         dispatch_dev('SvelteDOMSetData', { node: text, data });
         text.data = data;
     }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
+    }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
             if (!~keys.indexOf(slot_key)) {
                 console.warn(`<${name}> received an unexpected slot "${slot_key}".`);
+            }
+        }
+    }
+    function construct_svelte_component_dev(component, props) {
+        const error_message = 'this={...} of <svelte:component> should specify a Svelte component.';
+        try {
+            const instance = new component(props);
+            if (!instance.$$ || !instance.$set || !instance.$on || !instance.$destroy) {
+                throw new Error(error_message);
+            }
+            return instance;
+        }
+        catch (err) {
+            const { message } = err;
+            if (typeof message === 'string' && message.indexOf('is not a constructor') !== -1) {
+                throw new Error(error_message);
+            }
+            else {
+                throw err;
             }
         }
     }
@@ -448,6 +738,2993 @@ var app = (function () {
         $capture_state() { }
         $inject_state() { }
     }
+
+    const subscriber_queue = [];
+    /**
+     * Creates a `Readable` store that allows reading by subscription.
+     * @param value initial value
+     * @param {StartStopNotifier}start start and stop notifications for subscriptions
+     */
+    function readable(value, start) {
+        return {
+            subscribe: writable(value, start).subscribe
+        };
+    }
+    /**
+     * Create a `Writable` store that allows both updating and reading by subscription.
+     * @param {*=}value initial value
+     * @param {StartStopNotifier=}start start and stop notifications for subscriptions
+     */
+    function writable(value, start = noop) {
+        let stop;
+        const subscribers = new Set();
+        function set(new_value) {
+            if (safe_not_equal(value, new_value)) {
+                value = new_value;
+                if (stop) { // store is ready
+                    const run_queue = !subscriber_queue.length;
+                    for (const subscriber of subscribers) {
+                        subscriber[1]();
+                        subscriber_queue.push(subscriber, value);
+                    }
+                    if (run_queue) {
+                        for (let i = 0; i < subscriber_queue.length; i += 2) {
+                            subscriber_queue[i][0](subscriber_queue[i + 1]);
+                        }
+                        subscriber_queue.length = 0;
+                    }
+                }
+            }
+        }
+        function update(fn) {
+            set(fn(value));
+        }
+        function subscribe(run, invalidate = noop) {
+            const subscriber = [run, invalidate];
+            subscribers.add(subscriber);
+            if (subscribers.size === 1) {
+                stop = start(set) || noop;
+            }
+            run(value);
+            return () => {
+                subscribers.delete(subscriber);
+                if (subscribers.size === 0 && stop) {
+                    stop();
+                    stop = null;
+                }
+            };
+        }
+        return { set, update, subscribe };
+    }
+    function derived(stores, fn, initial_value) {
+        const single = !Array.isArray(stores);
+        const stores_array = single
+            ? [stores]
+            : stores;
+        const auto = fn.length < 2;
+        return readable(initial_value, (set) => {
+            let started = false;
+            const values = [];
+            let pending = 0;
+            let cleanup = noop;
+            const sync = () => {
+                if (pending) {
+                    return;
+                }
+                cleanup();
+                const result = fn(single ? values[0] : values, set);
+                if (auto) {
+                    set(result);
+                }
+                else {
+                    cleanup = is_function(result) ? result : noop;
+                }
+            };
+            const unsubscribers = stores_array.map((store, i) => subscribe(store, (value) => {
+                values[i] = value;
+                pending &= ~(1 << i);
+                if (started) {
+                    sync();
+                }
+            }, () => {
+                pending |= (1 << i);
+            }));
+            started = true;
+            sync();
+            return function stop() {
+                run_all(unsubscribers);
+                cleanup();
+                // We need to set this to false because callbacks can still happen despite having unsubscribed:
+                // Callbacks might already be placed in the queue which doesn't know it should no longer
+                // invoke this derived store.
+                started = false;
+            };
+        });
+    }
+
+    /**
+     * @external Store
+     * @see [Svelte stores](https://svelte.dev/docs#component-format-script-4-prefix-stores-with-$-to-access-their-values-store-contract)
+     */
+
+    /**
+     * Create a store similar to [Svelte's `derived`](https://svelte.dev/docs#run-time-svelte-store-writable),
+     * but which has its own `set` and `update` methods and can send values back to the origin stores.
+     * [Read more...](https://github.com/PixievoltNo1/svelte-writable-derived#default-export-writablederived)
+     * 
+     * @param {Store|Store[]} origins One or more stores to derive from. Same as
+     * [`derived`](https://svelte.dev/docs#run-time-svelte-store-writable)'s 1st parameter.
+     * @param {!Function} derive The callback to determine the derived value. Same as
+     * [`derived`](https://svelte.dev/docs#run-time-svelte-store-writable)'s 2nd parameter.
+     * @param {!Function} reflect Called when the derived store gets a new value via its `set` or
+     * `update` methods, and determines new values for the origin stores.
+     * [Read more...](https://github.com/PixievoltNo1/svelte-writable-derived#new-parameter-reflect)
+     * @param [initial] The new store's initial value. Same as
+     * [`derived`](https://svelte.dev/docs#run-time-svelte-store-writable)'s 3rd parameter.
+     * 
+     * @returns {Store} A writable store.
+     */
+    function writableDerived(origins, derive, reflect, initial) {
+    	var childDerivedSetter, originValues, blockNextDerive = false;
+    	var reflectOldValues = reflect.length >= 2;
+    	var wrappedDerive = (got, set) => {
+    		childDerivedSetter = set;
+    		if (reflectOldValues) {
+    			originValues = got;
+    		}
+    		if (!blockNextDerive) {
+    			let returned = derive(got, set);
+    			if (derive.length < 2) {
+    				set(returned);
+    			} else {
+    				return returned;
+    			}
+    		}
+    		blockNextDerive = false;
+    	};
+    	var childDerived = derived(origins, wrappedDerive, initial);
+    	
+    	var singleOrigin = !Array.isArray(origins);
+    	function doReflect(reflecting) {
+    		var setWith = reflect(reflecting, originValues);
+    		if (singleOrigin) {
+    			blockNextDerive = true;
+    			origins.set(setWith);
+    		} else {
+    			setWith.forEach( (value, i) => {
+    				blockNextDerive = true;
+    				origins[i].set(value);
+    			} );
+    		}
+    		blockNextDerive = false;
+    	}
+    	
+    	var tryingSet = false;
+    	function update(fn) {
+    		var isUpdated, mutatedBySubscriptions, oldValue, newValue;
+    		if (tryingSet) {
+    			newValue = fn( get_store_value(childDerived) );
+    			childDerivedSetter(newValue);
+    			return;
+    		}
+    		var unsubscribe = childDerived.subscribe( (value) => {
+    			if (!tryingSet) {
+    				oldValue = value;
+    			} else if (!isUpdated) {
+    				isUpdated = true;
+    			} else {
+    				mutatedBySubscriptions = true;
+    			}
+    		} );
+    		newValue = fn(oldValue);
+    		tryingSet = true;
+    		childDerivedSetter(newValue);
+    		unsubscribe();
+    		tryingSet = false;
+    		if (mutatedBySubscriptions) {
+    			newValue = get_store_value(childDerived);
+    		}
+    		if (isUpdated) {
+    			doReflect(newValue);
+    		}
+    	}
+    	return {
+    		subscribe: childDerived.subscribe,
+    		set(value) { update( () => value ); },
+    		update,
+    	};
+    }
+
+    const TOAST_LIMIT = 20;
+    const toasts = writable([]);
+    const pausedAt = writable(null);
+    const toastTimeouts = new Map();
+    const addToRemoveQueue = (toastId) => {
+        if (toastTimeouts.has(toastId)) {
+            return;
+        }
+        const timeout = setTimeout(() => {
+            toastTimeouts.delete(toastId);
+            remove(toastId);
+        }, 1000);
+        toastTimeouts.set(toastId, timeout);
+    };
+    const clearFromRemoveQueue = (toastId) => {
+        const timeout = toastTimeouts.get(toastId);
+        if (timeout) {
+            clearTimeout(timeout);
+        }
+    };
+    function update(toast) {
+        if (toast.id) {
+            clearFromRemoveQueue(toast.id);
+        }
+        toasts.update(($toasts) => $toasts.map((t) => (t.id === toast.id ? { ...t, ...toast } : t)));
+    }
+    function add(toast) {
+        toasts.update(($toasts) => [toast, ...$toasts].slice(0, TOAST_LIMIT));
+    }
+    function upsert(toast) {
+        if (get_store_value(toasts).find((t) => t.id === toast.id)) {
+            update(toast);
+        }
+        else {
+            add(toast);
+        }
+    }
+    function dismiss(toastId) {
+        toasts.update(($toasts) => {
+            if (toastId) {
+                addToRemoveQueue(toastId);
+            }
+            else {
+                $toasts.forEach((toast) => {
+                    addToRemoveQueue(toast.id);
+                });
+            }
+            return $toasts.map((t) => t.id === toastId || toastId === undefined ? { ...t, visible: false } : t);
+        });
+    }
+    function remove(toastId) {
+        toasts.update(($toasts) => {
+            if (toastId === undefined) {
+                return [];
+            }
+            return $toasts.filter((t) => t.id !== toastId);
+        });
+    }
+    function startPause(time) {
+        pausedAt.set(time);
+    }
+    function endPause(time) {
+        let diff;
+        pausedAt.update(($pausedAt) => {
+            diff = time - ($pausedAt || 0);
+            return null;
+        });
+        toasts.update(($toasts) => $toasts.map((t) => ({
+            ...t,
+            pauseDuration: t.pauseDuration + diff
+        })));
+    }
+    const defaultTimeouts = {
+        blank: 4000,
+        error: 4000,
+        success: 2000,
+        loading: Infinity,
+        custom: 4000
+    };
+    function useToasterStore(toastOptions = {}) {
+        const mergedToasts = writableDerived(toasts, ($toasts) => $toasts.map((t) => ({
+            ...toastOptions,
+            ...toastOptions[t.type],
+            ...t,
+            duration: t.duration ||
+                toastOptions[t.type]?.duration ||
+                toastOptions?.duration ||
+                defaultTimeouts[t.type],
+            style: [toastOptions.style, toastOptions[t.type]?.style, t.style].join(';')
+        })), ($toasts) => $toasts);
+        return {
+            toasts: mergedToasts,
+            pausedAt
+        };
+    }
+
+    const isFunction = (valOrFunction) => typeof valOrFunction === 'function';
+    const resolveValue = (valOrFunction, arg) => (isFunction(valOrFunction) ? valOrFunction(arg) : valOrFunction);
+
+    const genId = (() => {
+        let count = 0;
+        return () => {
+            count += 1;
+            return count.toString();
+        };
+    })();
+    const prefersReducedMotion = (() => {
+        // Cache result
+        let shouldReduceMotion;
+        return () => {
+            if (shouldReduceMotion === undefined && typeof window !== 'undefined') {
+                const mediaQuery = matchMedia('(prefers-reduced-motion: reduce)');
+                shouldReduceMotion = !mediaQuery || mediaQuery.matches;
+            }
+            return shouldReduceMotion;
+        };
+    })();
+
+    const createToast = (message, type = 'blank', opts) => ({
+        createdAt: Date.now(),
+        visible: true,
+        type,
+        ariaProps: {
+            role: 'status',
+            'aria-live': 'polite'
+        },
+        message,
+        pauseDuration: 0,
+        ...opts,
+        id: opts?.id || genId()
+    });
+    const createHandler = (type) => (message, options) => {
+        const toast = createToast(message, type, options);
+        upsert(toast);
+        return toast.id;
+    };
+    const toast = (message, opts) => createHandler('blank')(message, opts);
+    toast.error = createHandler('error');
+    toast.success = createHandler('success');
+    toast.loading = createHandler('loading');
+    toast.custom = createHandler('custom');
+    toast.dismiss = (toastId) => {
+        dismiss(toastId);
+    };
+    toast.remove = (toastId) => remove(toastId);
+    toast.promise = (promise, msgs, opts) => {
+        const id = toast.loading(msgs.loading, { ...opts, ...opts?.loading });
+        promise
+            .then((p) => {
+            toast.success(resolveValue(msgs.success, p), {
+                id,
+                ...opts,
+                ...opts?.success
+            });
+            return p;
+        })
+            .catch((e) => {
+            toast.error(resolveValue(msgs.error, e), {
+                id,
+                ...opts,
+                ...opts?.error
+            });
+        });
+        return promise;
+    };
+
+    function calculateOffset(toast, $toasts, opts) {
+        const { reverseOrder, gutter = 8, defaultPosition } = opts || {};
+        const relevantToasts = $toasts.filter((t) => (t.position || defaultPosition) === (toast.position || defaultPosition) && t.height);
+        const toastIndex = relevantToasts.findIndex((t) => t.id === toast.id);
+        const toastsBefore = relevantToasts.filter((toast, i) => i < toastIndex && toast.visible).length;
+        const offset = relevantToasts
+            .filter((t) => t.visible)
+            .slice(...(reverseOrder ? [toastsBefore + 1] : [0, toastsBefore]))
+            .reduce((acc, t) => acc + (t.height || 0) + gutter, 0);
+        return offset;
+    }
+    const handlers = {
+        startPause() {
+            startPause(Date.now());
+        },
+        endPause() {
+            endPause(Date.now());
+        },
+        updateHeight: (toastId, height) => {
+            update({ id: toastId, height });
+        },
+        calculateOffset
+    };
+    function useToaster(toastOptions) {
+        const { toasts, pausedAt } = useToasterStore(toastOptions);
+        const timeouts = new Map();
+        let _pausedAt;
+        const unsubscribes = [
+            pausedAt.subscribe(($pausedAt) => {
+                if ($pausedAt) {
+                    for (const [, timeoutId] of timeouts) {
+                        clearTimeout(timeoutId);
+                    }
+                    timeouts.clear();
+                }
+                _pausedAt = $pausedAt;
+            }),
+            toasts.subscribe(($toasts) => {
+                if (_pausedAt) {
+                    return;
+                }
+                const now = Date.now();
+                for (const t of $toasts) {
+                    if (timeouts.has(t.id)) {
+                        continue;
+                    }
+                    if (t.duration === Infinity) {
+                        continue;
+                    }
+                    const durationLeft = (t.duration || 0) + t.pauseDuration - (now - t.createdAt);
+                    if (durationLeft < 0) {
+                        if (t.visible) {
+                            // FIXME: This causes a recursive cycle of updates.
+                            toast.dismiss(t.id);
+                        }
+                        return null;
+                    }
+                    timeouts.set(t.id, setTimeout(() => toast.dismiss(t.id), durationLeft));
+                }
+            })
+        ];
+        onDestroy(() => {
+            for (const unsubscribe of unsubscribes) {
+                unsubscribe();
+            }
+        });
+        return { toasts, handlers };
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\CheckmarkIcon.svelte generated by Svelte v3.58.0 */
+
+    const file$9 = "node_modules\\svelte-french-toast\\dist\\components\\CheckmarkIcon.svelte";
+
+    function create_fragment$9(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			attr_dev(div, "class", "svelte-11kvm4p");
+    			set_style(div, "--primary", /*primary*/ ctx[0]);
+    			set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			add_location(div, file$9, 5, 0, 148);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*primary*/ 1) {
+    				set_style(div, "--primary", /*primary*/ ctx[0]);
+    			}
+
+    			if (dirty & /*secondary*/ 2) {
+    				set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$9.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$9($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('CheckmarkIcon', slots, []);
+    	let { primary = "#61d345" } = $$props;
+    	let { secondary = "#fff" } = $$props;
+    	const writable_props = ['primary', 'secondary'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<CheckmarkIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	$$self.$capture_state = () => ({ primary, secondary });
+
+    	$$self.$inject_state = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [primary, secondary];
+    }
+
+    class CheckmarkIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$9, create_fragment$9, safe_not_equal, { primary: 0, secondary: 1 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "CheckmarkIcon",
+    			options,
+    			id: create_fragment$9.name
+    		});
+    	}
+
+    	get primary() {
+    		throw new Error("<CheckmarkIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set primary(value) {
+    		throw new Error("<CheckmarkIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get secondary() {
+    		throw new Error("<CheckmarkIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set secondary(value) {
+    		throw new Error("<CheckmarkIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\ErrorIcon.svelte generated by Svelte v3.58.0 */
+
+    const file$8 = "node_modules\\svelte-french-toast\\dist\\components\\ErrorIcon.svelte";
+
+    function create_fragment$8(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			attr_dev(div, "class", "svelte-1ee93ns");
+    			set_style(div, "--primary", /*primary*/ ctx[0]);
+    			set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			add_location(div, file$8, 5, 0, 148);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*primary*/ 1) {
+    				set_style(div, "--primary", /*primary*/ ctx[0]);
+    			}
+
+    			if (dirty & /*secondary*/ 2) {
+    				set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$8.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$8($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ErrorIcon', slots, []);
+    	let { primary = "#ff4b4b" } = $$props;
+    	let { secondary = "#fff" } = $$props;
+    	const writable_props = ['primary', 'secondary'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ErrorIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	$$self.$capture_state = () => ({ primary, secondary });
+
+    	$$self.$inject_state = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [primary, secondary];
+    }
+
+    class ErrorIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$8, create_fragment$8, safe_not_equal, { primary: 0, secondary: 1 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ErrorIcon",
+    			options,
+    			id: create_fragment$8.name
+    		});
+    	}
+
+    	get primary() {
+    		throw new Error("<ErrorIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set primary(value) {
+    		throw new Error("<ErrorIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get secondary() {
+    		throw new Error("<ErrorIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set secondary(value) {
+    		throw new Error("<ErrorIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\LoaderIcon.svelte generated by Svelte v3.58.0 */
+
+    const file$7 = "node_modules\\svelte-french-toast\\dist\\components\\LoaderIcon.svelte";
+
+    function create_fragment$7(ctx) {
+    	let div;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			attr_dev(div, "class", "svelte-1j7dflg");
+    			set_style(div, "--primary", /*primary*/ ctx[0]);
+    			set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			add_location(div, file$7, 5, 0, 151);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*primary*/ 1) {
+    				set_style(div, "--primary", /*primary*/ ctx[0]);
+    			}
+
+    			if (dirty & /*secondary*/ 2) {
+    				set_style(div, "--secondary", /*secondary*/ ctx[1]);
+    			}
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$7.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$7($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('LoaderIcon', slots, []);
+    	let { primary = "#616161" } = $$props;
+    	let { secondary = "#e0e0e0" } = $$props;
+    	const writable_props = ['primary', 'secondary'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<LoaderIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	$$self.$capture_state = () => ({ primary, secondary });
+
+    	$$self.$inject_state = $$props => {
+    		if ('primary' in $$props) $$invalidate(0, primary = $$props.primary);
+    		if ('secondary' in $$props) $$invalidate(1, secondary = $$props.secondary);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [primary, secondary];
+    }
+
+    class LoaderIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$7, create_fragment$7, safe_not_equal, { primary: 0, secondary: 1 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "LoaderIcon",
+    			options,
+    			id: create_fragment$7.name
+    		});
+    	}
+
+    	get primary() {
+    		throw new Error("<LoaderIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set primary(value) {
+    		throw new Error("<LoaderIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get secondary() {
+    		throw new Error("<LoaderIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set secondary(value) {
+    		throw new Error("<LoaderIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\ToastIcon.svelte generated by Svelte v3.58.0 */
+    const file$6 = "node_modules\\svelte-french-toast\\dist\\components\\ToastIcon.svelte";
+
+    // (13:27) 
+    function create_if_block_2$1(ctx) {
+    	let div;
+    	let loadericon;
+    	let t;
+    	let current;
+    	const loadericon_spread_levels = [/*iconTheme*/ ctx[0]];
+    	let loadericon_props = {};
+
+    	for (let i = 0; i < loadericon_spread_levels.length; i += 1) {
+    		loadericon_props = assign(loadericon_props, loadericon_spread_levels[i]);
+    	}
+
+    	loadericon = new LoaderIcon({ props: loadericon_props, $$inline: true });
+    	let if_block = /*type*/ ctx[2] !== 'loading' && create_if_block_3(ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			create_component(loadericon.$$.fragment);
+    			t = space();
+    			if (if_block) if_block.c();
+    			attr_dev(div, "class", "indicator svelte-1kgeier");
+    			add_location(div, file$6, 13, 1, 390);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			mount_component(loadericon, div, null);
+    			append_dev(div, t);
+    			if (if_block) if_block.m(div, null);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const loadericon_changes = (dirty & /*iconTheme*/ 1)
+    			? get_spread_update(loadericon_spread_levels, [get_spread_object(/*iconTheme*/ ctx[0])])
+    			: {};
+
+    			loadericon.$set(loadericon_changes);
+
+    			if (/*type*/ ctx[2] !== 'loading') {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+
+    					if (dirty & /*type*/ 4) {
+    						transition_in(if_block, 1);
+    					}
+    				} else {
+    					if_block = create_if_block_3(ctx);
+    					if_block.c();
+    					transition_in(if_block, 1);
+    					if_block.m(div, null);
+    				}
+    			} else if (if_block) {
+    				group_outros();
+
+    				transition_out(if_block, 1, 1, () => {
+    					if_block = null;
+    				});
+
+    				check_outros();
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(loadericon.$$.fragment, local);
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(loadericon.$$.fragment, local);
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			destroy_component(loadericon);
+    			if (if_block) if_block.d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2$1.name,
+    		type: "if",
+    		source: "(13:27) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (11:38) 
+    function create_if_block_1$1(ctx) {
+    	let switch_instance;
+    	let switch_instance_anchor;
+    	let current;
+    	var switch_value = /*icon*/ ctx[1];
+
+    	function switch_props(ctx) {
+    		return { $$inline: true };
+    	}
+
+    	if (switch_value) {
+    		switch_instance = construct_svelte_component_dev(switch_value, switch_props());
+    	}
+
+    	const block = {
+    		c: function create() {
+    			if (switch_instance) create_component(switch_instance.$$.fragment);
+    			switch_instance_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (switch_instance) mount_component(switch_instance, target, anchor);
+    			insert_dev(target, switch_instance_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*icon*/ 2 && switch_value !== (switch_value = /*icon*/ ctx[1])) {
+    				if (switch_instance) {
+    					group_outros();
+    					const old_component = switch_instance;
+
+    					transition_out(old_component.$$.fragment, 1, 0, () => {
+    						destroy_component(old_component, 1);
+    					});
+
+    					check_outros();
+    				}
+
+    				if (switch_value) {
+    					switch_instance = construct_svelte_component_dev(switch_value, switch_props());
+    					create_component(switch_instance.$$.fragment);
+    					transition_in(switch_instance.$$.fragment, 1);
+    					mount_component(switch_instance, switch_instance_anchor.parentNode, switch_instance_anchor);
+    				} else {
+    					switch_instance = null;
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			if (switch_instance) transition_in(switch_instance.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (switch_instance) transition_out(switch_instance.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(switch_instance_anchor);
+    			if (switch_instance) destroy_component(switch_instance, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_1$1.name,
+    		type: "if",
+    		source: "(11:38) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (9:0) {#if typeof icon === 'string'}
+    function create_if_block$4(ctx) {
+    	let div;
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			t = text(/*icon*/ ctx[1]);
+    			attr_dev(div, "class", "animated svelte-1kgeier");
+    			add_location(div, file$6, 9, 1, 253);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			append_dev(div, t);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*icon*/ 2) set_data_dev(t, /*icon*/ ctx[1]);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$4.name,
+    		type: "if",
+    		source: "(9:0) {#if typeof icon === 'string'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (16:2) {#if type !== 'loading'}
+    function create_if_block_3(ctx) {
+    	let div;
+    	let current_block_type_index;
+    	let if_block;
+    	let current;
+    	const if_block_creators = [create_if_block_4, create_else_block$3];
+    	const if_blocks = [];
+
+    	function select_block_type_1(ctx, dirty) {
+    		if (/*type*/ ctx[2] === 'error') return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type_1(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			if_block.c();
+    			attr_dev(div, "class", "status svelte-1kgeier");
+    			add_location(div, file$6, 16, 3, 476);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			if_blocks[current_block_type_index].m(div, null);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type_1(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(div, null);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if_blocks[current_block_type_index].d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_3.name,
+    		type: "if",
+    		source: "(16:2) {#if type !== 'loading'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (20:4) {:else}
+    function create_else_block$3(ctx) {
+    	let checkmarkicon;
+    	let current;
+    	const checkmarkicon_spread_levels = [/*iconTheme*/ ctx[0]];
+    	let checkmarkicon_props = {};
+
+    	for (let i = 0; i < checkmarkicon_spread_levels.length; i += 1) {
+    		checkmarkicon_props = assign(checkmarkicon_props, checkmarkicon_spread_levels[i]);
+    	}
+
+    	checkmarkicon = new CheckmarkIcon({
+    			props: checkmarkicon_props,
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(checkmarkicon.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(checkmarkicon, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const checkmarkicon_changes = (dirty & /*iconTheme*/ 1)
+    			? get_spread_update(checkmarkicon_spread_levels, [get_spread_object(/*iconTheme*/ ctx[0])])
+    			: {};
+
+    			checkmarkicon.$set(checkmarkicon_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(checkmarkicon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(checkmarkicon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(checkmarkicon, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$3.name,
+    		type: "else",
+    		source: "(20:4) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (18:4) {#if type === 'error'}
+    function create_if_block_4(ctx) {
+    	let erroricon;
+    	let current;
+    	const erroricon_spread_levels = [/*iconTheme*/ ctx[0]];
+    	let erroricon_props = {};
+
+    	for (let i = 0; i < erroricon_spread_levels.length; i += 1) {
+    		erroricon_props = assign(erroricon_props, erroricon_spread_levels[i]);
+    	}
+
+    	erroricon = new ErrorIcon({ props: erroricon_props, $$inline: true });
+
+    	const block = {
+    		c: function create() {
+    			create_component(erroricon.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(erroricon, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const erroricon_changes = (dirty & /*iconTheme*/ 1)
+    			? get_spread_update(erroricon_spread_levels, [get_spread_object(/*iconTheme*/ ctx[0])])
+    			: {};
+
+    			erroricon.$set(erroricon_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(erroricon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(erroricon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(erroricon, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_4.name,
+    		type: "if",
+    		source: "(18:4) {#if type === 'error'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$6(ctx) {
+    	let current_block_type_index;
+    	let if_block;
+    	let if_block_anchor;
+    	let current;
+    	const if_block_creators = [create_if_block$4, create_if_block_1$1, create_if_block_2$1];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (typeof /*icon*/ ctx[1] === 'string') return 0;
+    		if (typeof /*icon*/ ctx[1] !== 'undefined') return 1;
+    		if (/*type*/ ctx[2] !== 'blank') return 2;
+    		return -1;
+    	}
+
+    	if (~(current_block_type_index = select_block_type(ctx))) {
+    		if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			if (~current_block_type_index) {
+    				if_blocks[current_block_type_index].m(target, anchor);
+    			}
+
+    			insert_dev(target, if_block_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if (~current_block_type_index) {
+    					if_blocks[current_block_type_index].p(ctx, dirty);
+    				}
+    			} else {
+    				if (if_block) {
+    					group_outros();
+
+    					transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    						if_blocks[previous_block_index] = null;
+    					});
+
+    					check_outros();
+    				}
+
+    				if (~current_block_type_index) {
+    					if_block = if_blocks[current_block_type_index];
+
+    					if (!if_block) {
+    						if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    						if_block.c();
+    					} else {
+    						if_block.p(ctx, dirty);
+    					}
+
+    					transition_in(if_block, 1);
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				} else {
+    					if_block = null;
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (~current_block_type_index) {
+    				if_blocks[current_block_type_index].d(detaching);
+    			}
+
+    			if (detaching) detach_dev(if_block_anchor);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$6.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$6($$self, $$props, $$invalidate) {
+    	let type;
+    	let icon;
+    	let iconTheme;
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ToastIcon', slots, []);
+    	let { toast } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (toast === undefined && !('toast' in $$props || $$self.$$.bound[$$self.$$.props['toast']])) {
+    			console.warn("<ToastIcon> was created without expected prop 'toast'");
+    		}
+    	});
+
+    	const writable_props = ['toast'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ToastIcon> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('toast' in $$props) $$invalidate(3, toast = $$props.toast);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		CheckmarkIcon,
+    		ErrorIcon,
+    		LoaderIcon,
+    		toast,
+    		iconTheme,
+    		icon,
+    		type
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('toast' in $$props) $$invalidate(3, toast = $$props.toast);
+    		if ('iconTheme' in $$props) $$invalidate(0, iconTheme = $$props.iconTheme);
+    		if ('icon' in $$props) $$invalidate(1, icon = $$props.icon);
+    		if ('type' in $$props) $$invalidate(2, type = $$props.type);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*toast*/ 8) {
+    			$$invalidate(2, { type, icon, iconTheme } = toast, type, ($$invalidate(1, icon), $$invalidate(3, toast)), ($$invalidate(0, iconTheme), $$invalidate(3, toast)));
+    		}
+    	};
+
+    	return [iconTheme, icon, type, toast];
+    }
+
+    class ToastIcon extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$6, create_fragment$6, safe_not_equal, { toast: 3 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ToastIcon",
+    			options,
+    			id: create_fragment$6.name
+    		});
+    	}
+
+    	get toast() {
+    		throw new Error("<ToastIcon>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set toast(value) {
+    		throw new Error("<ToastIcon>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\ToastMessage.svelte generated by Svelte v3.58.0 */
+
+    const file$5 = "node_modules\\svelte-french-toast\\dist\\components\\ToastMessage.svelte";
+
+    // (7:1) {:else}
+    function create_else_block$2(ctx) {
+    	let switch_instance;
+    	let switch_instance_anchor;
+    	let current;
+    	var switch_value = /*toast*/ ctx[0].message;
+
+    	function switch_props(ctx) {
+    		return {
+    			props: { toast: /*toast*/ ctx[0] },
+    			$$inline: true
+    		};
+    	}
+
+    	if (switch_value) {
+    		switch_instance = construct_svelte_component_dev(switch_value, switch_props(ctx));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			if (switch_instance) create_component(switch_instance.$$.fragment);
+    			switch_instance_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (switch_instance) mount_component(switch_instance, target, anchor);
+    			insert_dev(target, switch_instance_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const switch_instance_changes = {};
+    			if (dirty & /*toast*/ 1) switch_instance_changes.toast = /*toast*/ ctx[0];
+
+    			if (dirty & /*toast*/ 1 && switch_value !== (switch_value = /*toast*/ ctx[0].message)) {
+    				if (switch_instance) {
+    					group_outros();
+    					const old_component = switch_instance;
+
+    					transition_out(old_component.$$.fragment, 1, 0, () => {
+    						destroy_component(old_component, 1);
+    					});
+
+    					check_outros();
+    				}
+
+    				if (switch_value) {
+    					switch_instance = construct_svelte_component_dev(switch_value, switch_props(ctx));
+    					create_component(switch_instance.$$.fragment);
+    					transition_in(switch_instance.$$.fragment, 1);
+    					mount_component(switch_instance, switch_instance_anchor.parentNode, switch_instance_anchor);
+    				} else {
+    					switch_instance = null;
+    				}
+    			} else if (switch_value) {
+    				switch_instance.$set(switch_instance_changes);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			if (switch_instance) transition_in(switch_instance.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (switch_instance) transition_out(switch_instance.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(switch_instance_anchor);
+    			if (switch_instance) destroy_component(switch_instance, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$2.name,
+    		type: "else",
+    		source: "(7:1) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (5:1) {#if typeof toast.message === 'string'}
+    function create_if_block$3(ctx) {
+    	let t_value = /*toast*/ ctx[0].message + "";
+    	let t;
+
+    	const block = {
+    		c: function create() {
+    			t = text(t_value);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, t, anchor);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*toast*/ 1 && t_value !== (t_value = /*toast*/ ctx[0].message + "")) set_data_dev(t, t_value);
+    		},
+    		i: noop,
+    		o: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(t);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$3.name,
+    		type: "if",
+    		source: "(5:1) {#if typeof toast.message === 'string'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$5(ctx) {
+    	let div;
+    	let current_block_type_index;
+    	let if_block;
+    	let current;
+    	const if_block_creators = [create_if_block$3, create_else_block$2];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (typeof /*toast*/ ctx[0].message === 'string') return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    	let div_levels = [{ class: "message" }, /*toast*/ ctx[0].ariaProps];
+    	let div_data = {};
+
+    	for (let i = 0; i < div_levels.length; i += 1) {
+    		div_data = assign(div_data, div_levels[i]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			if_block.c();
+    			set_attributes(div, div_data);
+    			toggle_class(div, "svelte-1nauejd", true);
+    			add_location(div, file$5, 3, 0, 37);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			if_blocks[current_block_type_index].m(div, null);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(div, null);
+    			}
+
+    			set_attributes(div, div_data = get_spread_update(div_levels, [{ class: "message" }, dirty & /*toast*/ 1 && /*toast*/ ctx[0].ariaProps]));
+    			toggle_class(div, "svelte-1nauejd", true);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if_blocks[current_block_type_index].d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$5.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$5($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ToastMessage', slots, []);
+    	let { toast } = $$props;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (toast === undefined && !('toast' in $$props || $$self.$$.bound[$$self.$$.props['toast']])) {
+    			console.warn("<ToastMessage> was created without expected prop 'toast'");
+    		}
+    	});
+
+    	const writable_props = ['toast'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ToastMessage> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    	};
+
+    	$$self.$capture_state = () => ({ toast });
+
+    	$$self.$inject_state = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [toast];
+    }
+
+    class ToastMessage extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$5, create_fragment$5, safe_not_equal, { toast: 0 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ToastMessage",
+    			options,
+    			id: create_fragment$5.name
+    		});
+    	}
+
+    	get toast() {
+    		throw new Error("<ToastMessage>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set toast(value) {
+    		throw new Error("<ToastMessage>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\ToastBar.svelte generated by Svelte v3.58.0 */
+    const file$4 = "node_modules\\svelte-french-toast\\dist\\components\\ToastBar.svelte";
+    const get_default_slot_changes$1 = dirty => ({ toast: dirty & /*toast*/ 1 });
+
+    const get_default_slot_context$1 = ctx => ({
+    	ToastIcon,
+    	ToastMessage,
+    	toast: /*toast*/ ctx[0]
+    });
+
+    // (28:1) {:else}
+    function create_else_block$1(ctx) {
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[6].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], get_default_slot_context$1);
+    	const default_slot_or_fallback = default_slot || fallback_block$1(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (default_slot_or_fallback) default_slot_or_fallback.c();
+    		},
+    		m: function mount(target, anchor) {
+    			if (default_slot_or_fallback) {
+    				default_slot_or_fallback.m(target, anchor);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (default_slot) {
+    				if (default_slot.p && (!current || dirty & /*$$scope, toast*/ 129)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[7],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[7])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[7], dirty, get_default_slot_changes$1),
+    						get_default_slot_context$1
+    					);
+    				}
+    			} else {
+    				if (default_slot_or_fallback && default_slot_or_fallback.p && (!current || dirty & /*toast*/ 1)) {
+    					default_slot_or_fallback.p(ctx, !current ? -1 : dirty);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot_or_fallback, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot_or_fallback, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (default_slot_or_fallback) default_slot_or_fallback.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block$1.name,
+    		type: "else",
+    		source: "(28:1) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (23:1) {#if Component}
+    function create_if_block$2(ctx) {
+    	let switch_instance;
+    	let switch_instance_anchor;
+    	let current;
+    	var switch_value = /*Component*/ ctx[2];
+
+    	function switch_props(ctx) {
+    		return {
+    			props: {
+    				$$slots: {
+    					message: [create_message_slot],
+    					icon: [create_icon_slot]
+    				},
+    				$$scope: { ctx }
+    			},
+    			$$inline: true
+    		};
+    	}
+
+    	if (switch_value) {
+    		switch_instance = construct_svelte_component_dev(switch_value, switch_props(ctx));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			if (switch_instance) create_component(switch_instance.$$.fragment);
+    			switch_instance_anchor = empty();
+    		},
+    		m: function mount(target, anchor) {
+    			if (switch_instance) mount_component(switch_instance, target, anchor);
+    			insert_dev(target, switch_instance_anchor, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const switch_instance_changes = {};
+
+    			if (dirty & /*$$scope, toast*/ 129) {
+    				switch_instance_changes.$$scope = { dirty, ctx };
+    			}
+
+    			if (dirty & /*Component*/ 4 && switch_value !== (switch_value = /*Component*/ ctx[2])) {
+    				if (switch_instance) {
+    					group_outros();
+    					const old_component = switch_instance;
+
+    					transition_out(old_component.$$.fragment, 1, 0, () => {
+    						destroy_component(old_component, 1);
+    					});
+
+    					check_outros();
+    				}
+
+    				if (switch_value) {
+    					switch_instance = construct_svelte_component_dev(switch_value, switch_props(ctx));
+    					create_component(switch_instance.$$.fragment);
+    					transition_in(switch_instance.$$.fragment, 1);
+    					mount_component(switch_instance, switch_instance_anchor.parentNode, switch_instance_anchor);
+    				} else {
+    					switch_instance = null;
+    				}
+    			} else if (switch_value) {
+    				switch_instance.$set(switch_instance_changes);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			if (switch_instance) transition_in(switch_instance.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			if (switch_instance) transition_out(switch_instance.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(switch_instance_anchor);
+    			if (switch_instance) destroy_component(switch_instance, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$2.name,
+    		type: "if",
+    		source: "(23:1) {#if Component}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (29:43)     
+    function fallback_block$1(ctx) {
+    	let toasticon;
+    	let t;
+    	let toastmessage;
+    	let current;
+
+    	toasticon = new ToastIcon({
+    			props: { toast: /*toast*/ ctx[0] },
+    			$$inline: true
+    		});
+
+    	toastmessage = new ToastMessage({
+    			props: { toast: /*toast*/ ctx[0] },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(toasticon.$$.fragment);
+    			t = space();
+    			create_component(toastmessage.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toasticon, target, anchor);
+    			insert_dev(target, t, anchor);
+    			mount_component(toastmessage, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const toasticon_changes = {};
+    			if (dirty & /*toast*/ 1) toasticon_changes.toast = /*toast*/ ctx[0];
+    			toasticon.$set(toasticon_changes);
+    			const toastmessage_changes = {};
+    			if (dirty & /*toast*/ 1) toastmessage_changes.toast = /*toast*/ ctx[0];
+    			toastmessage.$set(toastmessage_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toasticon.$$.fragment, local);
+    			transition_in(toastmessage.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toasticon.$$.fragment, local);
+    			transition_out(toastmessage.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toasticon, detaching);
+    			if (detaching) detach_dev(t);
+    			destroy_component(toastmessage, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: fallback_block$1.name,
+    		type: "fallback",
+    		source: "(29:43)     ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (25:3) 
+    function create_icon_slot(ctx) {
+    	let toasticon;
+    	let current;
+
+    	toasticon = new ToastIcon({
+    			props: { toast: /*toast*/ ctx[0], slot: "icon" },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(toasticon.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toasticon, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const toasticon_changes = {};
+    			if (dirty & /*toast*/ 1) toasticon_changes.toast = /*toast*/ ctx[0];
+    			toasticon.$set(toasticon_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toasticon.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toasticon.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toasticon, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_icon_slot.name,
+    		type: "slot",
+    		source: "(25:3) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (26:3) 
+    function create_message_slot(ctx) {
+    	let toastmessage;
+    	let current;
+
+    	toastmessage = new ToastMessage({
+    			props: { toast: /*toast*/ ctx[0], slot: "message" },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(toastmessage.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toastmessage, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const toastmessage_changes = {};
+    			if (dirty & /*toast*/ 1) toastmessage_changes.toast = /*toast*/ ctx[0];
+    			toastmessage.$set(toastmessage_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toastmessage.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toastmessage.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toastmessage, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_message_slot.name,
+    		type: "slot",
+    		source: "(26:3) ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$4(ctx) {
+    	let div;
+    	let current_block_type_index;
+    	let if_block;
+    	let div_class_value;
+    	let div_style_value;
+    	let current;
+    	const if_block_creators = [create_if_block$2, create_else_block$1];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*Component*/ ctx[2]) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			if_block.c();
+
+    			attr_dev(div, "class", div_class_value = "base " + (/*toast*/ ctx[0].height
+    			? /*animation*/ ctx[4]
+    			: 'transparent') + " " + (/*toast*/ ctx[0].className || '') + " svelte-ug60r4");
+
+    			attr_dev(div, "style", div_style_value = "" + (/*style*/ ctx[1] + "; " + /*toast*/ ctx[0].style));
+    			set_style(div, "--factor", /*factor*/ ctx[3]);
+    			add_location(div, file$4, 17, 0, 540);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			if_blocks[current_block_type_index].m(div, null);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(div, null);
+    			}
+
+    			if (!current || dirty & /*toast, animation*/ 17 && div_class_value !== (div_class_value = "base " + (/*toast*/ ctx[0].height
+    			? /*animation*/ ctx[4]
+    			: 'transparent') + " " + (/*toast*/ ctx[0].className || '') + " svelte-ug60r4")) {
+    				attr_dev(div, "class", div_class_value);
+    			}
+
+    			if (!current || dirty & /*style, toast*/ 3 && div_style_value !== (div_style_value = "" + (/*style*/ ctx[1] + "; " + /*toast*/ ctx[0].style))) {
+    				attr_dev(div, "style", div_style_value);
+    			}
+
+    			const style_changed = dirty & /*style, toast*/ 3;
+
+    			if (style_changed || dirty & /*factor, style, toast*/ 11) {
+    				set_style(div, "--factor", /*factor*/ ctx[3]);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if_blocks[current_block_type_index].d();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$4.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$4($$self, $$props, $$invalidate) {
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ToastBar', slots, ['default']);
+    	let { toast } = $$props;
+    	let { position = void 0 } = $$props;
+    	let { style = "" } = $$props;
+    	let { Component = void 0 } = $$props;
+    	let factor;
+    	let animation;
+
+    	$$self.$$.on_mount.push(function () {
+    		if (toast === undefined && !('toast' in $$props || $$self.$$.bound[$$self.$$.props['toast']])) {
+    			console.warn("<ToastBar> was created without expected prop 'toast'");
+    		}
+    	});
+
+    	const writable_props = ['toast', 'position', 'style', 'Component'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ToastBar> was created with unknown prop '${key}'`);
+    	});
+
+    	$$self.$$set = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    		if ('position' in $$props) $$invalidate(5, position = $$props.position);
+    		if ('style' in $$props) $$invalidate(1, style = $$props.style);
+    		if ('Component' in $$props) $$invalidate(2, Component = $$props.Component);
+    		if ('$$scope' in $$props) $$invalidate(7, $$scope = $$props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		ToastIcon,
+    		prefersReducedMotion,
+    		ToastMessage,
+    		toast,
+    		position,
+    		style,
+    		Component,
+    		factor,
+    		animation
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    		if ('position' in $$props) $$invalidate(5, position = $$props.position);
+    		if ('style' in $$props) $$invalidate(1, style = $$props.style);
+    		if ('Component' in $$props) $$invalidate(2, Component = $$props.Component);
+    		if ('factor' in $$props) $$invalidate(3, factor = $$props.factor);
+    		if ('animation' in $$props) $$invalidate(4, animation = $$props.animation);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*toast, position*/ 33) {
+    			{
+    				const top = (toast.position || position || "top-center").includes("top");
+    				$$invalidate(3, factor = top ? 1 : -1);
+
+    				const [enter, exit] = prefersReducedMotion()
+    				? ["fadeIn", "fadeOut"]
+    				: ["enter", "exit"];
+
+    				$$invalidate(4, animation = toast.visible ? enter : exit);
+    			}
+    		}
+    	};
+
+    	return [toast, style, Component, factor, animation, position, slots, $$scope];
+    }
+
+    class ToastBar extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$4, create_fragment$4, safe_not_equal, {
+    			toast: 0,
+    			position: 5,
+    			style: 1,
+    			Component: 2
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ToastBar",
+    			options,
+    			id: create_fragment$4.name
+    		});
+    	}
+
+    	get toast() {
+    		throw new Error("<ToastBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set toast(value) {
+    		throw new Error("<ToastBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get position() {
+    		throw new Error("<ToastBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set position(value) {
+    		throw new Error("<ToastBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get style() {
+    		throw new Error("<ToastBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set style(value) {
+    		throw new Error("<ToastBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get Component() {
+    		throw new Error("<ToastBar>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set Component(value) {
+    		throw new Error("<ToastBar>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\ToastWrapper.svelte generated by Svelte v3.58.0 */
+    const file$3 = "node_modules\\svelte-french-toast\\dist\\components\\ToastWrapper.svelte";
+    const get_default_slot_changes = dirty => ({ toast: dirty & /*toast*/ 1 });
+    const get_default_slot_context = ctx => ({ toast: /*toast*/ ctx[0] });
+
+    // (34:1) {:else}
+    function create_else_block(ctx) {
+    	let current;
+    	const default_slot_template = /*#slots*/ ctx[8].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], get_default_slot_context);
+    	const default_slot_or_fallback = default_slot || fallback_block(ctx);
+
+    	const block = {
+    		c: function create() {
+    			if (default_slot_or_fallback) default_slot_or_fallback.c();
+    		},
+    		m: function mount(target, anchor) {
+    			if (default_slot_or_fallback) {
+    				default_slot_or_fallback.m(target, anchor);
+    			}
+
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			if (default_slot) {
+    				if (default_slot.p && (!current || dirty & /*$$scope, toast*/ 129)) {
+    					update_slot_base(
+    						default_slot,
+    						default_slot_template,
+    						ctx,
+    						/*$$scope*/ ctx[7],
+    						!current
+    						? get_all_dirty_from_scope(/*$$scope*/ ctx[7])
+    						: get_slot_changes(default_slot_template, /*$$scope*/ ctx[7], dirty, get_default_slot_changes),
+    						get_default_slot_context
+    					);
+    				}
+    			} else {
+    				if (default_slot_or_fallback && default_slot_or_fallback.p && (!current || dirty & /*toast*/ 1)) {
+    					default_slot_or_fallback.p(ctx, !current ? -1 : dirty);
+    				}
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(default_slot_or_fallback, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(default_slot_or_fallback, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (default_slot_or_fallback) default_slot_or_fallback.d(detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_else_block.name,
+    		type: "else",
+    		source: "(34:1) {:else}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (32:1) {#if toast.type === 'custom'}
+    function create_if_block$1(ctx) {
+    	let toastmessage;
+    	let current;
+
+    	toastmessage = new ToastMessage({
+    			props: { toast: /*toast*/ ctx[0] },
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(toastmessage.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toastmessage, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const toastmessage_changes = {};
+    			if (dirty & /*toast*/ 1) toastmessage_changes.toast = /*toast*/ ctx[0];
+    			toastmessage.$set(toastmessage_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toastmessage.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toastmessage.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toastmessage, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block$1.name,
+    		type: "if",
+    		source: "(32:1) {#if toast.type === 'custom'}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (35:16)     
+    function fallback_block(ctx) {
+    	let toastbar;
+    	let current;
+
+    	toastbar = new ToastBar({
+    			props: {
+    				toast: /*toast*/ ctx[0],
+    				position: /*toast*/ ctx[0].position
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		c: function create() {
+    			create_component(toastbar.$$.fragment);
+    		},
+    		m: function mount(target, anchor) {
+    			mount_component(toastbar, target, anchor);
+    			current = true;
+    		},
+    		p: function update(ctx, dirty) {
+    			const toastbar_changes = {};
+    			if (dirty & /*toast*/ 1) toastbar_changes.toast = /*toast*/ ctx[0];
+    			if (dirty & /*toast*/ 1) toastbar_changes.position = /*toast*/ ctx[0].position;
+    			toastbar.$set(toastbar_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toastbar.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toastbar.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			destroy_component(toastbar, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: fallback_block.name,
+    		type: "fallback",
+    		source: "(35:16)     ",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$3(ctx) {
+    	let div;
+    	let current_block_type_index;
+    	let if_block;
+    	let current;
+    	const if_block_creators = [create_if_block$1, create_else_block];
+    	const if_blocks = [];
+
+    	function select_block_type(ctx, dirty) {
+    		if (/*toast*/ ctx[0].type === 'custom') return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			if_block.c();
+    			attr_dev(div, "class", "wrapper svelte-v01oml");
+    			toggle_class(div, "active", /*toast*/ ctx[0].visible);
+    			toggle_class(div, "transition", !prefersReducedMotion());
+    			set_style(div, "--factor", /*factor*/ ctx[3]);
+    			set_style(div, "--offset", /*toast*/ ctx[0].offset);
+    			set_style(div, "top", /*top*/ ctx[5]);
+    			set_style(div, "bottom", /*bottom*/ ctx[4]);
+    			set_style(div, "justify-content", /*justifyContent*/ ctx[2]);
+    			add_location(div, file$3, 20, 0, 630);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+    			if_blocks[current_block_type_index].m(div, null);
+    			/*div_binding*/ ctx[9](div);
+    			current = true;
+    		},
+    		p: function update(ctx, [dirty]) {
+    			let previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+
+    			if (current_block_type_index === previous_block_index) {
+    				if_blocks[current_block_type_index].p(ctx, dirty);
+    			} else {
+    				group_outros();
+
+    				transition_out(if_blocks[previous_block_index], 1, 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+
+    				check_outros();
+    				if_block = if_blocks[current_block_type_index];
+
+    				if (!if_block) {
+    					if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block.c();
+    				} else {
+    					if_block.p(ctx, dirty);
+    				}
+
+    				transition_in(if_block, 1);
+    				if_block.m(div, null);
+    			}
+
+    			if (!current || dirty & /*toast*/ 1) {
+    				toggle_class(div, "active", /*toast*/ ctx[0].visible);
+    			}
+
+    			if (dirty & /*factor*/ 8) {
+    				set_style(div, "--factor", /*factor*/ ctx[3]);
+    			}
+
+    			if (dirty & /*toast*/ 1) {
+    				set_style(div, "--offset", /*toast*/ ctx[0].offset);
+    			}
+
+    			if (dirty & /*top*/ 32) {
+    				set_style(div, "top", /*top*/ ctx[5]);
+    			}
+
+    			if (dirty & /*bottom*/ 16) {
+    				set_style(div, "bottom", /*bottom*/ ctx[4]);
+    			}
+
+    			if (dirty & /*justifyContent*/ 4) {
+    				set_style(div, "justify-content", /*justifyContent*/ ctx[2]);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(if_block);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(if_block);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    			if_blocks[current_block_type_index].d();
+    			/*div_binding*/ ctx[9](null);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$3.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$3($$self, $$props, $$invalidate) {
+    	let top;
+    	let bottom;
+    	let factor;
+    	let justifyContent;
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('ToastWrapper', slots, ['default']);
+    	let { toast } = $$props;
+    	let { setHeight } = $$props;
+    	let wrapperEl;
+
+    	onMount(() => {
+    		setHeight(wrapperEl.getBoundingClientRect().height);
+    	});
+
+    	$$self.$$.on_mount.push(function () {
+    		if (toast === undefined && !('toast' in $$props || $$self.$$.bound[$$self.$$.props['toast']])) {
+    			console.warn("<ToastWrapper> was created without expected prop 'toast'");
+    		}
+
+    		if (setHeight === undefined && !('setHeight' in $$props || $$self.$$.bound[$$self.$$.props['setHeight']])) {
+    			console.warn("<ToastWrapper> was created without expected prop 'setHeight'");
+    		}
+    	});
+
+    	const writable_props = ['toast', 'setHeight'];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<ToastWrapper> was created with unknown prop '${key}'`);
+    	});
+
+    	function div_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			wrapperEl = $$value;
+    			$$invalidate(1, wrapperEl);
+    		});
+    	}
+
+    	$$self.$$set = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    		if ('setHeight' in $$props) $$invalidate(6, setHeight = $$props.setHeight);
+    		if ('$$scope' in $$props) $$invalidate(7, $$scope = $$props.$$scope);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		onMount,
+    		prefersReducedMotion,
+    		ToastBar,
+    		ToastMessage,
+    		toast,
+    		setHeight,
+    		wrapperEl,
+    		justifyContent,
+    		factor,
+    		bottom,
+    		top
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('toast' in $$props) $$invalidate(0, toast = $$props.toast);
+    		if ('setHeight' in $$props) $$invalidate(6, setHeight = $$props.setHeight);
+    		if ('wrapperEl' in $$props) $$invalidate(1, wrapperEl = $$props.wrapperEl);
+    		if ('justifyContent' in $$props) $$invalidate(2, justifyContent = $$props.justifyContent);
+    		if ('factor' in $$props) $$invalidate(3, factor = $$props.factor);
+    		if ('bottom' in $$props) $$invalidate(4, bottom = $$props.bottom);
+    		if ('top' in $$props) $$invalidate(5, top = $$props.top);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*toast*/ 1) {
+    			$$invalidate(5, top = (toast.position?.includes("top")) ? 0 : null);
+    		}
+
+    		if ($$self.$$.dirty & /*toast*/ 1) {
+    			$$invalidate(4, bottom = (toast.position?.includes("bottom")) ? 0 : null);
+    		}
+
+    		if ($$self.$$.dirty & /*toast*/ 1) {
+    			$$invalidate(3, factor = (toast.position?.includes("top")) ? 1 : -1);
+    		}
+
+    		if ($$self.$$.dirty & /*toast*/ 1) {
+    			$$invalidate(2, justifyContent = toast.position?.includes("center") && "center" || toast.position?.includes("right") && "flex-end" || null);
+    		}
+    	};
+
+    	return [
+    		toast,
+    		wrapperEl,
+    		justifyContent,
+    		factor,
+    		bottom,
+    		top,
+    		setHeight,
+    		$$scope,
+    		slots,
+    		div_binding
+    	];
+    }
+
+    class ToastWrapper extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+    		init(this, options, instance$3, create_fragment$3, safe_not_equal, { toast: 0, setHeight: 6 });
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "ToastWrapper",
+    			options,
+    			id: create_fragment$3.name
+    		});
+    	}
+
+    	get toast() {
+    		throw new Error("<ToastWrapper>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set toast(value) {
+    		throw new Error("<ToastWrapper>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get setHeight() {
+    		throw new Error("<ToastWrapper>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set setHeight(value) {
+    		throw new Error("<ToastWrapper>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    /* node_modules\svelte-french-toast\dist\components\Toaster.svelte generated by Svelte v3.58.0 */
+    const file$2 = "node_modules\\svelte-french-toast\\dist\\components\\Toaster.svelte";
+
+    function get_each_context$1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[11] = list[i];
+    	return child_ctx;
+    }
+
+    // (29:1) {#each _toasts as toast (toast.id)}
+    function create_each_block$1(key_1, ctx) {
+    	let first;
+    	let toastwrapper;
+    	let current;
+
+    	function func(...args) {
+    		return /*func*/ ctx[10](/*toast*/ ctx[11], ...args);
+    	}
+
+    	toastwrapper = new ToastWrapper({
+    			props: {
+    				toast: /*toast*/ ctx[11],
+    				setHeight: func
+    			},
+    			$$inline: true
+    		});
+
+    	const block = {
+    		key: key_1,
+    		first: null,
+    		c: function create() {
+    			first = empty();
+    			create_component(toastwrapper.$$.fragment);
+    			this.first = first;
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, first, anchor);
+    			mount_component(toastwrapper, target, anchor);
+    			current = true;
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			const toastwrapper_changes = {};
+    			if (dirty & /*_toasts*/ 4) toastwrapper_changes.toast = /*toast*/ ctx[11];
+    			if (dirty & /*_toasts*/ 4) toastwrapper_changes.setHeight = func;
+    			toastwrapper.$set(toastwrapper_changes);
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toastwrapper.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toastwrapper.$$.fragment, local);
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(first);
+    			destroy_component(toastwrapper, detaching);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block$1.name,
+    		type: "each",
+    		source: "(29:1) {#each _toasts as toast (toast.id)}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function create_fragment$2(ctx) {
+    	let div;
+    	let each_blocks = [];
+    	let each_1_lookup = new Map();
+    	let div_class_value;
+    	let current;
+    	let mounted;
+    	let dispose;
+    	let each_value = /*_toasts*/ ctx[2];
+    	validate_each_argument(each_value);
+    	const get_key = ctx => /*toast*/ ctx[11].id;
+    	validate_each_keys(ctx, each_value, get_each_context$1, get_key);
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		let child_ctx = get_each_context$1(ctx, each_value, i);
+    		let key = get_key(child_ctx);
+    		each_1_lookup.set(key, each_blocks[i] = create_each_block$1(key, child_ctx));
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			attr_dev(div, "class", div_class_value = "toaster " + (/*containerClassName*/ ctx[1] || '') + " svelte-1phplh9");
+    			attr_dev(div, "style", /*containerStyle*/ ctx[0]);
+    			add_location(div, file$2, 22, 0, 617);
+    		},
+    		l: function claim(nodes) {
+    			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div, anchor);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(div, null);
+    				}
+    			}
+
+    			current = true;
+
+    			if (!mounted) {
+    				dispose = [
+    					listen_dev(div, "mouseenter", /*handlers*/ ctx[4].startPause, false, false, false, false),
+    					listen_dev(div, "mouseleave", /*handlers*/ ctx[4].endPause, false, false, false, false)
+    				];
+
+    				mounted = true;
+    			}
+    		},
+    		p: function update(ctx, [dirty]) {
+    			if (dirty & /*_toasts, handlers*/ 20) {
+    				each_value = /*_toasts*/ ctx[2];
+    				validate_each_argument(each_value);
+    				group_outros();
+    				validate_each_keys(ctx, each_value, get_each_context$1, get_key);
+    				each_blocks = update_keyed_each(each_blocks, dirty, get_key, 1, ctx, each_value, each_1_lookup, div, outro_and_destroy_block, create_each_block$1, null, get_each_context$1);
+    				check_outros();
+    			}
+
+    			if (!current || dirty & /*containerClassName*/ 2 && div_class_value !== (div_class_value = "toaster " + (/*containerClassName*/ ctx[1] || '') + " svelte-1phplh9")) {
+    				attr_dev(div, "class", div_class_value);
+    			}
+
+    			if (!current || dirty & /*containerStyle*/ 1) {
+    				attr_dev(div, "style", /*containerStyle*/ ctx[0]);
+    			}
+    		},
+    		i: function intro(local) {
+    			if (current) return;
+
+    			for (let i = 0; i < each_value.length; i += 1) {
+    				transition_in(each_blocks[i]);
+    			}
+
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				transition_out(each_blocks[i]);
+    			}
+
+    			current = false;
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].d();
+    			}
+
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_fragment$2.name,
+    		type: "component",
+    		source: "",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    function instance$2($$self, $$props, $$invalidate) {
+    	let $toasts;
+    	let { $$slots: slots = {}, $$scope } = $$props;
+    	validate_slots('Toaster', slots, []);
+    	let { reverseOrder = false } = $$props;
+    	let { position = "top-center" } = $$props;
+    	let { toastOptions = void 0 } = $$props;
+    	let { gutter = 8 } = $$props;
+    	let { containerStyle = void 0 } = $$props;
+    	let { containerClassName = void 0 } = $$props;
+    	const { toasts, handlers } = useToaster(toastOptions);
+    	validate_store(toasts, 'toasts');
+    	component_subscribe($$self, toasts, value => $$invalidate(9, $toasts = value));
+    	let _toasts;
+
+    	const writable_props = [
+    		'reverseOrder',
+    		'position',
+    		'toastOptions',
+    		'gutter',
+    		'containerStyle',
+    		'containerClassName'
+    	];
+
+    	Object.keys($$props).forEach(key => {
+    		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Toaster> was created with unknown prop '${key}'`);
+    	});
+
+    	const func = (toast, height) => handlers.updateHeight(toast.id, height);
+
+    	$$self.$$set = $$props => {
+    		if ('reverseOrder' in $$props) $$invalidate(5, reverseOrder = $$props.reverseOrder);
+    		if ('position' in $$props) $$invalidate(6, position = $$props.position);
+    		if ('toastOptions' in $$props) $$invalidate(7, toastOptions = $$props.toastOptions);
+    		if ('gutter' in $$props) $$invalidate(8, gutter = $$props.gutter);
+    		if ('containerStyle' in $$props) $$invalidate(0, containerStyle = $$props.containerStyle);
+    		if ('containerClassName' in $$props) $$invalidate(1, containerClassName = $$props.containerClassName);
+    	};
+
+    	$$self.$capture_state = () => ({
+    		useToaster,
+    		ToastWrapper,
+    		reverseOrder,
+    		position,
+    		toastOptions,
+    		gutter,
+    		containerStyle,
+    		containerClassName,
+    		toasts,
+    		handlers,
+    		_toasts,
+    		$toasts
+    	});
+
+    	$$self.$inject_state = $$props => {
+    		if ('reverseOrder' in $$props) $$invalidate(5, reverseOrder = $$props.reverseOrder);
+    		if ('position' in $$props) $$invalidate(6, position = $$props.position);
+    		if ('toastOptions' in $$props) $$invalidate(7, toastOptions = $$props.toastOptions);
+    		if ('gutter' in $$props) $$invalidate(8, gutter = $$props.gutter);
+    		if ('containerStyle' in $$props) $$invalidate(0, containerStyle = $$props.containerStyle);
+    		if ('containerClassName' in $$props) $$invalidate(1, containerClassName = $$props.containerClassName);
+    		if ('_toasts' in $$props) $$invalidate(2, _toasts = $$props._toasts);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*$toasts, position, reverseOrder, gutter*/ 864) {
+    			$$invalidate(2, _toasts = $toasts.map(toast => ({
+    				...toast,
+    				position: toast.position || position,
+    				offset: handlers.calculateOffset(toast, $toasts, {
+    					reverseOrder,
+    					gutter,
+    					defaultPosition: position
+    				})
+    			})));
+    		}
+    	};
+
+    	return [
+    		containerStyle,
+    		containerClassName,
+    		_toasts,
+    		toasts,
+    		handlers,
+    		reverseOrder,
+    		position,
+    		toastOptions,
+    		gutter,
+    		$toasts,
+    		func
+    	];
+    }
+
+    class Toaster extends SvelteComponentDev {
+    	constructor(options) {
+    		super(options);
+
+    		init(this, options, instance$2, create_fragment$2, safe_not_equal, {
+    			reverseOrder: 5,
+    			position: 6,
+    			toastOptions: 7,
+    			gutter: 8,
+    			containerStyle: 0,
+    			containerClassName: 1
+    		});
+
+    		dispatch_dev("SvelteRegisterComponent", {
+    			component: this,
+    			tagName: "Toaster",
+    			options,
+    			id: create_fragment$2.name
+    		});
+    	}
+
+    	get reverseOrder() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set reverseOrder(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get position() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set position(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get toastOptions() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set toastOptions(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get gutter() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set gutter(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get containerStyle() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set containerStyle(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	get containerClassName() {
+    		throw new Error("<Toaster>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set containerClassName(value) {
+    		throw new Error("<Toaster>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+    }
+
+    const Configuration = ( ()=>{
+        const local = {
+            API:"http://localhost:8086/api",
+        };
+        const dev = {
+            API:"http://localhost:8086/api",
+        };
+
+        const prod = {
+            API: "",
+        };
+
+        const configMap = new Map();
+        configMap.set("local",local);
+        configMap.set("prod",prod);
+        configMap.set("dev",dev);
+
+        const getEnv= ()=>{
+            const host = window.location.toString();
+            const env = /simba/.test(host)?"dev" : /localhost:8080/.test(host)?"local": "prod";
+            return env;
+        };
+        const getConfiguration = ()=>{
+            const env = getEnv();
+            const config = configMap.get(env);
+            return config;
+        };
+
+        return {getConfiguration,getEnv}
+    }) ();
+
+    const conf = Configuration.getConfiguration();
+
+    let headers = { "Content-Type":"application/json;charset=utf-8"};
+    const ServerConnection = ( ()=>{
+
+         const serialize=(obj)=>{
+            var str = [];
+            for (var p in obj)
+              if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + "=" + encodeURIComponent(obj[p]));
+              }
+            return str.join("&");
+        };
+        const httpGetPromise=(url, payload)=>{
+            headers.Authorization='Bearer '+sessionStorage.getItem("token");
+
+            return new Promise((result,reject)=>{
+                let params=serialize(payload);
+                fetch(`${url}?${params}`,{method:'GET',headers})
+                .then(r=>r.json())
+                .then(r=> result(r))
+                .catch(e=> reject(e));
+            })
+        };
+        const getproductos = (params)=>{
+           return httpGetPromise(`${conf.API}/businessobject/list`, params);
+        };
+
+        return {getproductos}
+    } ) ();
 
     var qrcodeExports = {};
     var qrcode = {
@@ -2754,7 +6031,256 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\home.svelte";
 
-    // (592:8) {#if car>0}
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[33] = list[i];
+    	child_ctx[35] = i;
+    	return child_ctx;
+    }
+
+    function get_each_context_1(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[33] = list[i];
+    	child_ctx[35] = i;
+    	return child_ctx;
+    }
+
+    // (273:20) {#each  products.list as value , key}
+    function create_each_block_1(ctx) {
+    	let div3;
+    	let a;
+    	let div2;
+    	let div0;
+    	let img;
+    	let img_src_value;
+    	let t0;
+    	let div1;
+    	let h6;
+    	let t1_value = /*value*/ ctx[33].name + "";
+    	let t1;
+    	let t2;
+    	let small0;
+    	let t4;
+    	let small1;
+    	let t5;
+    	let t6_value = /*value*/ ctx[33].totalmoney + "";
+    	let t6;
+    	let t7;
+    	let t8;
+    	let mounted;
+    	let dispose;
+
+    	function click_handler() {
+    		return /*click_handler*/ ctx[14](/*value*/ ctx[33]);
+    	}
+
+    	const block = {
+    		c: function create() {
+    			div3 = element("div");
+    			a = element("a");
+    			div2 = element("div");
+    			div0 = element("div");
+    			img = element("img");
+    			t0 = space();
+    			div1 = element("div");
+    			h6 = element("h6");
+    			t1 = text(t1_value);
+    			t2 = space();
+    			small0 = element("small");
+    			small0.textContent = "100 Products";
+    			t4 = space();
+    			small1 = element("small");
+    			t5 = text("S/. ");
+    			t6 = text(t6_value);
+    			t7 = text(".00");
+    			t8 = space();
+    			attr_dev(img, "class", "img-fluid");
+    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[33].photo)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "");
+    			set_style(img, "height", "119px");
+    			add_location(img, file$1, 278, 40, 13883);
+    			attr_dev(div0, "class", "overflow-hidden");
+    			set_style(div0, "width", "120px");
+    			set_style(div0, "height", "120px");
+    			add_location(div0, file$1, 277, 36, 13775);
+    			add_location(h6, file$1, 281, 40, 14108);
+    			attr_dev(small0, "class", "text-body");
+    			add_location(small0, file$1, 282, 40, 14171);
+    			attr_dev(small1, "class", "text-price svelte-1ngsihw");
+    			add_location(small1, file$1, 283, 40, 14258);
+    			attr_dev(div1, "class", "flex-fill pl-3");
+    			add_location(div1, file$1, 280, 36, 14038);
+    			attr_dev(div2, "class", "cat-item d-flex align-items-center mb-4");
+    			add_location(div2, file$1, 276, 32, 13684);
+    			attr_dev(a, "href", "#");
+    			attr_dev(a, "class", "text-decoration-none");
+    			add_location(a, file$1, 275, 28, 13609);
+    			attr_dev(div3, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div3, file$1, 274, 24, 13484);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, a);
+    			append_dev(a, div2);
+    			append_dev(div2, div0);
+    			append_dev(div0, img);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, h6);
+    			append_dev(h6, t1);
+    			append_dev(div1, t2);
+    			append_dev(div1, small0);
+    			append_dev(div1, t4);
+    			append_dev(div1, small1);
+    			append_dev(small1, t5);
+    			append_dev(small1, t6);
+    			append_dev(small1, t7);
+    			append_dev(div3, t8);
+
+    			if (!mounted) {
+    				dispose = listen_dev(div3, "click", click_handler, false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*products*/ 16 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[33].photo)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+
+    			if (dirty[0] & /*products*/ 16 && t1_value !== (t1_value = /*value*/ ctx[33].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty[0] & /*products*/ 16 && t6_value !== (t6_value = /*value*/ ctx[33].totalmoney + "")) set_data_dev(t6, t6_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div3);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block_1.name,
+    		type: "each",
+    		source: "(273:20) {#each  products.list as value , key}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (367:32) {#each  product as value , key}
+    function create_each_block(ctx) {
+    	let div3;
+    	let a;
+    	let div2;
+    	let div0;
+    	let img;
+    	let img_src_value;
+    	let t0;
+    	let div1;
+    	let h6;
+    	let t1_value = /*value*/ ctx[33].name + "";
+    	let t1;
+    	let t2;
+    	let small0;
+    	let t4;
+    	let small1;
+    	let t5;
+    	let t6_value = /*value*/ ctx[33].totalmoney + "";
+    	let t6;
+    	let t7;
+    	let t8;
+
+    	const block = {
+    		c: function create() {
+    			div3 = element("div");
+    			a = element("a");
+    			div2 = element("div");
+    			div0 = element("div");
+    			img = element("img");
+    			t0 = space();
+    			div1 = element("div");
+    			h6 = element("h6");
+    			t1 = text(t1_value);
+    			t2 = space();
+    			small0 = element("small");
+    			small0.textContent = "100 Products";
+    			t4 = space();
+    			small1 = element("small");
+    			t5 = text("S/. ");
+    			t6 = text(t6_value);
+    			t7 = text(".00");
+    			t8 = space();
+    			attr_dev(img, "class", "img-fluid");
+    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[33].photo)) attr_dev(img, "src", img_src_value);
+    			attr_dev(img, "alt", "");
+    			set_style(img, "height", "119px");
+    			add_location(img, file$1, 371, 52, 19541);
+    			attr_dev(div0, "class", "overflow-hidden");
+    			set_style(div0, "width", "120px");
+    			set_style(div0, "height", "120px");
+    			add_location(div0, file$1, 370, 48, 19421);
+    			add_location(h6, file$1, 374, 52, 19802);
+    			attr_dev(small0, "class", "text-body");
+    			add_location(small0, file$1, 375, 52, 19877);
+    			attr_dev(small1, "class", "text-price svelte-1ngsihw");
+    			add_location(small1, file$1, 376, 52, 19976);
+    			attr_dev(div1, "class", "flex-fill pl-3");
+    			add_location(div1, file$1, 373, 48, 19720);
+    			attr_dev(div2, "class", "cat-item d-flex align-items-center mb-4");
+    			add_location(div2, file$1, 369, 44, 19318);
+    			attr_dev(a, "href", "#");
+    			attr_dev(a, "class", "text-decoration-none");
+    			add_location(a, file$1, 368, 40, 19231);
+    			attr_dev(div3, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div3, file$1, 367, 36, 19129);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, div3, anchor);
+    			append_dev(div3, a);
+    			append_dev(a, div2);
+    			append_dev(div2, div0);
+    			append_dev(div0, img);
+    			append_dev(div2, t0);
+    			append_dev(div2, div1);
+    			append_dev(div1, h6);
+    			append_dev(h6, t1);
+    			append_dev(div1, t2);
+    			append_dev(div1, small0);
+    			append_dev(div1, t4);
+    			append_dev(div1, small1);
+    			append_dev(small1, t5);
+    			append_dev(small1, t6);
+    			append_dev(small1, t7);
+    			append_dev(div3, t8);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*product*/ 64 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[33].photo)) {
+    				attr_dev(img, "src", img_src_value);
+    			}
+
+    			if (dirty[0] & /*product*/ 64 && t1_value !== (t1_value = /*value*/ ctx[33].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty[0] & /*product*/ 64 && t6_value !== (t6_value = /*value*/ ctx[33].totalmoney + "")) set_data_dev(t6, t6_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div3);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(367:32) {#each  product as value , key}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (491:8) {#if gameActive}
     function create_if_block_2(ctx) {
     	let div2;
     	let input;
@@ -2789,35 +6315,35 @@ var app = (function () {
     			label = element("label");
     			attr_dev(input, "type", "checkbox");
     			attr_dev(input, "id", "btn-mas");
-    			attr_dev(input, "class", "svelte-d9yz2r");
-    			add_location(input, file$1, 593, 16, 37270);
-    			attr_dev(img0, "class", "img-game svelte-d9yz2r");
+    			attr_dev(input, "class", "svelte-1ngsihw");
+    			add_location(input, file$1, 492, 16, 27217);
+    			attr_dev(img0, "class", "img-game svelte-1ngsihw");
     			if (!src_url_equal(img0.src, img0_src_value = "img/casino.jpg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "45px");
     			attr_dev(img0, "height", "45px");
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$1, 595, 34, 37379);
+    			add_location(img0, file$1, 494, 34, 27326);
     			attr_dev(a0, "href", "#");
-    			attr_dev(a0, "class", "svelte-d9yz2r");
-    			add_location(a0, file$1, 595, 20, 37365);
-    			attr_dev(img1, "class", "img-game svelte-d9yz2r");
+    			attr_dev(a0, "class", "svelte-1ngsihw");
+    			add_location(a0, file$1, 494, 20, 27312);
+    			attr_dev(img1, "class", "img-game svelte-1ngsihw");
     			if (!src_url_equal(img1.src, img1_src_value = "img/ruleta.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "width", "45px");
     			attr_dev(img1, "height", "45px");
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$1, 596, 34, 37528);
+    			add_location(img1, file$1, 495, 34, 27475);
     			attr_dev(a1, "href", "#");
-    			attr_dev(a1, "class", "svelte-d9yz2r");
-    			add_location(a1, file$1, 596, 20, 37514);
-    			attr_dev(div0, "class", "redes svelte-d9yz2r");
-    			add_location(div0, file$1, 594, 16, 37324);
+    			attr_dev(a1, "class", "svelte-1ngsihw");
+    			add_location(a1, file$1, 495, 20, 27461);
+    			attr_dev(div0, "class", "redes svelte-1ngsihw");
+    			add_location(div0, file$1, 493, 16, 27271);
     			attr_dev(label, "for", "btn-mas");
-    			attr_dev(label, "class", "fa fa-plus svelte-d9yz2r");
-    			add_location(label, file$1, 599, 20, 37732);
-    			attr_dev(div1, "class", "btn-mas svelte-d9yz2r");
-    			add_location(div1, file$1, 598, 16, 37689);
-    			attr_dev(div2, "class", "container svelte-d9yz2r");
-    			add_location(div2, file$1, 592, 12, 37229);
+    			attr_dev(label, "class", "fa fa-plus svelte-1ngsihw");
+    			add_location(label, file$1, 498, 20, 27679);
+    			attr_dev(div1, "class", "btn-mas svelte-1ngsihw");
+    			add_location(div1, file$1, 497, 16, 27636);
+    			attr_dev(div2, "class", "container svelte-1ngsihw");
+    			add_location(div2, file$1, 491, 12, 27176);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -2835,8 +6361,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(img0, "click", /*click_handler_20*/ ctx[24], false, false, false, false),
-    					listen_dev(img1, "click", /*click_handler_21*/ ctx[25], false, false, false, false)
+    					listen_dev(img0, "click", /*click_handler_8*/ ctx[22], false, false, false, false),
+    					listen_dev(img1, "click", /*click_handler_9*/ ctx[23], false, false, false, false)
     				];
 
     				mounted = true;
@@ -2854,14 +6380,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(592:8) {#if car>0}",
+    		source: "(491:8) {#if gameActive}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (606:8) {#if gameOpen==true}
+    // (505:8) {#if gameOpen==true}
     function create_if_block_1(ctx) {
     	let i;
     	let t;
@@ -2881,13 +6407,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 606, 12, 37895);
+    			add_location(i, file$1, 505, 12, 27842);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 607, 12, 38067);
+    			add_location(iframe, file$1, 506, 12, 28014);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -2895,7 +6421,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_22*/ ctx[26], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_10*/ ctx[24], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -2913,14 +6439,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(606:8) {#if gameOpen==true}",
+    		source: "(505:8) {#if gameOpen==true}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (611:8) {#if gameOpencasine==true}
+    // (510:8) {#if gameOpencasine==true}
     function create_if_block(ctx) {
     	let i;
     	let t;
@@ -2940,13 +6466,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 611, 12, 38695);
+    			add_location(i, file$1, 510, 12, 28642);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 612, 12, 38873);
+    			add_location(iframe, file$1, 511, 12, 28820);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -2954,7 +6480,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_23*/ ctx[27], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_11*/ ctx[25], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -2972,7 +6498,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(611:8) {#if gameOpencasine==true}",
+    		source: "(510:8) {#if gameOpencasine==true}",
     		ctx
     	});
 
@@ -2982,1923 +6508,1248 @@ var app = (function () {
     function create_fragment$1(ctx) {
     	let main;
     	let body;
-    	let div0;
+    	let toaster;
     	let t0;
+    	let div0;
+    	let t1;
     	let div7;
     	let div6;
     	let div1;
     	let img0;
     	let img0_src_value;
-    	let t1;
+    	let t2;
     	let a0;
     	let span0;
-    	let t3;
+    	let t4;
     	let span1;
-    	let t5;
-    	let div4;
-    	let form0;
-    	let div3;
-    	let input;
     	let t6;
+    	let div4;
+    	let div3;
+    	let input0;
+    	let t7;
     	let div2;
     	let span2;
     	let i0;
-    	let t7;
+    	let t8;
     	let div5;
     	let p0;
-    	let t9;
+    	let t10;
     	let h50;
-    	let t11;
+    	let t12;
     	let div18;
     	let div17;
     	let div10;
     	let a1;
     	let h60;
     	let i1;
-    	let t12;
     	let t13;
-    	let i2;
     	let t14;
+    	let i2;
+    	let t15;
     	let nav0;
     	let div9;
     	let div8;
     	let a2;
-    	let t16;
+    	let t17;
     	let a3;
-    	let t18;
+    	let t19;
     	let a4;
-    	let t20;
+    	let t21;
     	let a5;
-    	let t22;
+    	let t23;
     	let a6;
-    	let t24;
+    	let t25;
     	let div16;
     	let nav1;
     	let button0;
     	let span3;
-    	let t25;
+    	let t26;
     	let a7;
     	let span4;
-    	let t27;
+    	let t28;
     	let span5;
-    	let t29;
+    	let t30;
     	let div15;
     	let div13;
     	let a8;
-    	let t31;
+    	let t32;
     	let a9;
-    	let t33;
+    	let t34;
     	let a10;
-    	let t35;
+    	let t36;
     	let div12;
     	let a11;
-    	let t36;
-    	let i3;
     	let t37;
+    	let i3;
+    	let t38;
     	let div11;
     	let a12;
-    	let t39;
+    	let t40;
     	let a13;
-    	let t41;
+    	let t42;
     	let a14;
-    	let t43;
+    	let t44;
     	let div14;
     	let a15;
     	let i4;
-    	let t44;
+    	let t45;
     	let span6;
-    	let t46;
+    	let t47;
     	let a16;
     	let i5;
-    	let t47;
-    	let span7;
     	let t48;
+    	let span7;
+    	let t49_value = /*product*/ ctx[6].length + "";
     	let t49;
-    	let div81;
+    	let t50;
+    	let div52;
     	let div32;
     	let div31;
     	let div30;
     	let div29;
     	let ol;
     	let li0;
-    	let t50;
-    	let li1;
     	let t51;
-    	let li2;
+    	let li1;
     	let t52;
+    	let li2;
+    	let t53;
     	let div28;
     	let div21;
     	let img1;
     	let img1_src_value;
-    	let t53;
+    	let t54;
     	let div20;
     	let div19;
     	let h10;
-    	let t55;
+    	let t56;
     	let p1;
-    	let t57;
+    	let t58;
     	let div24;
     	let img2;
     	let img2_src_value;
-    	let t58;
+    	let t59;
     	let div23;
     	let div22;
     	let h11;
-    	let t60;
+    	let t61;
     	let p2;
-    	let t62;
+    	let t63;
     	let div27;
     	let img3;
     	let img3_src_value;
-    	let t63;
+    	let t64;
     	let div26;
     	let div25;
     	let h12;
-    	let t65;
+    	let t66;
     	let p3;
-    	let t67;
-    	let div66;
-    	let h20;
-    	let span8;
-    	let t69;
-    	let div65;
-    	let div36;
-    	let a17;
+    	let t68;
     	let div35;
+    	let div34;
+    	let input1;
+    	let t69;
     	let div33;
+    	let span8;
+    	let i6;
+    	let t70;
+    	let div37;
+    	let h20;
+    	let span9;
+    	let t72;
+    	let div36;
+    	let t73;
+    	let div51;
+    	let h21;
+    	let span10;
+    	let t75;
+    	let div50;
+    	let div41;
+    	let a17;
+    	let div40;
+    	let div38;
     	let img4;
     	let img4_src_value;
-    	let t70;
-    	let div34;
-    	let h61;
-    	let t72;
-    	let small0;
-    	let t74;
-    	let small1;
     	let t76;
-    	let div40;
-    	let a18;
     	let div39;
-    	let div37;
+    	let h61;
+    	let t78;
+    	let small0;
+    	let t80;
+    	let small1;
+    	let t82;
+    	let div45;
+    	let a18;
+    	let div44;
+    	let div42;
     	let img5;
     	let img5_src_value;
-    	let t77;
-    	let div38;
-    	let h62;
-    	let t79;
-    	let small2;
-    	let t81;
-    	let small3;
     	let t83;
-    	let div44;
-    	let a19;
     	let div43;
-    	let div41;
+    	let h62;
+    	let t85;
+    	let small2;
+    	let t87;
+    	let small3;
+    	let t89;
+    	let div49;
+    	let a19;
+    	let div48;
+    	let div46;
     	let img6;
     	let img6_src_value;
-    	let t84;
-    	let div42;
-    	let h63;
-    	let t86;
-    	let small4;
-    	let t88;
-    	let small5;
     	let t90;
-    	let div48;
-    	let a20;
     	let div47;
-    	let div45;
+    	let h63;
+    	let t92;
+    	let small4;
+    	let t94;
+    	let small5;
+    	let t96;
+    	let div53;
+    	let a20;
+    	let span11;
+    	let i7;
+    	let t97_value = /*product*/ ctx[6].length + "";
+    	let t97;
+    	let t98;
+    	let a21;
     	let img7;
     	let img7_src_value;
-    	let t91;
-    	let div46;
-    	let h64;
-    	let t93;
-    	let small6;
-    	let t95;
-    	let small7;
-    	let t97;
-    	let div52;
-    	let a21;
-    	let div51;
-    	let div49;
+    	let t99;
+    	let div60;
+    	let div59;
+    	let div58;
+    	let div54;
+    	let h51;
     	let img8;
     	let img8_src_value;
-    	let t98;
-    	let div50;
-    	let h65;
     	let t100;
-    	let small8;
-    	let t102;
-    	let small9;
-    	let t104;
-    	let div56;
-    	let a22;
-    	let div55;
-    	let div53;
-    	let img9;
-    	let img9_src_value;
-    	let t105;
-    	let div54;
-    	let h66;
-    	let t107;
-    	let small10;
-    	let t109;
-    	let small11;
-    	let t111;
-    	let div60;
-    	let a23;
-    	let div59;
-    	let div57;
-    	let img10;
-    	let img10_src_value;
-    	let t112;
-    	let div58;
-    	let h67;
-    	let t114;
-    	let small12;
-    	let t116;
-    	let small13;
-    	let t118;
-    	let div64;
-    	let a24;
-    	let div63;
-    	let div61;
-    	let img11;
-    	let img11_src_value;
-    	let t119;
-    	let div62;
-    	let h68;
-    	let t121;
-    	let small14;
-    	let t123;
-    	let small15;
-    	let t125;
-    	let div80;
-    	let h21;
-    	let span9;
-    	let t127;
-    	let div79;
-    	let div70;
-    	let a25;
-    	let div69;
-    	let div67;
-    	let img12;
-    	let img12_src_value;
-    	let t128;
-    	let div68;
-    	let h69;
-    	let t130;
-    	let small16;
-    	let t132;
-    	let small17;
-    	let t134;
-    	let div74;
-    	let a26;
-    	let div73;
-    	let div71;
-    	let img13;
-    	let img13_src_value;
-    	let t135;
-    	let div72;
-    	let h610;
-    	let t137;
-    	let small18;
-    	let t139;
-    	let small19;
-    	let t141;
-    	let div78;
-    	let a27;
-    	let div77;
-    	let div75;
-    	let img14;
-    	let img14_src_value;
-    	let t142;
-    	let div76;
-    	let h611;
-    	let t144;
-    	let small20;
-    	let t146;
-    	let small21;
-    	let t148;
-    	let div82;
-    	let a28;
-    	let span10;
-    	let i6;
-    	let t149;
-    	let t150;
-    	let a29;
-    	let img15;
-    	let img15_src_value;
-    	let t151;
-    	let div109;
-    	let div108;
-    	let div107;
-    	let div83;
-    	let h51;
-    	let img16;
-    	let img16_src_value;
-    	let t152;
-    	let t153;
+    	let t101;
     	let button1;
-    	let span11;
-    	let t155;
-    	let div105;
-    	let form1;
-    	let div104;
-    	let div87;
-    	let a30;
-    	let div86;
-    	let div84;
-    	let img17;
-    	let img17_src_value;
-    	let t156;
-    	let div85;
-    	let h612;
-    	let t158;
-    	let small22;
-    	let t160;
-    	let small23;
-    	let t162;
-    	let div91;
-    	let a31;
-    	let div90;
-    	let div88;
-    	let img18;
-    	let img18_src_value;
-    	let t163;
-    	let div89;
-    	let h613;
-    	let t165;
-    	let small24;
-    	let t167;
-    	let small25;
-    	let t169;
-    	let div95;
-    	let a32;
-    	let div94;
-    	let div92;
-    	let img19;
-    	let img19_src_value;
-    	let t170;
-    	let div93;
-    	let h614;
-    	let t172;
-    	let small26;
-    	let t174;
-    	let small27;
-    	let t176;
-    	let div99;
-    	let a33;
-    	let div98;
-    	let div96;
-    	let img20;
-    	let img20_src_value;
-    	let t177;
-    	let div97;
-    	let h615;
-    	let t179;
-    	let small28;
-    	let t181;
-    	let small29;
-    	let t183;
-    	let div103;
-    	let a34;
-    	let div102;
-    	let div100;
-    	let img21;
-    	let img21_src_value;
-    	let t184;
-    	let div101;
-    	let h616;
-    	let t186;
-    	let small30;
-    	let t188;
-    	let small31;
-    	let t190;
-    	let div106;
+    	let span12;
+    	let t103;
+    	let div56;
+    	let div55;
+    	let t104;
+    	let div57;
     	let tbody0;
     	let tr0;
     	let td0;
-    	let span12;
-    	let strong0;
-    	let t192;
-    	let td1;
     	let span13;
-    	let t194;
-    	let tr1;
-    	let td2;
+    	let strong0;
+    	let t106;
+    	let td1;
     	let span14;
     	let strong1;
-    	let t196;
-    	let td3;
+    	let t107;
+    	let t108;
+    	let t109;
+    	let t110;
+    	let button2;
+    	let t112;
+    	let div79;
+    	let div78;
+    	let div77;
+    	let div61;
+    	let h52;
+    	let t114;
+    	let button3;
     	let span15;
-    	let t198;
-    	let tr2;
-    	let td4;
+    	let t116;
+    	let div75;
+    	let div74;
+    	let div65;
+    	let a22;
+    	let div64;
+    	let div62;
+    	let img9;
+    	let img9_src_value;
+    	let t117;
+    	let div63;
+    	let h64;
+    	let t119;
+    	let small6;
+    	let t121;
+    	let small7;
+    	let t123;
+    	let div69;
+    	let a23;
+    	let div68;
+    	let div66;
+    	let img10;
+    	let img10_src_value;
+    	let t124;
+    	let div67;
+    	let h65;
+    	let t126;
+    	let small8;
+    	let t128;
+    	let small9;
+    	let t130;
+    	let div73;
+    	let a24;
+    	let div72;
+    	let div70;
+    	let img11;
+    	let img11_src_value;
+    	let t131;
+    	let div71;
+    	let h66;
+    	let t133;
+    	let small10;
+    	let t135;
+    	let small11;
+    	let t137;
+    	let div76;
+    	let tbody1;
+    	let tr1;
+    	let td2;
     	let span16;
     	let strong2;
-    	let t200;
-    	let td5;
+    	let t139;
+    	let td3;
     	let span17;
-    	let strong3;
-    	let t202;
-    	let button2;
-    	let t204;
-    	let div128;
-    	let div127;
-    	let div126;
-    	let div110;
-    	let h52;
-    	let t206;
-    	let button3;
+    	let t141;
+    	let tr2;
+    	let td4;
     	let span18;
-    	let t208;
-    	let div124;
-    	let form2;
-    	let div123;
-    	let div114;
-    	let a35;
-    	let div113;
-    	let div111;
-    	let img22;
-    	let img22_src_value;
-    	let t209;
-    	let div112;
-    	let h617;
-    	let t211;
-    	let small32;
-    	let t213;
-    	let small33;
-    	let t215;
-    	let div118;
-    	let a36;
-    	let div117;
-    	let div115;
-    	let img23;
-    	let img23_src_value;
-    	let t216;
-    	let div116;
-    	let h618;
-    	let t218;
-    	let small34;
-    	let t220;
-    	let small35;
-    	let t222;
-    	let div122;
-    	let a37;
-    	let div121;
-    	let div119;
-    	let img24;
-    	let img24_src_value;
-    	let t223;
-    	let div120;
-    	let h619;
-    	let t225;
-    	let small36;
-    	let t227;
-    	let small37;
-    	let t229;
-    	let div125;
-    	let tbody1;
-    	let tr3;
-    	let td6;
+    	let strong3;
+    	let t143;
+    	let td5;
     	let span19;
     	let strong4;
-    	let t231;
-    	let td7;
-    	let span20;
-    	let t233;
-    	let tr4;
-    	let td8;
-    	let span21;
-    	let strong5;
-    	let t235;
-    	let td9;
-    	let span22;
-    	let strong6;
-    	let t237;
+    	let t145;
     	let button4;
-    	let t239;
-    	let t240;
-    	let t241;
+    	let t147;
+    	let t148;
+    	let t149;
+    	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*car*/ ctx[1] > 0 && create_if_block_2(ctx);
+    	toaster = new Toaster({ $$inline: true });
+    	let each_value_1 = /*products*/ ctx[4].list;
+    	validate_each_argument(each_value_1);
+    	let each_blocks_1 = [];
+
+    	for (let i = 0; i < each_value_1.length; i += 1) {
+    		each_blocks_1[i] = create_each_block_1(get_each_context_1(ctx, each_value_1, i));
+    	}
+
+    	let each_value = /*product*/ ctx[6];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
+
+    	let if_block0 = /*gameActive*/ ctx[2] && create_if_block_2(ctx);
     	let if_block1 = /*gameOpen*/ ctx[0] == true && create_if_block_1(ctx);
-    	let if_block2 = /*gameOpencasine*/ ctx[2] == true && create_if_block(ctx);
+    	let if_block2 = /*gameOpencasine*/ ctx[3] == true && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
     			main = element("main");
     			body = element("body");
-    			div0 = element("div");
+    			create_component(toaster.$$.fragment);
     			t0 = space();
+    			div0 = element("div");
+    			t1 = space();
     			div7 = element("div");
     			div6 = element("div");
     			div1 = element("div");
     			img0 = element("img");
-    			t1 = space();
+    			t2 = space();
     			a0 = element("a");
     			span0 = element("span");
     			span0.textContent = "Go";
-    			t3 = space();
+    			t4 = space();
     			span1 = element("span");
     			span1.textContent = "Eat";
-    			t5 = space();
-    			div4 = element("div");
-    			form0 = element("form");
-    			div3 = element("div");
-    			input = element("input");
     			t6 = space();
+    			div4 = element("div");
+    			div3 = element("div");
+    			input0 = element("input");
+    			t7 = space();
     			div2 = element("div");
     			span2 = element("span");
     			i0 = element("i");
-    			t7 = space();
+    			t8 = space();
     			div5 = element("div");
     			p0 = element("p");
     			p0.textContent = "Servicio al Cliente";
-    			t9 = space();
+    			t10 = space();
     			h50 = element("h5");
     			h50.textContent = "+ 951 970 113";
-    			t11 = space();
+    			t12 = space();
     			div18 = element("div");
     			div17 = element("div");
     			div10 = element("div");
     			a1 = element("a");
     			h60 = element("h6");
     			i1 = element("i");
-    			t12 = text("Categorias");
-    			t13 = space();
-    			i2 = element("i");
+    			t13 = text("Categorias");
     			t14 = space();
+    			i2 = element("i");
+    			t15 = space();
     			nav0 = element("nav");
     			div9 = element("div");
     			div8 = element("div");
     			a2 = element("a");
     			a2.textContent = "Brosterias";
-    			t16 = space();
+    			t17 = space();
     			a3 = element("a");
     			a3.textContent = "Pizzas";
-    			t18 = space();
+    			t19 = space();
     			a4 = element("a");
     			a4.textContent = "Taquerias";
-    			t20 = space();
+    			t21 = space();
     			a5 = element("a");
     			a5.textContent = "Juguerias";
-    			t22 = space();
+    			t23 = space();
     			a6 = element("a");
     			a6.textContent = "Restobar";
-    			t24 = space();
+    			t25 = space();
     			div16 = element("div");
     			nav1 = element("nav");
     			button0 = element("button");
     			span3 = element("span");
-    			t25 = space();
+    			t26 = space();
     			a7 = element("a");
     			span4 = element("span");
     			span4.textContent = "GO";
-    			t27 = space();
+    			t28 = space();
     			span5 = element("span");
     			span5.textContent = "Eat";
-    			t29 = space();
+    			t30 = space();
     			div15 = element("div");
     			div13 = element("div");
     			a8 = element("a");
     			a8.textContent = "Home";
-    			t31 = space();
+    			t32 = space();
     			a9 = element("a");
     			a9.textContent = "Shop";
-    			t33 = space();
+    			t34 = space();
     			a10 = element("a");
     			a10.textContent = "Shop Detail";
-    			t35 = space();
+    			t36 = space();
     			div12 = element("div");
     			a11 = element("a");
-    			t36 = text("Pages ");
+    			t37 = text("Pages ");
     			i3 = element("i");
-    			t37 = space();
+    			t38 = space();
     			div11 = element("div");
     			a12 = element("a");
     			a12.textContent = "Shopping Cart";
-    			t39 = space();
+    			t40 = space();
     			a13 = element("a");
     			a13.textContent = "Checkout";
-    			t41 = space();
+    			t42 = space();
     			a14 = element("a");
     			a14.textContent = "Contact";
-    			t43 = space();
+    			t44 = space();
     			div14 = element("div");
     			a15 = element("a");
     			i4 = element("i");
-    			t44 = space();
+    			t45 = space();
     			span6 = element("span");
     			span6.textContent = "0";
-    			t46 = space();
+    			t47 = space();
     			a16 = element("a");
     			i5 = element("i");
-    			t47 = space();
+    			t48 = space();
     			span7 = element("span");
-    			t48 = text(/*car*/ ctx[1]);
-    			t49 = space();
-    			div81 = element("div");
+    			t49 = text(t49_value);
+    			t50 = space();
+    			div52 = element("div");
     			div32 = element("div");
     			div31 = element("div");
     			div30 = element("div");
     			div29 = element("div");
     			ol = element("ol");
     			li0 = element("li");
-    			t50 = space();
-    			li1 = element("li");
     			t51 = space();
-    			li2 = element("li");
+    			li1 = element("li");
     			t52 = space();
+    			li2 = element("li");
+    			t53 = space();
     			div28 = element("div");
     			div21 = element("div");
     			img1 = element("img");
-    			t53 = space();
+    			t54 = space();
     			div20 = element("div");
     			div19 = element("div");
     			h10 = element("h1");
     			h10.textContent = "Warmin Coffe";
-    			t55 = space();
+    			t56 = space();
     			p1 = element("p");
     			p1.textContent = "Warmi, el lugar adecuado si te encuentras en tingo maría";
-    			t57 = space();
+    			t58 = space();
     			div24 = element("div");
     			img2 = element("img");
-    			t58 = space();
+    			t59 = space();
     			div23 = element("div");
     			div22 = element("div");
     			h11 = element("h1");
     			h11.textContent = "Women Fashion";
-    			t60 = space();
+    			t61 = space();
     			p2 = element("p");
     			p2.textContent = "Lugar adecuado si te encuentras en tingo maría";
-    			t62 = space();
+    			t63 = space();
     			div27 = element("div");
     			img3 = element("img");
-    			t63 = space();
+    			t64 = space();
     			div26 = element("div");
     			div25 = element("div");
     			h12 = element("h1");
     			h12.textContent = "Kids Fashion";
-    			t65 = space();
+    			t66 = space();
     			p3 = element("p");
     			p3.textContent = "Lugar adecuado si te encuentras en tingo maría";
-    			t67 = space();
-    			div66 = element("div");
-    			h20 = element("h2");
-    			span8 = element("span");
-    			span8.textContent = "COMIDAS";
-    			t69 = space();
-    			div65 = element("div");
-    			div36 = element("div");
-    			a17 = element("a");
+    			t68 = space();
     			div35 = element("div");
-    			div33 = element("div");
-    			img4 = element("img");
-    			t70 = space();
     			div34 = element("div");
-    			h61 = element("h6");
-    			h61.textContent = "Fideos a la Italiana";
-    			t72 = space();
-    			small0 = element("small");
-    			small0.textContent = "100 Products";
-    			t74 = space();
-    			small1 = element("small");
-    			small1.textContent = "S/. 15.00";
-    			t76 = space();
-    			div40 = element("div");
-    			a18 = element("a");
-    			div39 = element("div");
+    			input1 = element("input");
+    			t69 = space();
+    			div33 = element("div");
+    			span8 = element("span");
+    			i6 = element("i");
+    			t70 = space();
     			div37 = element("div");
-    			img5 = element("img");
-    			t77 = space();
+    			h20 = element("h2");
+    			span9 = element("span");
+    			span9.textContent = "COMIDAS";
+    			t72 = space();
+    			div36 = element("div");
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				each_blocks_1[i].c();
+    			}
+
+    			t73 = space();
+    			div51 = element("div");
+    			h21 = element("h2");
+    			span10 = element("span");
+    			span10.textContent = "BEBIDAS";
+    			t75 = space();
+    			div50 = element("div");
+    			div41 = element("div");
+    			a17 = element("a");
+    			div40 = element("div");
     			div38 = element("div");
+    			img4 = element("img");
+    			t76 = space();
+    			div39 = element("div");
+    			h61 = element("h6");
+    			h61.textContent = "Coca Cola";
+    			t78 = space();
+    			small0 = element("small");
+    			small0.textContent = "50 Unidades";
+    			t80 = space();
+    			small1 = element("small");
+    			small1.textContent = "S/. 3.00";
+    			t82 = space();
+    			div45 = element("div");
+    			a18 = element("a");
+    			div44 = element("div");
+    			div42 = element("div");
+    			img5 = element("img");
+    			t83 = space();
+    			div43 = element("div");
     			h62 = element("h6");
-    			h62.textContent = "Sandwich";
-    			t79 = space();
+    			h62.textContent = "Inka Cola";
+    			t85 = space();
     			small2 = element("small");
     			small2.textContent = "100 Products";
-    			t81 = space();
+    			t87 = space();
     			small3 = element("small");
-    			small3.textContent = "S/. 25.00";
-    			t83 = space();
-    			div44 = element("div");
+    			small3.textContent = "S/. 3.00";
+    			t89 = space();
+    			div49 = element("div");
     			a19 = element("a");
-    			div43 = element("div");
-    			div41 = element("div");
+    			div48 = element("div");
+    			div46 = element("div");
     			img6 = element("img");
-    			t84 = space();
-    			div42 = element("div");
+    			t90 = space();
+    			div47 = element("div");
     			h63 = element("h6");
-    			h63.textContent = "Arroz Chaufa Amazonico";
-    			t86 = space();
+    			h63.textContent = "Pepsi Cola";
+    			t92 = space();
     			small4 = element("small");
     			small4.textContent = "100 Products";
-    			t88 = space();
+    			t94 = space();
     			small5 = element("small");
-    			small5.textContent = "S/. 10.00";
-    			t90 = space();
-    			div48 = element("div");
-    			a20 = element("a");
-    			div47 = element("div");
-    			div45 = element("div");
-    			img7 = element("img");
-    			t91 = space();
-    			div46 = element("div");
-    			h64 = element("h6");
-    			h64.textContent = "Arroz con pato";
-    			t93 = space();
-    			small6 = element("small");
-    			small6.textContent = "100 Products";
-    			t95 = space();
-    			small7 = element("small");
-    			small7.textContent = "S/. 8.00";
-    			t97 = space();
-    			div52 = element("div");
-    			a21 = element("a");
-    			div51 = element("div");
-    			div49 = element("div");
-    			img8 = element("img");
-    			t98 = space();
-    			div50 = element("div");
-    			h65 = element("h6");
-    			h65.textContent = "Mondonguito Italiano";
-    			t100 = space();
-    			small8 = element("small");
-    			small8.textContent = "100 Products";
-    			t102 = space();
-    			small9 = element("small");
-    			small9.textContent = "S/. 13.00";
-    			t104 = space();
-    			div56 = element("div");
-    			a22 = element("a");
-    			div55 = element("div");
+    			small5.textContent = "S/. 2.00";
+    			t96 = space();
     			div53 = element("div");
-    			img9 = element("img");
-    			t105 = space();
-    			div54 = element("div");
-    			h66 = element("h6");
-    			h66.textContent = "Saltado de Res";
-    			t107 = space();
-    			small10 = element("small");
-    			small10.textContent = "100 Products";
-    			t109 = space();
-    			small11 = element("small");
-    			small11.textContent = "S/. 11.00";
-    			t111 = space();
-    			div60 = element("div");
-    			a23 = element("a");
-    			div59 = element("div");
-    			div57 = element("div");
-    			img10 = element("img");
-    			t112 = space();
-    			div58 = element("div");
-    			h67 = element("h6");
-    			h67.textContent = "Pollo a la brasa";
-    			t114 = space();
-    			small12 = element("small");
-    			small12.textContent = "100 Products";
-    			t116 = space();
-    			small13 = element("small");
-    			small13.textContent = "S/. 11.00";
-    			t118 = space();
-    			div64 = element("div");
-    			a24 = element("a");
-    			div63 = element("div");
-    			div61 = element("div");
-    			img11 = element("img");
-    			t119 = space();
-    			div62 = element("div");
-    			h68 = element("h6");
-    			h68.textContent = "Chancho ala Caja China";
-    			t121 = space();
-    			small14 = element("small");
-    			small14.textContent = "100 Products";
-    			t123 = space();
-    			small15 = element("small");
-    			small15.textContent = "S/. 15.00";
-    			t125 = space();
-    			div80 = element("div");
-    			h21 = element("h2");
-    			span9 = element("span");
-    			span9.textContent = "BEBIDAS";
-    			t127 = space();
-    			div79 = element("div");
-    			div70 = element("div");
-    			a25 = element("a");
-    			div69 = element("div");
-    			div67 = element("div");
-    			img12 = element("img");
-    			t128 = space();
-    			div68 = element("div");
-    			h69 = element("h6");
-    			h69.textContent = "Coca Cola";
-    			t130 = space();
-    			small16 = element("small");
-    			small16.textContent = "50 Unidades";
-    			t132 = space();
-    			small17 = element("small");
-    			small17.textContent = "S/. 3.00";
-    			t134 = space();
-    			div74 = element("div");
-    			a26 = element("a");
-    			div73 = element("div");
-    			div71 = element("div");
-    			img13 = element("img");
-    			t135 = space();
-    			div72 = element("div");
-    			h610 = element("h6");
-    			h610.textContent = "Inka Cola";
-    			t137 = space();
-    			small18 = element("small");
-    			small18.textContent = "100 Products";
-    			t139 = space();
-    			small19 = element("small");
-    			small19.textContent = "S/. 3.00";
-    			t141 = space();
-    			div78 = element("div");
-    			a27 = element("a");
-    			div77 = element("div");
-    			div75 = element("div");
-    			img14 = element("img");
-    			t142 = space();
-    			div76 = element("div");
-    			h611 = element("h6");
-    			h611.textContent = "Pepsi Cola";
-    			t144 = space();
-    			small20 = element("small");
-    			small20.textContent = "100 Products";
-    			t146 = space();
-    			small21 = element("small");
-    			small21.textContent = "S/. 2.00";
-    			t148 = space();
-    			div82 = element("div");
-    			a28 = element("a");
-    			span10 = element("span");
-    			i6 = element("i");
-    			t149 = text(/*car*/ ctx[1]);
-    			t150 = space();
-    			a29 = element("a");
-    			img15 = element("img");
-    			t151 = space();
-    			div109 = element("div");
-    			div108 = element("div");
-    			div107 = element("div");
-    			div83 = element("div");
-    			h51 = element("h5");
-    			img16 = element("img");
-    			t152 = text("Carrito");
-    			t153 = space();
-    			button1 = element("button");
+    			a20 = element("a");
     			span11 = element("span");
-    			span11.textContent = "×";
-    			t155 = space();
-    			div105 = element("div");
-    			form1 = element("form");
-    			div104 = element("div");
-    			div87 = element("div");
-    			a30 = element("a");
-    			div86 = element("div");
-    			div84 = element("div");
-    			img17 = element("img");
-    			t156 = space();
-    			div85 = element("div");
-    			h612 = element("h6");
-    			h612.textContent = "Coca Cola";
-    			t158 = space();
-    			small22 = element("small");
-    			small22.textContent = "50 Unidades";
-    			t160 = space();
-    			small23 = element("small");
-    			small23.textContent = "S/. 3.00";
-    			t162 = space();
-    			div91 = element("div");
-    			a31 = element("a");
-    			div90 = element("div");
-    			div88 = element("div");
-    			img18 = element("img");
-    			t163 = space();
-    			div89 = element("div");
-    			h613 = element("h6");
-    			h613.textContent = "Inka Cola";
-    			t165 = space();
-    			small24 = element("small");
-    			small24.textContent = "100 Products";
-    			t167 = space();
-    			small25 = element("small");
-    			small25.textContent = "S/. 3.00";
-    			t169 = space();
-    			div95 = element("div");
-    			a32 = element("a");
-    			div94 = element("div");
-    			div92 = element("div");
-    			img19 = element("img");
-    			t170 = space();
-    			div93 = element("div");
-    			h614 = element("h6");
-    			h614.textContent = "Pepsi Cola";
-    			t172 = space();
-    			small26 = element("small");
-    			small26.textContent = "100 Products";
-    			t174 = space();
-    			small27 = element("small");
-    			small27.textContent = "S/. 2.00";
-    			t176 = space();
-    			div99 = element("div");
-    			a33 = element("a");
-    			div98 = element("div");
-    			div96 = element("div");
-    			img20 = element("img");
-    			t177 = space();
-    			div97 = element("div");
-    			h615 = element("h6");
-    			h615.textContent = "Pepsi Cola";
-    			t179 = space();
-    			small28 = element("small");
-    			small28.textContent = "100 Products";
-    			t181 = space();
-    			small29 = element("small");
-    			small29.textContent = "S/. 2.00";
-    			t183 = space();
-    			div103 = element("div");
-    			a34 = element("a");
-    			div102 = element("div");
-    			div100 = element("div");
-    			img21 = element("img");
-    			t184 = space();
-    			div101 = element("div");
-    			h616 = element("h6");
-    			h616.textContent = "Pepsi Cola";
-    			t186 = space();
-    			small30 = element("small");
-    			small30.textContent = "100 Products";
-    			t188 = space();
-    			small31 = element("small");
-    			small31.textContent = "S/. 2.00";
-    			t190 = space();
-    			div106 = element("div");
+    			i7 = element("i");
+    			t97 = text(t97_value);
+    			t98 = space();
+    			a21 = element("a");
+    			img7 = element("img");
+    			t99 = space();
+    			div60 = element("div");
+    			div59 = element("div");
+    			div58 = element("div");
+    			div54 = element("div");
+    			h51 = element("h5");
+    			img8 = element("img");
+    			t100 = text("Carrito");
+    			t101 = space();
+    			button1 = element("button");
+    			span12 = element("span");
+    			span12.textContent = "×";
+    			t103 = space();
+    			div56 = element("div");
+    			div55 = element("div");
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t104 = space();
+    			div57 = element("div");
     			tbody0 = element("tbody");
     			tr0 = element("tr");
     			td0 = element("td");
-    			span12 = element("span");
-    			strong0 = element("strong");
-    			strong0.textContent = "Sub total:";
-    			t192 = space();
-    			td1 = element("td");
     			span13 = element("span");
-    			span13.textContent = "S/ 8.00";
-    			t194 = space();
-    			tr1 = element("tr");
-    			td2 = element("td");
+    			strong0 = element("strong");
+    			strong0.textContent = "TOTAL:";
+    			t106 = space();
+    			td1 = element("td");
     			span14 = element("span");
     			strong1 = element("strong");
-    			strong1.textContent = "Entrega:";
-    			t196 = space();
-    			td3 = element("td");
-    			span15 = element("span");
-    			span15.textContent = "Por calcular:";
-    			t198 = space();
-    			tr2 = element("tr");
-    			td4 = element("td");
-    			span16 = element("span");
-    			strong2 = element("strong");
-    			strong2.textContent = "TOTAL:";
-    			t200 = space();
-    			td5 = element("td");
-    			span17 = element("span");
-    			strong3 = element("strong");
-    			strong3.textContent = "S/ 8.00";
-    			t202 = space();
+    			t107 = text("S/ ");
+    			t108 = text(/*totalMoney*/ ctx[5]);
+    			t109 = text(".00");
+    			t110 = space();
     			button2 = element("button");
     			button2.textContent = "Proceder pago";
-    			t204 = space();
-    			div128 = element("div");
-    			div127 = element("div");
-    			div126 = element("div");
-    			div110 = element("div");
+    			t112 = space();
+    			div79 = element("div");
+    			div78 = element("div");
+    			div77 = element("div");
+    			div61 = element("div");
     			h52 = element("h5");
     			h52.textContent = "El sazon del pato";
-    			t206 = space();
+    			t114 = space();
     			button3 = element("button");
-    			span18 = element("span");
-    			span18.textContent = "×";
-    			t208 = space();
-    			div124 = element("div");
-    			form2 = element("form");
-    			div123 = element("div");
-    			div114 = element("div");
-    			a35 = element("a");
-    			div113 = element("div");
-    			div111 = element("div");
-    			img22 = element("img");
-    			t209 = space();
-    			div112 = element("div");
-    			h617 = element("h6");
-    			h617.textContent = "Arroz Chaufa Amazonico";
-    			t211 = space();
-    			small32 = element("small");
-    			small32.textContent = "50 Unidades";
-    			t213 = space();
-    			small33 = element("small");
-    			small33.textContent = "S/. 10.00";
-    			t215 = space();
-    			div118 = element("div");
-    			a36 = element("a");
-    			div117 = element("div");
-    			div115 = element("div");
-    			img23 = element("img");
-    			t216 = space();
-    			div116 = element("div");
-    			h618 = element("h6");
-    			h618.textContent = "Fideos a la Italiana";
-    			t218 = space();
-    			small34 = element("small");
-    			small34.textContent = "100 Products";
-    			t220 = space();
-    			small35 = element("small");
-    			small35.textContent = "S/. 13.00";
-    			t222 = space();
-    			div122 = element("div");
-    			a37 = element("a");
-    			div121 = element("div");
-    			div119 = element("div");
-    			img24 = element("img");
-    			t223 = space();
-    			div120 = element("div");
-    			h619 = element("h6");
-    			h619.textContent = "Arroz con pato";
-    			t225 = space();
-    			small36 = element("small");
-    			small36.textContent = "100 Products";
-    			t227 = space();
-    			small37 = element("small");
-    			small37.textContent = "S/. 15.00";
-    			t229 = space();
-    			div125 = element("div");
+    			span15 = element("span");
+    			span15.textContent = "×";
+    			t116 = space();
+    			div75 = element("div");
+    			div74 = element("div");
+    			div65 = element("div");
+    			a22 = element("a");
+    			div64 = element("div");
+    			div62 = element("div");
+    			img9 = element("img");
+    			t117 = space();
+    			div63 = element("div");
+    			h64 = element("h6");
+    			h64.textContent = "Arroz Chaufa Amazonico";
+    			t119 = space();
+    			small6 = element("small");
+    			small6.textContent = "50 Unidades";
+    			t121 = space();
+    			small7 = element("small");
+    			small7.textContent = "S/. 10.00";
+    			t123 = space();
+    			div69 = element("div");
+    			a23 = element("a");
+    			div68 = element("div");
+    			div66 = element("div");
+    			img10 = element("img");
+    			t124 = space();
+    			div67 = element("div");
+    			h65 = element("h6");
+    			h65.textContent = "Fideos a la Italiana";
+    			t126 = space();
+    			small8 = element("small");
+    			small8.textContent = "100 Products";
+    			t128 = space();
+    			small9 = element("small");
+    			small9.textContent = "S/. 13.00";
+    			t130 = space();
+    			div73 = element("div");
+    			a24 = element("a");
+    			div72 = element("div");
+    			div70 = element("div");
+    			img11 = element("img");
+    			t131 = space();
+    			div71 = element("div");
+    			h66 = element("h6");
+    			h66.textContent = "Arroz con pato";
+    			t133 = space();
+    			small10 = element("small");
+    			small10.textContent = "100 Products";
+    			t135 = space();
+    			small11 = element("small");
+    			small11.textContent = "S/. 15.00";
+    			t137 = space();
+    			div76 = element("div");
     			tbody1 = element("tbody");
-    			tr3 = element("tr");
-    			td6 = element("td");
+    			tr1 = element("tr");
+    			td2 = element("td");
+    			span16 = element("span");
+    			strong2 = element("strong");
+    			strong2.textContent = "Mesa:";
+    			t139 = space();
+    			td3 = element("td");
+    			span17 = element("span");
+    			span17.textContent = "1";
+    			t141 = space();
+    			tr2 = element("tr");
+    			td4 = element("td");
+    			span18 = element("span");
+    			strong3 = element("strong");
+    			strong3.textContent = "TOTAL:";
+    			t143 = space();
+    			td5 = element("td");
     			span19 = element("span");
     			strong4 = element("strong");
-    			strong4.textContent = "Mesa:";
-    			t231 = space();
-    			td7 = element("td");
-    			span20 = element("span");
-    			span20.textContent = "1";
-    			t233 = space();
-    			tr4 = element("tr");
-    			td8 = element("td");
-    			span21 = element("span");
-    			strong5 = element("strong");
-    			strong5.textContent = "TOTAL:";
-    			t235 = space();
-    			td9 = element("td");
-    			span22 = element("span");
-    			strong6 = element("strong");
-    			strong6.textContent = "S/ 0.00";
-    			t237 = space();
+    			strong4.textContent = "S/ 0.00";
+    			t145 = space();
     			button4 = element("button");
     			button4.textContent = "Realizar pedido";
-    			t239 = space();
+    			t147 = space();
     			if (if_block0) if_block0.c();
-    			t240 = space();
+    			t148 = space();
     			if (if_block1) if_block1.c();
-    			t241 = space();
+    			t149 = space();
     			if (if_block2) if_block2.c();
     			attr_dev(div0, "id", "qrcode");
-    			add_location(div0, file$1, 59, 8, 1610);
+    			add_location(div0, file$1, 118, 8, 3185);
     			if (!src_url_equal(img0.src, img0_src_value = "img/goeat.png")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "80");
     			attr_dev(img0, "height", "80");
     			set_style(img0, "margin-top", "-26px");
-    			add_location(img0, file$1, 64, 20, 1854);
+    			add_location(img0, file$1, 123, 20, 3429);
     			attr_dev(span0, "class", "h1 text-uppercase text-primary");
-    			add_location(span0, file$1, 66, 24, 2011);
+    			add_location(span0, file$1, 125, 24, 3586);
     			attr_dev(span1, "class", "h1 text-uppercase text-dark");
-    			add_location(span1, file$1, 67, 24, 2091);
+    			add_location(span1, file$1, 126, 24, 3666);
     			attr_dev(a0, "class", "text-decoration-none");
-    			add_location(a0, file$1, 65, 20, 1952);
+    			add_location(a0, file$1, 124, 20, 3527);
     			attr_dev(div1, "class", "col-lg-4");
-    			add_location(div1, file$1, 63, 16, 1810);
-    			attr_dev(input, "type", "text");
-    			attr_dev(input, "class", "form-control");
-    			attr_dev(input, "placeholder", "Search for products");
-    			add_location(input, file$1, 73, 28, 2368);
+    			add_location(div1, file$1, 122, 16, 3385);
+    			attr_dev(input0, "type", "text");
+    			attr_dev(input0, "class", "form-control");
+    			attr_dev(input0, "placeholder", "Search for products");
+    			add_location(input0, file$1, 131, 24, 3897);
     			attr_dev(i0, "class", "fa fa-search");
-    			add_location(i0, file$1, 76, 36, 2635);
+    			add_location(i0, file$1, 134, 32, 4215);
     			attr_dev(span2, "class", "input-group-text bg-transparent text-primary");
-    			add_location(span2, file$1, 75, 32, 2538);
+    			add_location(span2, file$1, 133, 28, 4122);
     			attr_dev(div2, "class", "input-group-append");
-    			add_location(div2, file$1, 74, 28, 2472);
+    			add_location(div2, file$1, 132, 24, 4060);
     			attr_dev(div3, "class", "input-group");
-    			add_location(div3, file$1, 72, 24, 2313);
-    			attr_dev(form0, "action", "");
-    			add_location(form0, file$1, 71, 20, 2271);
+    			add_location(div3, file$1, 130, 20, 3846);
     			attr_dev(div4, "class", "col-lg-4 col-6 text-left");
-    			add_location(div4, file$1, 70, 16, 2211);
+    			add_location(div4, file$1, 129, 16, 3786);
     			attr_dev(p0, "class", "m-0");
-    			add_location(p0, file$1, 83, 20, 2904);
+    			add_location(p0, file$1, 141, 20, 4453);
     			attr_dev(h50, "class", "m-0");
-    			add_location(h50, file$1, 84, 20, 2964);
+    			add_location(h50, file$1, 142, 20, 4513);
     			attr_dev(div5, "class", "col-lg-4 col-6 text-right");
-    			add_location(div5, file$1, 82, 16, 2843);
+    			add_location(div5, file$1, 140, 16, 4392);
     			attr_dev(div6, "class", "row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex");
-    			add_location(div6, file$1, 62, 12, 1717);
+    			add_location(div6, file$1, 121, 12, 3292);
     			attr_dev(div7, "class", "container-fluid");
-    			add_location(div7, file$1, 61, 8, 1674);
+    			add_location(div7, file$1, 120, 8, 3249);
     			attr_dev(i1, "class", "fa fa-bars mr-2");
-    			add_location(i1, file$1, 96, 50, 3522);
+    			add_location(i1, file$1, 154, 50, 5071);
     			attr_dev(h60, "class", "text-dark m-0");
-    			add_location(h60, file$1, 96, 24, 3496);
+    			add_location(h60, file$1, 154, 24, 5045);
     			attr_dev(i2, "class", "fa fa-angle-down text-dark");
-    			add_location(i2, file$1, 97, 24, 3594);
+    			add_location(i2, file$1, 155, 24, 5143);
     			attr_dev(a1, "class", "btn d-flex align-items-center justify-content-between bg-primary w-100");
     			attr_dev(a1, "data-toggle", "collapse");
     			attr_dev(a1, "href", "#navbar-vertical");
     			set_style(a1, "height", "65px");
     			set_style(a1, "padding", "0 30px");
-    			add_location(a1, file$1, 95, 20, 3302);
+    			add_location(a1, file$1, 153, 20, 4851);
     			attr_dev(a2, "href", "");
     			attr_dev(a2, "class", "nav-item nav-link");
-    			add_location(a2, file$1, 102, 28, 4017);
+    			add_location(a2, file$1, 160, 28, 5566);
     			attr_dev(a3, "href", "");
     			attr_dev(a3, "class", "nav-item nav-link");
-    			add_location(a3, file$1, 103, 28, 4098);
+    			add_location(a3, file$1, 161, 28, 5647);
     			attr_dev(a4, "href", "");
     			attr_dev(a4, "class", "nav-item nav-link");
-    			add_location(a4, file$1, 104, 28, 4175);
+    			add_location(a4, file$1, 162, 28, 5724);
     			attr_dev(a5, "href", "");
     			attr_dev(a5, "class", "nav-item nav-link");
-    			add_location(a5, file$1, 105, 28, 4255);
+    			add_location(a5, file$1, 163, 28, 5804);
     			attr_dev(a6, "href", "");
     			attr_dev(a6, "class", "nav-item nav-link");
-    			add_location(a6, file$1, 106, 28, 4335);
+    			add_location(a6, file$1, 164, 28, 5884);
     			attr_dev(div8, "class", "nav-item dropdown dropright");
-    			add_location(div8, file$1, 101, 28, 3946);
+    			add_location(div8, file$1, 159, 28, 5495);
     			attr_dev(div9, "class", "navbar-nav w-100");
-    			add_location(div9, file$1, 100, 24, 3886);
+    			add_location(div9, file$1, 158, 24, 5435);
     			attr_dev(nav0, "class", "collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light");
     			attr_dev(nav0, "id", "navbar-vertical");
     			set_style(nav0, "width", "calc(100% - 30px)");
     			set_style(nav0, "z-index", "999");
-    			add_location(nav0, file$1, 99, 20, 3684);
+    			add_location(nav0, file$1, 157, 20, 5233);
     			attr_dev(div10, "class", "col-lg-3 d-none d-lg-block");
-    			add_location(div10, file$1, 94, 16, 3240);
+    			add_location(div10, file$1, 152, 16, 4789);
     			attr_dev(span3, "class", "navbar-toggler-icon");
-    			add_location(span3, file$1, 113, 28, 4774);
+    			add_location(span3, file$1, 171, 28, 6323);
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "navbar-toggler");
     			attr_dev(button0, "data-toggle", "collapse");
     			attr_dev(button0, "data-target", "#navbarCollapse");
-    			add_location(button0, file$1, 112, 24, 4646);
+    			add_location(button0, file$1, 170, 24, 6195);
     			attr_dev(span4, "class", "h1 text-uppercase text-dark bg-light px-2");
-    			add_location(span4, file$1, 116, 28, 4964);
+    			add_location(span4, file$1, 174, 28, 6513);
     			attr_dev(span5, "class", "h1 text-uppercase text-light bg-primary px-2 ml-n1");
-    			add_location(span5, file$1, 117, 28, 5059);
+    			add_location(span5, file$1, 175, 28, 6608);
     			attr_dev(a7, "href", "");
     			attr_dev(a7, "class", "text-decoration-none d-block d-lg-none");
-    			add_location(a7, file$1, 115, 24, 4876);
+    			add_location(a7, file$1, 173, 24, 6425);
     			attr_dev(a8, "href", "index.html");
     			attr_dev(a8, "class", "nav-item nav-link active");
-    			add_location(a8, file$1, 121, 32, 5373);
+    			add_location(a8, file$1, 179, 32, 6922);
     			attr_dev(a9, "href", "shop.html");
     			attr_dev(a9, "class", "nav-item nav-link");
-    			add_location(a9, file$1, 122, 32, 5469);
+    			add_location(a9, file$1, 180, 32, 7018);
     			attr_dev(a10, "href", "detail.html");
     			attr_dev(a10, "class", "nav-item nav-link");
-    			add_location(a10, file$1, 123, 32, 5557);
+    			add_location(a10, file$1, 181, 32, 7106);
     			attr_dev(i3, "class", "fa fa-angle-down mt-1");
-    			add_location(i3, file$1, 125, 110, 5797);
+    			add_location(i3, file$1, 183, 110, 7346);
     			attr_dev(a11, "href", "#");
     			attr_dev(a11, "class", "nav-link dropdown-toggle");
     			attr_dev(a11, "data-toggle", "dropdown");
-    			add_location(a11, file$1, 125, 36, 5723);
+    			add_location(a11, file$1, 183, 36, 7272);
     			attr_dev(a12, "href", "cart.html");
     			attr_dev(a12, "class", "dropdown-item");
-    			add_location(a12, file$1, 127, 40, 5979);
+    			add_location(a12, file$1, 185, 40, 7528);
     			attr_dev(a13, "href", "checkout.html");
     			attr_dev(a13, "class", "dropdown-item");
-    			add_location(a13, file$1, 128, 40, 6080);
+    			add_location(a13, file$1, 186, 40, 7629);
     			attr_dev(div11, "class", "dropdown-menu bg-primary rounded-0 border-0 m-0");
-    			add_location(div11, file$1, 126, 36, 5876);
+    			add_location(div11, file$1, 184, 36, 7425);
     			attr_dev(div12, "class", "nav-item dropdown");
-    			add_location(div12, file$1, 124, 32, 5654);
+    			add_location(div12, file$1, 182, 32, 7203);
     			attr_dev(a14, "href", "contact.html");
     			attr_dev(a14, "class", "nav-item nav-link");
-    			add_location(a14, file$1, 131, 32, 6256);
+    			add_location(a14, file$1, 189, 32, 7805);
     			attr_dev(div13, "class", "navbar-nav mr-auto py-0");
-    			add_location(div13, file$1, 120, 28, 5302);
+    			add_location(div13, file$1, 178, 28, 6851);
     			attr_dev(i4, "class", "fas fa-heart text-primary");
-    			add_location(i4, file$1, 135, 36, 6538);
+    			add_location(i4, file$1, 193, 36, 8087);
     			attr_dev(span6, "class", "badge text-secondary border border-secondary rounded-circle");
     			set_style(span6, "padding-bottom", "2px");
-    			add_location(span6, file$1, 136, 36, 6617);
+    			add_location(span6, file$1, 194, 36, 8166);
     			attr_dev(a15, "href", "#");
     			attr_dev(a15, "class", "btn px-0");
-    			add_location(a15, file$1, 134, 32, 6471);
+    			add_location(a15, file$1, 192, 32, 8020);
     			attr_dev(i5, "class", "fas fa-shopping-cart text-primary");
-    			add_location(i5, file$1, 139, 36, 6927);
+    			add_location(i5, file$1, 197, 36, 8476);
     			attr_dev(span7, "class", "badge text-secondary border border-secondary rounded-circle");
     			set_style(span7, "padding-bottom", "2px");
-    			add_location(span7, file$1, 140, 36, 7014);
+    			add_location(span7, file$1, 198, 36, 8563);
     			attr_dev(a16, "href", "#");
     			attr_dev(a16, "class", "btn px-0 ml-3");
     			attr_dev(a16, "data-toggle", "modal");
     			attr_dev(a16, "data-target", ".bd-example-modal-sm");
-    			add_location(a16, file$1, 138, 32, 6800);
+    			add_location(a16, file$1, 196, 32, 8349);
     			attr_dev(div14, "class", "navbar-nav ml-auto py-0 d-none d-lg-block");
-    			add_location(div14, file$1, 133, 28, 6382);
+    			add_location(div14, file$1, 191, 28, 7931);
     			attr_dev(div15, "class", "collapse navbar-collapse justify-content-between");
     			attr_dev(div15, "id", "navbarCollapse");
-    			add_location(div15, file$1, 119, 24, 5190);
+    			add_location(div15, file$1, 177, 24, 6739);
     			attr_dev(nav1, "class", "navbar-perfile navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0");
-    			add_location(nav1, file$1, 111, 20, 4530);
+    			add_location(nav1, file$1, 169, 20, 6079);
     			attr_dev(div16, "class", "col-lg-9");
-    			add_location(div16, file$1, 110, 16, 4486);
+    			add_location(div16, file$1, 168, 16, 6035);
     			attr_dev(div17, "class", "row px-xl-5");
-    			add_location(div17, file$1, 93, 12, 3197);
+    			add_location(div17, file$1, 151, 12, 4746);
     			attr_dev(div18, "class", "container-fluid bg-dark mb-30");
-    			add_location(div18, file$1, 92, 8, 3140);
+    			add_location(div18, file$1, 150, 8, 4689);
     			attr_dev(li0, "data-target", "#header-carousel");
     			attr_dev(li0, "data-slide-to", "0");
     			attr_dev(li0, "class", "active");
-    			add_location(li0, file$1, 157, 32, 7786);
+    			add_location(li0, file$1, 215, 32, 9346);
     			attr_dev(li1, "data-target", "#header-carousel");
     			attr_dev(li1, "data-slide-to", "1");
-    			add_location(li1, file$1, 158, 32, 7893);
+    			add_location(li1, file$1, 216, 32, 9453);
     			attr_dev(li2, "data-target", "#header-carousel");
     			attr_dev(li2, "data-slide-to", "2");
-    			add_location(li2, file$1, 159, 32, 7985);
+    			add_location(li2, file$1, 217, 32, 9545);
     			attr_dev(ol, "class", "carousel-indicators");
-    			add_location(ol, file$1, 156, 28, 7720);
+    			add_location(ol, file$1, 214, 28, 9280);
     			attr_dev(img1, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img1.src, img1_src_value = "img/carousel-1.jpg")) attr_dev(img1, "src", img1_src_value);
     			set_style(img1, "object-fit", "cover");
-    			add_location(img1, file$1, 163, 36, 8283);
+    			add_location(img1, file$1, 221, 36, 9843);
     			attr_dev(h10, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h10, file$1, 166, 44, 8638);
+    			add_location(h10, file$1, 224, 44, 10198);
     			attr_dev(p1, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p1, file$1, 167, 44, 8777);
+    			add_location(p1, file$1, 225, 44, 10337);
     			attr_dev(div19, "class", "p-3");
     			set_style(div19, "max-width", "700px");
-    			add_location(div19, file$1, 165, 40, 8549);
+    			add_location(div19, file$1, 223, 40, 10109);
     			attr_dev(div20, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div20, file$1, 164, 36, 8416);
+    			add_location(div20, file$1, 222, 36, 9976);
     			attr_dev(div21, "class", "carousel-item position-relative active");
     			set_style(div21, "height", "220px");
-    			add_location(div21, file$1, 162, 32, 8170);
+    			add_location(div21, file$1, 220, 32, 9730);
     			attr_dev(img2, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img2.src, img2_src_value = "img/carousel-2.jpg")) attr_dev(img2, "src", img2_src_value);
     			set_style(img2, "object-fit", "cover");
-    			add_location(img2, file$1, 172, 36, 9170);
+    			add_location(img2, file$1, 230, 36, 10730);
     			attr_dev(h11, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h11, file$1, 175, 44, 9525);
+    			add_location(h11, file$1, 233, 44, 11085);
     			attr_dev(p2, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p2, file$1, 176, 44, 9665);
+    			add_location(p2, file$1, 234, 44, 11225);
     			attr_dev(div22, "class", "p-3");
     			set_style(div22, "max-width", "700px");
-    			add_location(div22, file$1, 174, 40, 9436);
+    			add_location(div22, file$1, 232, 40, 10996);
     			attr_dev(div23, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div23, file$1, 173, 36, 9303);
+    			add_location(div23, file$1, 231, 36, 10863);
     			attr_dev(div24, "class", "carousel-item position-relative");
     			set_style(div24, "height", "220px");
-    			add_location(div24, file$1, 171, 32, 9064);
+    			add_location(div24, file$1, 229, 32, 10624);
     			attr_dev(img3, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img3.src, img3_src_value = "img/carousel-3.jpg")) attr_dev(img3, "src", img3_src_value);
     			set_style(img3, "object-fit", "cover");
-    			add_location(img3, file$1, 181, 36, 10048);
+    			add_location(img3, file$1, 239, 36, 11608);
     			attr_dev(h12, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h12, file$1, 184, 44, 10403);
+    			add_location(h12, file$1, 242, 44, 11963);
     			attr_dev(p3, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p3, file$1, 185, 44, 10542);
+    			add_location(p3, file$1, 243, 44, 12102);
     			attr_dev(div25, "class", "p-3");
     			set_style(div25, "max-width", "700px");
-    			add_location(div25, file$1, 183, 40, 10314);
+    			add_location(div25, file$1, 241, 40, 11874);
     			attr_dev(div26, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div26, file$1, 182, 36, 10181);
+    			add_location(div26, file$1, 240, 36, 11741);
     			attr_dev(div27, "class", "carousel-item position-relative");
     			set_style(div27, "height", "220px");
-    			add_location(div27, file$1, 180, 32, 9942);
+    			add_location(div27, file$1, 238, 32, 11502);
     			attr_dev(div28, "class", "carousel-inner");
-    			add_location(div28, file$1, 161, 28, 8108);
+    			add_location(div28, file$1, 219, 28, 9668);
     			attr_dev(div29, "id", "header-carousel");
     			attr_dev(div29, "class", "carousel slide carousel-fade mb-30 mb-lg-0");
     			attr_dev(div29, "data-ride", "carousel");
-    			add_location(div29, file$1, 155, 24, 7592);
+    			add_location(div29, file$1, 213, 24, 9152);
     			attr_dev(div30, "class", "col-lg-12");
-    			add_location(div30, file$1, 154, 20, 7543);
+    			add_location(div30, file$1, 212, 20, 9103);
     			attr_dev(div31, "class", "row px-xl-4");
-    			add_location(div31, file$1, 153, 16, 7496);
+    			add_location(div31, file$1, 211, 16, 9056);
     			attr_dev(div32, "class", "container-fluid");
-    			add_location(div32, file$1, 152, 12, 7449);
-    			attr_dev(span8, "class", "bg-secondary pr-3");
-    			add_location(span8, file$1, 198, 88, 11120);
+    			add_location(div32, file$1, 210, 12, 9009);
+    			attr_dev(input1, "type", "text");
+    			attr_dev(input1, "class", "form-control");
+    			attr_dev(input1, "placeholder", "Search for products");
+    			add_location(input1, file$1, 257, 20, 12681);
+    			attr_dev(i6, "class", "fa fa-search");
+    			add_location(i6, file$1, 260, 28, 13008);
+    			attr_dev(span8, "class", "input-group-text bg-transparent text-primary");
+    			add_location(span8, file$1, 259, 24, 12919);
+    			attr_dev(div33, "class", "input-group-append");
+    			set_style(div33, "cursor", "pointer");
+    			add_location(div33, file$1, 258, 20, 12813);
+    			attr_dev(div34, "class", "input-group");
+    			add_location(div34, file$1, 256, 16, 12634);
+    			attr_dev(div35, "class", "col-lg-4 text-left buscadorMovil svelte-1ngsihw");
+    			add_location(div35, file$1, 255, 12, 12569);
+    			attr_dev(span9, "class", "bg-secondary pr-3");
+    			add_location(span9, file$1, 268, 88, 13294);
     			attr_dev(h20, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
-    			add_location(h20, file$1, 198, 16, 11048);
+    			add_location(h20, file$1, 268, 16, 13222);
+    			attr_dev(div36, "class", "row px-xl-5 pb-3");
+    			add_location(div36, file$1, 269, 16, 13363);
+    			attr_dev(div37, "class", "container-fluid");
+    			add_location(div37, file$1, 266, 12, 13157);
+    			attr_dev(span10, "class", "bg-secondary pr-3");
+    			add_location(span10, file$1, 294, 88, 14694);
+    			attr_dev(h21, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
+    			add_location(h21, file$1, 294, 16, 14622);
     			attr_dev(img4, "class", "img-fluid");
-    			if (!src_url_equal(img4.src, img4_src_value = "img/cat-1.jpg")) attr_dev(img4, "src", img4_src_value);
+    			if (!src_url_equal(img4.src, img4_src_value = "img/cat-9.webp")) attr_dev(img4, "src", img4_src_value);
     			attr_dev(img4, "alt", "");
     			set_style(img4, "height", "119px");
-    			add_location(img4, file$1, 204, 36, 11613);
-    			attr_dev(div33, "class", "overflow-hidden");
-    			set_style(div33, "width", "120px");
-    			set_style(div33, "height", "120px");
-    			add_location(div33, file$1, 203, 32, 11509);
-    			add_location(h61, file$1, 207, 36, 11826);
+    			add_location(img4, file$1, 300, 36, 15179);
+    			attr_dev(div38, "class", "overflow-hidden");
+    			set_style(div38, "width", "120px");
+    			set_style(div38, "height", "120px");
+    			add_location(div38, file$1, 299, 32, 15075);
+    			add_location(h61, file$1, 303, 36, 15393);
     			attr_dev(small0, "class", "text-body");
-    			add_location(small0, file$1, 208, 36, 11893);
-    			attr_dev(small1, "class", "text-price svelte-d9yz2r");
-    			add_location(small1, file$1, 209, 36, 11976);
-    			attr_dev(div34, "class", "flex-fill pl-3");
-    			add_location(div34, file$1, 206, 32, 11760);
-    			attr_dev(div35, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div35, file$1, 202, 28, 11422);
-    			attr_dev(a17, "href", "#");
+    			add_location(small0, file$1, 304, 36, 15449);
+    			attr_dev(small1, "class", "text-price svelte-1ngsihw");
+    			add_location(small1, file$1, 305, 36, 15531);
+    			attr_dev(div39, "class", "flex-fill pl-3");
+    			add_location(div39, file$1, 302, 32, 15327);
+    			attr_dev(div40, "class", "cat-item d-flex align-items-center mb-4");
+    			add_location(div40, file$1, 298, 28, 14988);
     			attr_dev(a17, "class", "text-decoration-none");
-    			add_location(a17, file$1, 201, 24, 11351);
-    			attr_dev(div36, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div36, file$1, 200, 20, 11241);
+    			add_location(a17, file$1, 297, 24, 14926);
+    			attr_dev(div41, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div41, file$1, 296, 20, 14815);
     			attr_dev(img5, "class", "img-fluid");
-    			if (!src_url_equal(img5.src, img5_src_value = "img/cat-2.avif")) attr_dev(img5, "src", img5_src_value);
+    			if (!src_url_equal(img5.src, img5_src_value = "img/cat-10.png")) attr_dev(img5, "src", img5_src_value);
     			attr_dev(img5, "alt", "");
     			set_style(img5, "height", "119px");
-    			add_location(img5, file$1, 218, 36, 12558);
-    			attr_dev(div37, "class", "overflow-hidden");
-    			set_style(div37, "width", "120px");
-    			set_style(div37, "height", "120px");
-    			add_location(div37, file$1, 217, 32, 12454);
-    			add_location(h62, file$1, 221, 36, 12772);
+    			add_location(img5, file$1, 314, 36, 16102);
+    			attr_dev(div42, "class", "overflow-hidden");
+    			set_style(div42, "width", "120px");
+    			set_style(div42, "height", "120px");
+    			add_location(div42, file$1, 313, 32, 15998);
+    			add_location(h62, file$1, 317, 36, 16316);
     			attr_dev(small2, "class", "text-body");
-    			add_location(small2, file$1, 222, 36, 12827);
-    			attr_dev(small3, "class", "text-price svelte-d9yz2r");
-    			add_location(small3, file$1, 223, 36, 12910);
-    			attr_dev(div38, "class", "flex-fill pl-3");
-    			add_location(div38, file$1, 220, 32, 12706);
-    			attr_dev(div39, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div39, file$1, 216, 28, 12358);
-    			attr_dev(a18, "href", "#");
+    			add_location(small2, file$1, 318, 36, 16372);
+    			attr_dev(small3, "class", "text-price svelte-1ngsihw");
+    			add_location(small3, file$1, 319, 36, 16455);
+    			attr_dev(div43, "class", "flex-fill pl-3");
+    			add_location(div43, file$1, 316, 32, 16250);
+    			attr_dev(div44, "class", "cat-item img-zoom d-flex align-items-center mb-4");
+    			add_location(div44, file$1, 312, 28, 15902);
     			attr_dev(a18, "class", "text-decoration-none");
-    			add_location(a18, file$1, 215, 24, 12286);
-    			attr_dev(div40, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div40, file$1, 214, 20, 12175);
+    			add_location(a18, file$1, 311, 24, 15840);
+    			attr_dev(div45, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div45, file$1, 310, 20, 15729);
     			attr_dev(img6, "class", "img-fluid");
-    			if (!src_url_equal(img6.src, img6_src_value = "img/cat-3.jpg")) attr_dev(img6, "src", img6_src_value);
+    			if (!src_url_equal(img6.src, img6_src_value = "img/cat-11.webp")) attr_dev(img6, "src", img6_src_value);
     			attr_dev(img6, "alt", "");
     			set_style(img6, "height", "119px");
     			set_style(img6, "width", "120px");
-    			add_location(img6, file$1, 232, 36, 13482);
-    			attr_dev(div41, "class", "overflow-hidden");
-    			set_style(div41, "width", "120px");
-    			set_style(div41, "height", "120px");
-    			add_location(div41, file$1, 231, 32, 13378);
-    			add_location(h63, file$1, 235, 36, 13707);
+    			add_location(img6, file$1, 328, 36, 17026);
+    			attr_dev(div46, "class", "overflow-hidden");
+    			set_style(div46, "width", "120px");
+    			set_style(div46, "height", "120px");
+    			add_location(div46, file$1, 327, 32, 16922);
+    			add_location(h63, file$1, 331, 36, 17253);
     			attr_dev(small4, "class", "text-body");
-    			add_location(small4, file$1, 236, 36, 13776);
-    			attr_dev(small5, "class", "text-price svelte-d9yz2r");
-    			add_location(small5, file$1, 237, 36, 13859);
-    			attr_dev(div42, "class", "flex-fill pl-3");
-    			add_location(div42, file$1, 234, 32, 13641);
-    			attr_dev(div43, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div43, file$1, 230, 28, 13282);
+    			add_location(small4, file$1, 332, 36, 17310);
+    			attr_dev(small5, "class", "text-price svelte-1ngsihw");
+    			add_location(small5, file$1, 333, 36, 17393);
+    			attr_dev(div47, "class", "flex-fill pl-3");
+    			add_location(div47, file$1, 330, 32, 17187);
+    			attr_dev(div48, "class", "cat-item img-zoom d-flex align-items-center mb-4");
+    			add_location(div48, file$1, 326, 28, 16826);
     			attr_dev(a19, "class", "text-decoration-none");
-    			add_location(a19, file$1, 229, 24, 13220);
-    			attr_dev(div44, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div44, file$1, 228, 20, 13109);
-    			attr_dev(img7, "class", "img-fluid");
-    			if (!src_url_equal(img7.src, img7_src_value = "img/cat-4.jpg")) attr_dev(img7, "src", img7_src_value);
+    			add_location(a19, file$1, 325, 24, 16764);
+    			attr_dev(div49, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div49, file$1, 324, 20, 16653);
+    			attr_dev(div50, "class", "row px-xl-5 pb-3");
+    			add_location(div50, file$1, 295, 16, 14763);
+    			attr_dev(div51, "class", "container-fluid pt-5");
+    			add_location(div51, file$1, 293, 12, 14570);
+    			attr_dev(div52, "class", "content-page svelte-1ngsihw");
+    			add_location(div52, file$1, 208, 8, 8928);
+    			attr_dev(i7, "class", "fas fa-shopping-cart");
+    			set_style(i7, "color", "red");
+    			set_style(i7, "font-size", "15px");
+    			add_location(i7, file$1, 346, 78, 17897);
+    			set_style(span11, "padding-bottom", "2px");
+    			set_style(span11, "color", "red");
+    			set_style(span11, "font-size", "10px");
+    			add_location(span11, file$1, 346, 16, 17835);
+    			attr_dev(a20, "href", "#");
+    			attr_dev(a20, "class", "btn px-0 ");
+    			set_style(a20, "margin-left", "3px");
+    			attr_dev(a20, "data-toggle", "modal");
+    			attr_dev(a20, "data-target", ".bd-example-modal-sm");
+    			add_location(a20, file$1, 345, 12, 17704);
+    			if (!src_url_equal(img7.src, img7_src_value = "img/scanner.png")) attr_dev(img7, "src", img7_src_value);
     			attr_dev(img7, "alt", "");
-    			set_style(img7, "height", "119px");
-    			add_location(img7, file$1, 247, 36, 14509);
-    			attr_dev(div45, "class", "overflow-hidden");
-    			set_style(div45, "width", "120px");
-    			set_style(div45, "height", "120px");
-    			add_location(div45, file$1, 246, 32, 14405);
-    			add_location(h64, file$1, 250, 36, 14722);
-    			attr_dev(small6, "class", "text-body");
-    			add_location(small6, file$1, 251, 36, 14783);
-    			attr_dev(small7, "class", "text-price svelte-d9yz2r");
-    			add_location(small7, file$1, 252, 36, 14866);
-    			attr_dev(div46, "class", "flex-fill pl-3");
-    			add_location(div46, file$1, 249, 32, 14656);
-    			attr_dev(div47, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div47, file$1, 245, 28, 14309);
-    			attr_dev(a20, "class", "text-decoration-none");
-    			add_location(a20, file$1, 244, 24, 14247);
-    			attr_dev(div48, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div48, file$1, 243, 20, 14136);
-    			attr_dev(img8, "class", "img-fluid");
-    			if (!src_url_equal(img8.src, img8_src_value = "img/cat-5.jpg")) attr_dev(img8, "src", img8_src_value);
-    			attr_dev(img8, "alt", "");
-    			set_style(img8, "height", "119px");
-    			add_location(img8, file$1, 261, 36, 15437);
-    			attr_dev(div49, "class", "overflow-hidden");
-    			set_style(div49, "width", "120px");
-    			set_style(div49, "height", "120px");
-    			add_location(div49, file$1, 260, 32, 15333);
-    			add_location(h65, file$1, 264, 36, 15650);
-    			attr_dev(small8, "class", "text-body");
-    			add_location(small8, file$1, 265, 36, 15717);
-    			attr_dev(small9, "class", "text-price svelte-d9yz2r");
-    			add_location(small9, file$1, 266, 36, 15800);
-    			attr_dev(div50, "class", "flex-fill pl-3");
-    			add_location(div50, file$1, 263, 32, 15584);
-    			attr_dev(div51, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div51, file$1, 259, 28, 15237);
-    			attr_dev(a21, "class", "text-decoration-none");
-    			add_location(a21, file$1, 258, 24, 15175);
-    			attr_dev(div52, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div52, file$1, 257, 20, 15064);
-    			attr_dev(img9, "class", "img-fluid");
-    			if (!src_url_equal(img9.src, img9_src_value = "img/cat-6.jpg")) attr_dev(img9, "src", img9_src_value);
-    			attr_dev(img9, "alt", "");
-    			set_style(img9, "height", "119px");
-    			add_location(img9, file$1, 275, 36, 16373);
-    			attr_dev(div53, "class", "overflow-hidden");
-    			set_style(div53, "width", "120px");
-    			set_style(div53, "height", "120px");
-    			add_location(div53, file$1, 274, 32, 16269);
-    			add_location(h66, file$1, 278, 36, 16586);
-    			attr_dev(small10, "class", "text-body");
-    			add_location(small10, file$1, 279, 36, 16647);
-    			attr_dev(small11, "class", "text-price svelte-d9yz2r");
-    			add_location(small11, file$1, 280, 36, 16730);
-    			attr_dev(div54, "class", "flex-fill pl-3");
-    			add_location(div54, file$1, 277, 32, 16520);
-    			attr_dev(div55, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div55, file$1, 273, 28, 16173);
-    			attr_dev(a22, "class", "text-decoration-none");
-    			add_location(a22, file$1, 272, 24, 16110);
-    			attr_dev(div56, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div56, file$1, 271, 20, 15999);
-    			attr_dev(img10, "class", "img-fluid");
-    			if (!src_url_equal(img10.src, img10_src_value = "img/cat-7.avif")) attr_dev(img10, "src", img10_src_value);
-    			attr_dev(img10, "alt", "");
-    			set_style(img10, "height", "119px");
-    			add_location(img10, file$1, 289, 36, 17302);
-    			attr_dev(div57, "class", "overflow-hidden");
-    			set_style(div57, "width", "120px");
-    			set_style(div57, "height", "120px");
-    			add_location(div57, file$1, 288, 32, 17198);
-    			add_location(h67, file$1, 292, 36, 17516);
-    			attr_dev(small12, "class", "text-body");
-    			add_location(small12, file$1, 293, 36, 17579);
-    			attr_dev(small13, "class", "text-price svelte-d9yz2r");
-    			add_location(small13, file$1, 294, 36, 17662);
-    			attr_dev(div58, "class", "flex-fill pl-3");
-    			add_location(div58, file$1, 291, 32, 17450);
-    			attr_dev(div59, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div59, file$1, 287, 28, 17102);
-    			attr_dev(a23, "class", "text-decoration-none");
-    			add_location(a23, file$1, 286, 24, 17040);
-    			attr_dev(div60, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div60, file$1, 285, 20, 16929);
-    			attr_dev(img11, "class", "img-fluid");
-    			if (!src_url_equal(img11.src, img11_src_value = "img/cat-8.jpg")) attr_dev(img11, "src", img11_src_value);
-    			attr_dev(img11, "alt", "");
-    			set_style(img11, "height", "119px");
-    			add_location(img11, file$1, 303, 36, 18234);
-    			attr_dev(div61, "class", "overflow-hidden");
-    			set_style(div61, "width", "120px");
-    			set_style(div61, "height", "120px");
-    			add_location(div61, file$1, 302, 32, 18130);
-    			add_location(h68, file$1, 306, 36, 18447);
-    			attr_dev(small14, "class", "text-body");
-    			add_location(small14, file$1, 307, 36, 18516);
-    			attr_dev(small15, "class", "text-price svelte-d9yz2r");
-    			add_location(small15, file$1, 308, 36, 18599);
-    			attr_dev(div62, "class", "flex-fill pl-3");
-    			add_location(div62, file$1, 305, 32, 18381);
-    			attr_dev(div63, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div63, file$1, 301, 28, 18034);
-    			attr_dev(a24, "class", "text-decoration-none");
-    			add_location(a24, file$1, 300, 24, 17972);
-    			attr_dev(div64, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div64, file$1, 299, 20, 17861);
-    			attr_dev(div65, "class", "row px-xl-5 pb-3");
-    			add_location(div65, file$1, 199, 16, 11189);
-    			attr_dev(div66, "class", "container-fluid");
-    			add_location(div66, file$1, 197, 12, 11001);
-    			attr_dev(span9, "class", "bg-secondary pr-3");
-    			add_location(span9, file$1, 317, 88, 18972);
-    			attr_dev(h21, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
-    			add_location(h21, file$1, 317, 16, 18900);
-    			attr_dev(img12, "class", "img-fluid");
-    			if (!src_url_equal(img12.src, img12_src_value = "img/cat-9.webp")) attr_dev(img12, "src", img12_src_value);
-    			attr_dev(img12, "alt", "");
-    			set_style(img12, "height", "119px");
-    			add_location(img12, file$1, 323, 36, 19457);
-    			attr_dev(div67, "class", "overflow-hidden");
-    			set_style(div67, "width", "120px");
-    			set_style(div67, "height", "120px");
-    			add_location(div67, file$1, 322, 32, 19353);
-    			add_location(h69, file$1, 326, 36, 19671);
-    			attr_dev(small16, "class", "text-body");
-    			add_location(small16, file$1, 327, 36, 19727);
-    			attr_dev(small17, "class", "text-price svelte-d9yz2r");
-    			add_location(small17, file$1, 328, 36, 19809);
-    			attr_dev(div68, "class", "flex-fill pl-3");
-    			add_location(div68, file$1, 325, 32, 19605);
-    			attr_dev(div69, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div69, file$1, 321, 28, 19266);
-    			attr_dev(a25, "class", "text-decoration-none");
-    			add_location(a25, file$1, 320, 24, 19204);
-    			attr_dev(div70, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div70, file$1, 319, 20, 19093);
-    			attr_dev(img13, "class", "img-fluid");
-    			if (!src_url_equal(img13.src, img13_src_value = "img/cat-10.png")) attr_dev(img13, "src", img13_src_value);
-    			attr_dev(img13, "alt", "");
-    			set_style(img13, "height", "119px");
-    			add_location(img13, file$1, 337, 36, 20380);
-    			attr_dev(div71, "class", "overflow-hidden");
-    			set_style(div71, "width", "120px");
-    			set_style(div71, "height", "120px");
-    			add_location(div71, file$1, 336, 32, 20276);
-    			add_location(h610, file$1, 340, 36, 20594);
-    			attr_dev(small18, "class", "text-body");
-    			add_location(small18, file$1, 341, 36, 20650);
-    			attr_dev(small19, "class", "text-price svelte-d9yz2r");
-    			add_location(small19, file$1, 342, 36, 20733);
-    			attr_dev(div72, "class", "flex-fill pl-3");
-    			add_location(div72, file$1, 339, 32, 20528);
-    			attr_dev(div73, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div73, file$1, 335, 28, 20180);
-    			attr_dev(a26, "class", "text-decoration-none");
-    			add_location(a26, file$1, 334, 24, 20118);
-    			attr_dev(div74, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div74, file$1, 333, 20, 20007);
-    			attr_dev(img14, "class", "img-fluid");
-    			if (!src_url_equal(img14.src, img14_src_value = "img/cat-11.webp")) attr_dev(img14, "src", img14_src_value);
-    			attr_dev(img14, "alt", "");
-    			set_style(img14, "height", "119px");
-    			set_style(img14, "width", "120px");
-    			add_location(img14, file$1, 351, 36, 21304);
-    			attr_dev(div75, "class", "overflow-hidden");
-    			set_style(div75, "width", "120px");
-    			set_style(div75, "height", "120px");
-    			add_location(div75, file$1, 350, 32, 21200);
-    			add_location(h611, file$1, 354, 36, 21531);
-    			attr_dev(small20, "class", "text-body");
-    			add_location(small20, file$1, 355, 36, 21588);
-    			attr_dev(small21, "class", "text-price svelte-d9yz2r");
-    			add_location(small21, file$1, 356, 36, 21671);
-    			attr_dev(div76, "class", "flex-fill pl-3");
-    			add_location(div76, file$1, 353, 32, 21465);
-    			attr_dev(div77, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div77, file$1, 349, 28, 21104);
-    			attr_dev(a27, "class", "text-decoration-none");
-    			add_location(a27, file$1, 348, 24, 21042);
-    			attr_dev(div78, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div78, file$1, 347, 20, 20931);
-    			attr_dev(div79, "class", "row px-xl-5 pb-3");
-    			add_location(div79, file$1, 318, 16, 19041);
-    			attr_dev(div80, "class", "container-fluid pt-5");
-    			add_location(div80, file$1, 316, 12, 18848);
-    			attr_dev(div81, "class", "content-page svelte-d9yz2r");
-    			add_location(div81, file$1, 150, 8, 7368);
-    			attr_dev(i6, "class", "fas fa-shopping-cart");
-    			set_style(i6, "color", "red");
-    			set_style(i6, "font-size", "15px");
-    			add_location(i6, file$1, 369, 78, 22175);
-    			set_style(span10, "padding-bottom", "2px");
-    			set_style(span10, "color", "red");
-    			set_style(span10, "font-size", "10px");
-    			add_location(span10, file$1, 369, 16, 22113);
-    			attr_dev(a28, "href", "#");
-    			attr_dev(a28, "class", "btn px-0 ");
-    			set_style(a28, "margin-left", "3px");
-    			attr_dev(a28, "data-toggle", "modal");
-    			attr_dev(a28, "data-target", ".bd-example-modal-sm");
-    			add_location(a28, file$1, 368, 12, 21982);
-    			if (!src_url_equal(img15.src, img15_src_value = "img/scanner.png")) attr_dev(img15, "src", img15_src_value);
-    			attr_dev(img15, "alt", "");
-    			attr_dev(img15, "width", "25");
-    			attr_dev(img15, "height", "25");
-    			add_location(img15, file$1, 372, 16, 22392);
-    			attr_dev(a29, "href", "#");
-    			attr_dev(a29, "class", "btn px-0 ");
-    			set_style(a29, "margin-left", "3px");
-    			add_location(a29, file$1, 371, 12, 22291);
-    			attr_dev(div82, "class", "card back-to-card bg-dark svelte-d9yz2r");
-    			add_location(div82, file$1, 367, 8, 21928);
-    			if (!src_url_equal(img16.src, img16_src_value = "img/goeat.png")) attr_dev(img16, "src", img16_src_value);
-    			attr_dev(img16, "width", "40");
-    			attr_dev(img16, "height", "40");
-    			add_location(img16, file$1, 381, 72, 22841);
+    			attr_dev(img7, "width", "25");
+    			attr_dev(img7, "height", "25");
+    			add_location(img7, file$1, 349, 16, 18125);
+    			attr_dev(a21, "href", "#");
+    			attr_dev(a21, "class", "btn px-0 ");
+    			set_style(a21, "margin-left", "3px");
+    			add_location(a21, file$1, 348, 12, 18024);
+    			attr_dev(div53, "class", "card back-to-card bg-dark svelte-1ngsihw");
+    			add_location(div53, file$1, 344, 8, 17650);
+    			if (!src_url_equal(img8.src, img8_src_value = "img/goeat.png")) attr_dev(img8, "src", img8_src_value);
+    			attr_dev(img8, "width", "40");
+    			attr_dev(img8, "height", "40");
+    			add_location(img8, file$1, 358, 72, 18574);
     			attr_dev(h51, "class", "modal-title");
     			attr_dev(h51, "id", "exampleModalLabel");
-    			add_location(h51, file$1, 381, 24, 22793);
-    			attr_dev(span11, "aria-hidden", "true");
-    			add_location(span11, file$1, 383, 24, 23030);
+    			add_location(h51, file$1, 358, 24, 18526);
+    			attr_dev(span12, "aria-hidden", "true");
+    			add_location(span12, file$1, 360, 24, 18763);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "close");
     			attr_dev(button1, "data-dismiss", "modal");
     			attr_dev(button1, "aria-label", "Close");
-    			add_location(button1, file$1, 382, 24, 22928);
-    			attr_dev(div83, "class", "modal-header");
-    			add_location(div83, file$1, 380, 20, 22741);
-    			attr_dev(img17, "class", "img-fluid");
-    			if (!src_url_equal(img17.src, img17_src_value = "img/cat-9.webp")) attr_dev(img17, "src", img17_src_value);
-    			attr_dev(img17, "alt", "");
-    			set_style(img17, "height", "70px");
-    			add_location(img17, file$1, 394, 48, 23854);
-    			attr_dev(div84, "class", "overflow-hidden");
-    			set_style(div84, "width", "100px");
-    			set_style(div84, "height", "70px");
-    			add_location(div84, file$1, 393, 44, 23739);
-    			add_location(h612, file$1, 397, 48, 24103);
-    			attr_dev(small22, "class", "text-body");
-    			add_location(small22, file$1, 398, 48, 24171);
-    			attr_dev(small23, "class", "text-price svelte-d9yz2r");
-    			add_location(small23, file$1, 399, 48, 24265);
-    			attr_dev(div85, "class", "flex-fill pl-3");
-    			add_location(div85, file$1, 396, 44, 24025);
-    			attr_dev(div86, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div86, file$1, 392, 40, 23640);
-    			attr_dev(a30, "href", "#");
-    			attr_dev(a30, "class", "text-decoration-none");
-    			add_location(a30, file$1, 391, 36, 23556);
-    			attr_dev(div87, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div87, file$1, 390, 32, 23433);
-    			attr_dev(img18, "class", "img-fluid");
-    			if (!src_url_equal(img18.src, img18_src_value = "img/cat-10.png")) attr_dev(img18, "src", img18_src_value);
-    			attr_dev(img18, "alt", "");
-    			set_style(img18, "height", "70px");
-    			add_location(img18, file$1, 409, 48, 25045);
-    			attr_dev(div88, "class", "overflow-hidden");
-    			set_style(div88, "width", "100px");
-    			set_style(div88, "height", "70px");
-    			add_location(div88, file$1, 408, 44, 24930);
-    			add_location(h613, file$1, 412, 48, 25294);
-    			attr_dev(small24, "class", "text-body");
-    			add_location(small24, file$1, 413, 48, 25362);
-    			attr_dev(small25, "class", "text-price svelte-d9yz2r");
-    			add_location(small25, file$1, 414, 48, 25457);
-    			attr_dev(div89, "class", "flex-fill pl-3");
-    			add_location(div89, file$1, 411, 44, 25216);
-    			attr_dev(div90, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div90, file$1, 407, 40, 24822);
-    			attr_dev(a31, "href", "#");
-    			attr_dev(a31, "class", "text-decoration-none");
-    			add_location(a31, file$1, 406, 36, 24738);
-    			attr_dev(div91, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div91, file$1, 405, 32, 24615);
-    			attr_dev(img19, "class", "img-fluid");
-    			if (!src_url_equal(img19.src, img19_src_value = "img/cat-11.webp")) attr_dev(img19, "src", img19_src_value);
-    			attr_dev(img19, "alt", "");
-    			set_style(img19, "height", "70px");
-    			add_location(img19, file$1, 424, 48, 26237);
-    			attr_dev(div92, "class", "overflow-hidden");
-    			set_style(div92, "width", "100px");
-    			set_style(div92, "height", "70px");
-    			add_location(div92, file$1, 423, 44, 26122);
-    			add_location(h614, file$1, 427, 48, 26487);
-    			attr_dev(small26, "class", "text-body");
-    			add_location(small26, file$1, 428, 48, 26556);
-    			attr_dev(small27, "class", "text-price svelte-d9yz2r");
-    			add_location(small27, file$1, 429, 48, 26651);
-    			attr_dev(div93, "class", "flex-fill pl-3");
-    			add_location(div93, file$1, 426, 44, 26409);
-    			attr_dev(div94, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div94, file$1, 422, 40, 26014);
-    			attr_dev(a32, "href", "#");
-    			attr_dev(a32, "class", "text-decoration-none");
-    			add_location(a32, file$1, 421, 36, 25930);
-    			attr_dev(div95, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div95, file$1, 420, 32, 25807);
-    			attr_dev(img20, "class", "img-fluid");
-    			if (!src_url_equal(img20.src, img20_src_value = "img/cat-11.webp")) attr_dev(img20, "src", img20_src_value);
-    			attr_dev(img20, "alt", "");
-    			set_style(img20, "height", "70px");
-    			add_location(img20, file$1, 440, 48, 27504);
-    			attr_dev(div96, "class", "overflow-hidden");
-    			set_style(div96, "width", "100px");
-    			set_style(div96, "height", "70px");
-    			add_location(div96, file$1, 439, 44, 27389);
-    			add_location(h615, file$1, 443, 48, 27754);
-    			attr_dev(small28, "class", "text-body");
-    			add_location(small28, file$1, 444, 48, 27823);
-    			attr_dev(small29, "class", "text-price svelte-d9yz2r");
-    			add_location(small29, file$1, 445, 48, 27918);
-    			attr_dev(div97, "class", "flex-fill pl-3");
-    			add_location(div97, file$1, 442, 44, 27676);
-    			attr_dev(div98, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div98, file$1, 438, 40, 27281);
-    			attr_dev(a33, "class", "text-decoration-none");
-    			add_location(a33, file$1, 437, 36, 27207);
-    			attr_dev(div99, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div99, file$1, 435, 32, 27001);
-    			attr_dev(img21, "class", "img-fluid");
-    			if (!src_url_equal(img21.src, img21_src_value = "img/cat-11.webp")) attr_dev(img21, "src", img21_src_value);
-    			attr_dev(img21, "alt", "");
-    			set_style(img21, "height", "70px");
-    			add_location(img21, file$1, 456, 48, 28771);
-    			attr_dev(div100, "class", "overflow-hidden");
-    			set_style(div100, "width", "100px");
-    			set_style(div100, "height", "70px");
-    			add_location(div100, file$1, 455, 44, 28656);
-    			add_location(h616, file$1, 459, 48, 29021);
-    			attr_dev(small30, "class", "text-body");
-    			add_location(small30, file$1, 460, 48, 29090);
-    			attr_dev(small31, "class", "text-price svelte-d9yz2r");
-    			add_location(small31, file$1, 461, 48, 29185);
-    			attr_dev(div101, "class", "flex-fill pl-3");
-    			add_location(div101, file$1, 458, 44, 28943);
-    			attr_dev(div102, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div102, file$1, 454, 40, 28548);
-    			attr_dev(a34, "class", "text-decoration-none");
-    			add_location(a34, file$1, 453, 36, 28474);
-    			attr_dev(div103, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div103, file$1, 451, 32, 28268);
-    			attr_dev(div104, "class", "row px-xl-5 pb-3");
-    			set_style(div104, "overflow", "auto");
-    			set_style(div104, "height", "250px");
-    			add_location(div104, file$1, 388, 28, 23240);
-    			add_location(form1, file$1, 387, 24, 23204);
-    			attr_dev(div105, "class", "modal-body");
-    			add_location(div105, file$1, 386, 20, 23154);
-    			add_location(strong0, file$1, 473, 95, 29813);
-    			attr_dev(span12, "class", "span-secundary svelte-d9yz2r");
-    			set_style(span12, "padding", "0");
-    			set_style(span12, "margin", "0");
-    			add_location(span12, file$1, 473, 36, 29754);
-    			add_location(td0, file$1, 472, 32, 29712);
-    			attr_dev(span13, "class", "span-secundary svelte-d9yz2r");
-    			set_style(span13, "padding", "0");
-    			set_style(span13, "margin", "0");
-    			add_location(span13, file$1, 476, 36, 29962);
-    			add_location(td1, file$1, 475, 32, 29920);
-    			set_style(tr0, "padding", "0");
-    			set_style(tr0, "margin", "0");
-    			add_location(tr0, file$1, 471, 28, 29644);
-    			add_location(strong1, file$1, 482, 66, 30283);
-    			attr_dev(span14, "class", "span-secundary svelte-d9yz2r");
-    			add_location(span14, file$1, 482, 36, 30253);
-    			add_location(td2, file$1, 481, 32, 30211);
-    			attr_dev(span15, "class", "span-secundary svelte-d9yz2r");
-    			add_location(span15, file$1, 485, 36, 30431);
-    			add_location(td3, file$1, 484, 32, 30389);
-    			add_location(tr1, file$1, 480, 28, 30173);
-    			add_location(strong2, file$1, 490, 63, 30692);
-    			attr_dev(span16, "class", "span-primary svelte-d9yz2r");
-    			add_location(span16, file$1, 490, 36, 30665);
-    			add_location(td4, file$1, 489, 32, 30623);
-    			add_location(strong3, file$1, 493, 63, 30864);
-    			attr_dev(span17, "class", "span-primary svelte-d9yz2r");
-    			add_location(span17, file$1, 493, 36, 30837);
-    			add_location(td5, file$1, 492, 32, 30795);
-    			add_location(tr2, file$1, 488, 28, 30585);
+    			add_location(button1, file$1, 359, 24, 18661);
+    			attr_dev(div54, "class", "modal-header");
+    			add_location(div54, file$1, 357, 20, 18474);
+    			attr_dev(div55, "class", "row px-xl-5 pb-3");
+    			set_style(div55, "overflow", "auto");
+    			set_style(div55, "height", "250px");
+    			add_location(div55, file$1, 365, 28, 18957);
+    			attr_dev(div56, "class", "modal-body");
+    			add_location(div56, file$1, 363, 20, 18887);
+    			add_location(strong0, file$1, 389, 63, 20608);
+    			attr_dev(span13, "class", "span-primary svelte-1ngsihw");
+    			add_location(span13, file$1, 389, 36, 20581);
+    			add_location(td0, file$1, 388, 32, 20539);
+    			add_location(strong1, file$1, 392, 63, 20780);
+    			attr_dev(span14, "class", "span-primary svelte-1ngsihw");
+    			add_location(span14, file$1, 392, 36, 20753);
+    			add_location(td1, file$1, 391, 32, 20711);
+    			add_location(tr0, file$1, 387, 28, 20501);
     			set_style(tbody0, "line-height", "normal");
-    			add_location(tbody0, file$1, 470, 24, 29580);
+    			add_location(tbody0, file$1, 386, 24, 20437);
     			attr_dev(button2, "type", "button");
-    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-d9yz2r");
-    			add_location(button2, file$1, 497, 24, 31073);
-    			attr_dev(div106, "class", "modal-footer");
-    			add_location(div106, file$1, 469, 20, 29528);
-    			attr_dev(div107, "class", "modal-content");
-    			add_location(div107, file$1, 379, 16, 22692);
-    			attr_dev(div108, "class", "modal-dialog modal-xl");
-    			add_location(div108, file$1, 378, 12, 22639);
-    			attr_dev(div109, "class", "modal fade bd-example-modal-sm");
-    			attr_dev(div109, "tabindex", "-1");
-    			attr_dev(div109, "role", "dialog");
-    			attr_dev(div109, "aria-labelledby", "mySmallModalLabel");
-    			attr_dev(div109, "aria-hidden", "true");
-    			add_location(div109, file$1, 377, 8, 22498);
+    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-1ngsihw");
+    			attr_dev(button2, "data-dismiss", "modal");
+    			add_location(button2, file$1, 396, 24, 21000);
+    			attr_dev(div57, "class", "modal-footer");
+    			add_location(div57, file$1, 385, 20, 20385);
+    			attr_dev(div58, "class", "modal-content");
+    			add_location(div58, file$1, 356, 16, 18425);
+    			attr_dev(div59, "class", "modal-dialog modal-xl");
+    			add_location(div59, file$1, 355, 12, 18372);
+    			attr_dev(div60, "class", "modal fade bd-example-modal-sm");
+    			attr_dev(div60, "tabindex", "-1");
+    			attr_dev(div60, "role", "dialog");
+    			attr_dev(div60, "aria-labelledby", "mySmallModalLabel");
+    			attr_dev(div60, "aria-hidden", "true");
+    			add_location(div60, file$1, 354, 8, 18231);
     			attr_dev(h52, "class", "modal-title");
     			attr_dev(h52, "id", "exampleModalLabel");
-    			add_location(h52, file$1, 506, 24, 31531);
-    			attr_dev(span18, "aria-hidden", "true");
-    			add_location(span18, file$1, 508, 24, 31728);
+    			add_location(h52, file$1, 405, 24, 21506);
+    			attr_dev(span15, "aria-hidden", "true");
+    			add_location(span15, file$1, 407, 24, 21703);
     			attr_dev(button3, "type", "button");
     			attr_dev(button3, "class", "close");
     			attr_dev(button3, "data-dismiss", "modal");
     			attr_dev(button3, "aria-label", "Close");
-    			add_location(button3, file$1, 507, 24, 31626);
-    			attr_dev(div110, "class", "modal-header");
-    			add_location(div110, file$1, 505, 20, 31479);
-    			attr_dev(img22, "class", "img-fluid");
-    			if (!src_url_equal(img22.src, img22_src_value = "img/cat-3.jpg")) attr_dev(img22, "src", img22_src_value);
-    			attr_dev(img22, "alt", "");
-    			set_style(img22, "height", "70px");
-    			set_style(img22, "width", "100%");
-    			add_location(img22, file$1, 519, 48, 32552);
-    			attr_dev(div111, "class", "overflow-hidden");
-    			set_style(div111, "width", "100px");
-    			set_style(div111, "height", "70px");
-    			add_location(div111, file$1, 518, 44, 32437);
-    			add_location(h617, file$1, 522, 48, 32813);
-    			attr_dev(small32, "class", "text-body");
-    			add_location(small32, file$1, 523, 48, 32894);
-    			attr_dev(small33, "class", "text-price svelte-d9yz2r");
-    			add_location(small33, file$1, 524, 48, 32988);
-    			attr_dev(div112, "class", "flex-fill pl-3");
-    			add_location(div112, file$1, 521, 44, 32735);
-    			attr_dev(div113, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div113, file$1, 517, 40, 32338);
-    			attr_dev(a35, "href", "#");
-    			attr_dev(a35, "class", "text-decoration-none");
-    			add_location(a35, file$1, 516, 36, 32254);
-    			attr_dev(div114, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div114, file$1, 515, 32, 32131);
-    			attr_dev(img23, "class", "img-fluid");
-    			if (!src_url_equal(img23.src, img23_src_value = "img/cat-1.jpg")) attr_dev(img23, "src", img23_src_value);
-    			attr_dev(img23, "alt", "");
-    			set_style(img23, "height", "70px");
-    			add_location(img23, file$1, 534, 48, 33769);
-    			attr_dev(div115, "class", "overflow-hidden");
-    			set_style(div115, "width", "100px");
-    			set_style(div115, "height", "70px");
-    			add_location(div115, file$1, 533, 44, 33654);
-    			add_location(h618, file$1, 537, 48, 34017);
-    			attr_dev(small34, "class", "text-body");
-    			add_location(small34, file$1, 538, 48, 34096);
-    			attr_dev(small35, "class", "text-price svelte-d9yz2r");
-    			add_location(small35, file$1, 539, 48, 34191);
-    			attr_dev(div116, "class", "flex-fill pl-3");
-    			add_location(div116, file$1, 536, 44, 33939);
-    			attr_dev(div117, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div117, file$1, 532, 40, 33546);
-    			attr_dev(a36, "href", "#");
-    			attr_dev(a36, "class", "text-decoration-none");
-    			add_location(a36, file$1, 531, 36, 33462);
-    			attr_dev(div118, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div118, file$1, 530, 32, 33339);
-    			attr_dev(img24, "class", "img-fluid");
-    			if (!src_url_equal(img24.src, img24_src_value = "img/cat-4.jpg")) attr_dev(img24, "src", img24_src_value);
-    			attr_dev(img24, "alt", "");
-    			set_style(img24, "height", "70px");
-    			add_location(img24, file$1, 549, 48, 34972);
-    			attr_dev(div119, "class", "overflow-hidden");
-    			set_style(div119, "width", "100px");
-    			set_style(div119, "height", "70px");
-    			add_location(div119, file$1, 548, 44, 34857);
-    			add_location(h619, file$1, 552, 48, 35220);
-    			attr_dev(small36, "class", "text-body");
-    			add_location(small36, file$1, 553, 48, 35293);
-    			attr_dev(small37, "class", "text-price svelte-d9yz2r");
-    			add_location(small37, file$1, 554, 48, 35388);
-    			attr_dev(div120, "class", "flex-fill pl-3");
-    			add_location(div120, file$1, 551, 44, 35142);
-    			attr_dev(div121, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div121, file$1, 547, 40, 34749);
-    			attr_dev(a37, "href", "#");
-    			attr_dev(a37, "class", "text-decoration-none");
-    			add_location(a37, file$1, 546, 36, 34665);
-    			attr_dev(div122, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
-    			add_location(div122, file$1, 545, 32, 34542);
-    			attr_dev(div123, "class", "row px-xl-5 pb-3");
-    			set_style(div123, "overflow", "auto");
-    			set_style(div123, "height", "250px");
-    			add_location(div123, file$1, 513, 28, 31938);
-    			add_location(form2, file$1, 512, 24, 31902);
-    			attr_dev(div124, "class", "modal-body");
-    			add_location(div124, file$1, 511, 20, 31852);
-    			add_location(strong4, file$1, 569, 93, 36143);
-    			attr_dev(span19, "class", "span-primary svelte-d9yz2r");
-    			set_style(span19, "padding", "0");
-    			set_style(span19, "margin", "0");
-    			add_location(span19, file$1, 569, 36, 36086);
-    			add_location(td6, file$1, 568, 32, 36044);
-    			attr_dev(span20, "class", "span-primary svelte-d9yz2r");
-    			set_style(span20, "padding", "0");
-    			set_style(span20, "margin", "0");
-    			add_location(span20, file$1, 572, 36, 36287);
-    			add_location(td7, file$1, 571, 32, 36245);
-    			set_style(tr3, "padding", "0");
-    			set_style(tr3, "margin", "0");
-    			add_location(tr3, file$1, 567, 28, 35976);
-    			add_location(strong5, file$1, 579, 63, 36611);
-    			attr_dev(span21, "class", "span-primary svelte-d9yz2r");
-    			add_location(span21, file$1, 579, 36, 36584);
-    			add_location(td8, file$1, 578, 32, 36542);
-    			add_location(strong6, file$1, 582, 63, 36783);
-    			attr_dev(span22, "class", "span-primary svelte-d9yz2r");
-    			add_location(span22, file$1, 582, 36, 36756);
-    			add_location(td9, file$1, 581, 32, 36714);
-    			add_location(tr4, file$1, 577, 28, 36504);
+    			add_location(button3, file$1, 406, 24, 21601);
+    			attr_dev(div61, "class", "modal-header");
+    			add_location(div61, file$1, 404, 20, 21454);
+    			attr_dev(img9, "class", "img-fluid");
+    			if (!src_url_equal(img9.src, img9_src_value = "img/cat-3.jpg")) attr_dev(img9, "src", img9_src_value);
+    			attr_dev(img9, "alt", "");
+    			set_style(img9, "height", "70px");
+    			set_style(img9, "width", "100%");
+    			add_location(img9, file$1, 418, 48, 22511);
+    			attr_dev(div62, "class", "overflow-hidden");
+    			set_style(div62, "width", "100px");
+    			set_style(div62, "height", "70px");
+    			add_location(div62, file$1, 417, 44, 22396);
+    			add_location(h64, file$1, 421, 48, 22772);
+    			attr_dev(small6, "class", "text-body");
+    			add_location(small6, file$1, 422, 48, 22853);
+    			attr_dev(small7, "class", "text-price svelte-1ngsihw");
+    			add_location(small7, file$1, 423, 48, 22947);
+    			attr_dev(div63, "class", "flex-fill pl-3");
+    			add_location(div63, file$1, 420, 44, 22694);
+    			attr_dev(div64, "class", "cat-item d-flex align-items-center mb-4");
+    			add_location(div64, file$1, 416, 40, 22297);
+    			attr_dev(a22, "href", "#");
+    			attr_dev(a22, "class", "text-decoration-none");
+    			add_location(a22, file$1, 415, 36, 22213);
+    			attr_dev(div65, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div65, file$1, 414, 32, 22090);
+    			attr_dev(img10, "class", "img-fluid");
+    			if (!src_url_equal(img10.src, img10_src_value = "img/cat-1.jpg")) attr_dev(img10, "src", img10_src_value);
+    			attr_dev(img10, "alt", "");
+    			set_style(img10, "height", "70px");
+    			add_location(img10, file$1, 433, 48, 23728);
+    			attr_dev(div66, "class", "overflow-hidden");
+    			set_style(div66, "width", "100px");
+    			set_style(div66, "height", "70px");
+    			add_location(div66, file$1, 432, 44, 23613);
+    			add_location(h65, file$1, 436, 48, 23976);
+    			attr_dev(small8, "class", "text-body");
+    			add_location(small8, file$1, 437, 48, 24055);
+    			attr_dev(small9, "class", "text-price svelte-1ngsihw");
+    			add_location(small9, file$1, 438, 48, 24150);
+    			attr_dev(div67, "class", "flex-fill pl-3");
+    			add_location(div67, file$1, 435, 44, 23898);
+    			attr_dev(div68, "class", "cat-item img-zoom d-flex align-items-center mb-4");
+    			add_location(div68, file$1, 431, 40, 23505);
+    			attr_dev(a23, "href", "#");
+    			attr_dev(a23, "class", "text-decoration-none");
+    			add_location(a23, file$1, 430, 36, 23421);
+    			attr_dev(div69, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div69, file$1, 429, 32, 23298);
+    			attr_dev(img11, "class", "img-fluid");
+    			if (!src_url_equal(img11.src, img11_src_value = "img/cat-4.jpg")) attr_dev(img11, "src", img11_src_value);
+    			attr_dev(img11, "alt", "");
+    			set_style(img11, "height", "70px");
+    			add_location(img11, file$1, 448, 48, 24931);
+    			attr_dev(div70, "class", "overflow-hidden");
+    			set_style(div70, "width", "100px");
+    			set_style(div70, "height", "70px");
+    			add_location(div70, file$1, 447, 44, 24816);
+    			add_location(h66, file$1, 451, 48, 25179);
+    			attr_dev(small10, "class", "text-body");
+    			add_location(small10, file$1, 452, 48, 25252);
+    			attr_dev(small11, "class", "text-price svelte-1ngsihw");
+    			add_location(small11, file$1, 453, 48, 25347);
+    			attr_dev(div71, "class", "flex-fill pl-3");
+    			add_location(div71, file$1, 450, 44, 25101);
+    			attr_dev(div72, "class", "cat-item img-zoom d-flex align-items-center mb-4");
+    			add_location(div72, file$1, 446, 40, 24708);
+    			attr_dev(a24, "href", "#");
+    			attr_dev(a24, "class", "text-decoration-none");
+    			add_location(a24, file$1, 445, 36, 24624);
+    			attr_dev(div73, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-1ngsihw");
+    			add_location(div73, file$1, 444, 32, 24501);
+    			attr_dev(div74, "class", "row px-xl-5 pb-3");
+    			set_style(div74, "overflow", "auto");
+    			set_style(div74, "height", "250px");
+    			add_location(div74, file$1, 412, 28, 21897);
+    			attr_dev(div75, "class", "modal-body");
+    			add_location(div75, file$1, 410, 20, 21827);
+    			add_location(strong2, file$1, 468, 93, 26085);
+    			attr_dev(span16, "class", "span-primary svelte-1ngsihw");
+    			set_style(span16, "padding", "0");
+    			set_style(span16, "margin", "0");
+    			add_location(span16, file$1, 468, 36, 26028);
+    			add_location(td2, file$1, 467, 32, 25986);
+    			attr_dev(span17, "class", "span-primary svelte-1ngsihw");
+    			set_style(span17, "padding", "0");
+    			set_style(span17, "margin", "0");
+    			add_location(span17, file$1, 471, 36, 26229);
+    			add_location(td3, file$1, 470, 32, 26187);
+    			set_style(tr1, "padding", "0");
+    			set_style(tr1, "margin", "0");
+    			add_location(tr1, file$1, 466, 28, 25918);
+    			add_location(strong3, file$1, 478, 63, 26553);
+    			attr_dev(span18, "class", "span-primary svelte-1ngsihw");
+    			add_location(span18, file$1, 478, 36, 26526);
+    			add_location(td4, file$1, 477, 32, 26484);
+    			add_location(strong4, file$1, 481, 63, 26725);
+    			attr_dev(span19, "class", "span-primary svelte-1ngsihw");
+    			add_location(span19, file$1, 481, 36, 26698);
+    			add_location(td5, file$1, 480, 32, 26656);
+    			add_location(tr2, file$1, 476, 28, 26446);
     			set_style(tbody1, "line-height", "normal");
-    			add_location(tbody1, file$1, 566, 24, 35912);
+    			add_location(tbody1, file$1, 465, 24, 25854);
     			attr_dev(button4, "type", "button");
-    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-d9yz2r");
-    			add_location(button4, file$1, 586, 24, 36992);
-    			attr_dev(div125, "class", "modal-footer");
-    			add_location(div125, file$1, 565, 20, 35860);
-    			attr_dev(div126, "class", "modal-content");
-    			add_location(div126, file$1, 504, 16, 31430);
-    			attr_dev(div127, "class", "modal-dialog modal-xl");
-    			add_location(div127, file$1, 503, 12, 31377);
-    			attr_dev(div128, "class", "modal fade bd-model");
-    			attr_dev(div128, "tabindex", "-1");
-    			attr_dev(div128, "role", "dialog");
-    			attr_dev(div128, "aria-labelledby", "mySmallModalLabel");
-    			attr_dev(div128, "aria-hidden", "true");
-    			add_location(div128, file$1, 502, 8, 31247);
-    			attr_dev(body, "class", "svelte-d9yz2r");
-    			add_location(body, file$1, 58, 4, 1594);
-    			add_location(main, file$1, 56, 0, 1580);
+    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-1ngsihw");
+    			add_location(button4, file$1, 485, 24, 26934);
+    			attr_dev(div76, "class", "modal-footer");
+    			add_location(div76, file$1, 464, 20, 25802);
+    			attr_dev(div77, "class", "modal-content");
+    			add_location(div77, file$1, 403, 16, 21405);
+    			attr_dev(div78, "class", "modal-dialog modal-xl");
+    			add_location(div78, file$1, 402, 12, 21352);
+    			attr_dev(div79, "class", "modal fade bd-model");
+    			attr_dev(div79, "tabindex", "-1");
+    			attr_dev(div79, "role", "dialog");
+    			attr_dev(div79, "aria-labelledby", "mySmallModalLabel");
+    			attr_dev(div79, "aria-hidden", "true");
+    			add_location(div79, file$1, 401, 8, 21222);
+    			attr_dev(body, "class", "svelte-1ngsihw");
+    			add_location(body, file$1, 117, 4, 3158);
+    			add_location(main, file$1, 116, 0, 3146);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -4906,524 +7757,419 @@ var app = (function () {
     		m: function mount(target, anchor) {
     			insert_dev(target, main, anchor);
     			append_dev(main, body);
-    			append_dev(body, div0);
+    			mount_component(toaster, body, null);
     			append_dev(body, t0);
+    			append_dev(body, div0);
+    			append_dev(body, t1);
     			append_dev(body, div7);
     			append_dev(div7, div6);
     			append_dev(div6, div1);
     			append_dev(div1, img0);
-    			append_dev(div1, t1);
+    			append_dev(div1, t2);
     			append_dev(div1, a0);
     			append_dev(a0, span0);
-    			append_dev(a0, t3);
+    			append_dev(a0, t4);
     			append_dev(a0, span1);
-    			append_dev(div6, t5);
+    			append_dev(div6, t6);
     			append_dev(div6, div4);
-    			append_dev(div4, form0);
-    			append_dev(form0, div3);
-    			append_dev(div3, input);
-    			append_dev(div3, t6);
+    			append_dev(div4, div3);
+    			append_dev(div3, input0);
+    			set_input_value(input0, /*products*/ ctx[4].filters.name);
+    			append_dev(div3, t7);
     			append_dev(div3, div2);
     			append_dev(div2, span2);
     			append_dev(span2, i0);
-    			append_dev(div6, t7);
+    			append_dev(div6, t8);
     			append_dev(div6, div5);
     			append_dev(div5, p0);
-    			append_dev(div5, t9);
+    			append_dev(div5, t10);
     			append_dev(div5, h50);
-    			append_dev(body, t11);
+    			append_dev(body, t12);
     			append_dev(body, div18);
     			append_dev(div18, div17);
     			append_dev(div17, div10);
     			append_dev(div10, a1);
     			append_dev(a1, h60);
     			append_dev(h60, i1);
-    			append_dev(h60, t12);
-    			append_dev(a1, t13);
+    			append_dev(h60, t13);
+    			append_dev(a1, t14);
     			append_dev(a1, i2);
-    			append_dev(div10, t14);
+    			append_dev(div10, t15);
     			append_dev(div10, nav0);
     			append_dev(nav0, div9);
     			append_dev(div9, div8);
     			append_dev(div8, a2);
-    			append_dev(div8, t16);
+    			append_dev(div8, t17);
     			append_dev(div8, a3);
-    			append_dev(div8, t18);
+    			append_dev(div8, t19);
     			append_dev(div8, a4);
-    			append_dev(div8, t20);
+    			append_dev(div8, t21);
     			append_dev(div8, a5);
-    			append_dev(div8, t22);
+    			append_dev(div8, t23);
     			append_dev(div8, a6);
-    			append_dev(div17, t24);
+    			append_dev(div17, t25);
     			append_dev(div17, div16);
     			append_dev(div16, nav1);
     			append_dev(nav1, button0);
     			append_dev(button0, span3);
-    			append_dev(nav1, t25);
+    			append_dev(nav1, t26);
     			append_dev(nav1, a7);
     			append_dev(a7, span4);
-    			append_dev(a7, t27);
+    			append_dev(a7, t28);
     			append_dev(a7, span5);
-    			append_dev(nav1, t29);
+    			append_dev(nav1, t30);
     			append_dev(nav1, div15);
     			append_dev(div15, div13);
     			append_dev(div13, a8);
-    			append_dev(div13, t31);
+    			append_dev(div13, t32);
     			append_dev(div13, a9);
-    			append_dev(div13, t33);
+    			append_dev(div13, t34);
     			append_dev(div13, a10);
-    			append_dev(div13, t35);
+    			append_dev(div13, t36);
     			append_dev(div13, div12);
     			append_dev(div12, a11);
-    			append_dev(a11, t36);
+    			append_dev(a11, t37);
     			append_dev(a11, i3);
-    			append_dev(div12, t37);
+    			append_dev(div12, t38);
     			append_dev(div12, div11);
     			append_dev(div11, a12);
-    			append_dev(div11, t39);
+    			append_dev(div11, t40);
     			append_dev(div11, a13);
-    			append_dev(div13, t41);
+    			append_dev(div13, t42);
     			append_dev(div13, a14);
-    			append_dev(div15, t43);
+    			append_dev(div15, t44);
     			append_dev(div15, div14);
     			append_dev(div14, a15);
     			append_dev(a15, i4);
-    			append_dev(a15, t44);
+    			append_dev(a15, t45);
     			append_dev(a15, span6);
-    			append_dev(div14, t46);
+    			append_dev(div14, t47);
     			append_dev(div14, a16);
     			append_dev(a16, i5);
-    			append_dev(a16, t47);
+    			append_dev(a16, t48);
     			append_dev(a16, span7);
-    			append_dev(span7, t48);
-    			append_dev(body, t49);
-    			append_dev(body, div81);
-    			append_dev(div81, div32);
+    			append_dev(span7, t49);
+    			append_dev(body, t50);
+    			append_dev(body, div52);
+    			append_dev(div52, div32);
     			append_dev(div32, div31);
     			append_dev(div31, div30);
     			append_dev(div30, div29);
     			append_dev(div29, ol);
     			append_dev(ol, li0);
-    			append_dev(ol, t50);
-    			append_dev(ol, li1);
     			append_dev(ol, t51);
+    			append_dev(ol, li1);
+    			append_dev(ol, t52);
     			append_dev(ol, li2);
-    			append_dev(div29, t52);
+    			append_dev(div29, t53);
     			append_dev(div29, div28);
     			append_dev(div28, div21);
     			append_dev(div21, img1);
-    			append_dev(div21, t53);
+    			append_dev(div21, t54);
     			append_dev(div21, div20);
     			append_dev(div20, div19);
     			append_dev(div19, h10);
-    			append_dev(div19, t55);
+    			append_dev(div19, t56);
     			append_dev(div19, p1);
-    			append_dev(div28, t57);
+    			append_dev(div28, t58);
     			append_dev(div28, div24);
     			append_dev(div24, img2);
-    			append_dev(div24, t58);
+    			append_dev(div24, t59);
     			append_dev(div24, div23);
     			append_dev(div23, div22);
     			append_dev(div22, h11);
-    			append_dev(div22, t60);
+    			append_dev(div22, t61);
     			append_dev(div22, p2);
-    			append_dev(div28, t62);
+    			append_dev(div28, t63);
     			append_dev(div28, div27);
     			append_dev(div27, img3);
-    			append_dev(div27, t63);
+    			append_dev(div27, t64);
     			append_dev(div27, div26);
     			append_dev(div26, div25);
     			append_dev(div25, h12);
-    			append_dev(div25, t65);
+    			append_dev(div25, t66);
     			append_dev(div25, p3);
-    			append_dev(div81, t67);
-    			append_dev(div81, div66);
-    			append_dev(div66, h20);
-    			append_dev(h20, span8);
-    			append_dev(div66, t69);
-    			append_dev(div66, div65);
-    			append_dev(div65, div36);
-    			append_dev(div36, a17);
-    			append_dev(a17, div35);
-    			append_dev(div35, div33);
-    			append_dev(div33, img4);
-    			append_dev(div35, t70);
+    			append_dev(div52, t68);
+    			append_dev(div52, div35);
     			append_dev(div35, div34);
-    			append_dev(div34, h61);
-    			append_dev(div34, t72);
-    			append_dev(div34, small0);
-    			append_dev(div34, t74);
-    			append_dev(div34, small1);
-    			append_dev(div65, t76);
-    			append_dev(div65, div40);
-    			append_dev(div40, a18);
-    			append_dev(a18, div39);
-    			append_dev(div39, div37);
-    			append_dev(div37, img5);
-    			append_dev(div39, t77);
-    			append_dev(div39, div38);
-    			append_dev(div38, h62);
-    			append_dev(div38, t79);
-    			append_dev(div38, small2);
-    			append_dev(div38, t81);
-    			append_dev(div38, small3);
-    			append_dev(div65, t83);
-    			append_dev(div65, div44);
-    			append_dev(div44, a19);
-    			append_dev(a19, div43);
-    			append_dev(div43, div41);
-    			append_dev(div41, img6);
-    			append_dev(div43, t84);
-    			append_dev(div43, div42);
-    			append_dev(div42, h63);
-    			append_dev(div42, t86);
-    			append_dev(div42, small4);
-    			append_dev(div42, t88);
-    			append_dev(div42, small5);
-    			append_dev(div65, t90);
-    			append_dev(div65, div48);
-    			append_dev(div48, a20);
-    			append_dev(a20, div47);
-    			append_dev(div47, div45);
-    			append_dev(div45, img7);
-    			append_dev(div47, t91);
-    			append_dev(div47, div46);
-    			append_dev(div46, h64);
-    			append_dev(div46, t93);
-    			append_dev(div46, small6);
-    			append_dev(div46, t95);
-    			append_dev(div46, small7);
-    			append_dev(div65, t97);
-    			append_dev(div65, div52);
-    			append_dev(div52, a21);
-    			append_dev(a21, div51);
-    			append_dev(div51, div49);
-    			append_dev(div49, img8);
-    			append_dev(div51, t98);
+    			append_dev(div34, input1);
+    			set_input_value(input1, /*products*/ ctx[4].filters.name);
+    			append_dev(div34, t69);
+    			append_dev(div34, div33);
+    			append_dev(div33, span8);
+    			append_dev(span8, i6);
+    			append_dev(div52, t70);
+    			append_dev(div52, div37);
+    			append_dev(div37, h20);
+    			append_dev(h20, span9);
+    			append_dev(div37, t72);
+    			append_dev(div37, div36);
+
+    			for (let i = 0; i < each_blocks_1.length; i += 1) {
+    				if (each_blocks_1[i]) {
+    					each_blocks_1[i].m(div36, null);
+    				}
+    			}
+
+    			append_dev(div52, t73);
+    			append_dev(div52, div51);
+    			append_dev(div51, h21);
+    			append_dev(h21, span10);
+    			append_dev(div51, t75);
     			append_dev(div51, div50);
-    			append_dev(div50, h65);
-    			append_dev(div50, t100);
-    			append_dev(div50, small8);
-    			append_dev(div50, t102);
-    			append_dev(div50, small9);
-    			append_dev(div65, t104);
-    			append_dev(div65, div56);
-    			append_dev(div56, a22);
-    			append_dev(a22, div55);
-    			append_dev(div55, div53);
-    			append_dev(div53, img9);
-    			append_dev(div55, t105);
-    			append_dev(div55, div54);
-    			append_dev(div54, h66);
-    			append_dev(div54, t107);
-    			append_dev(div54, small10);
-    			append_dev(div54, t109);
-    			append_dev(div54, small11);
-    			append_dev(div65, t111);
-    			append_dev(div65, div60);
-    			append_dev(div60, a23);
-    			append_dev(a23, div59);
-    			append_dev(div59, div57);
-    			append_dev(div57, img10);
-    			append_dev(div59, t112);
+    			append_dev(div50, div41);
+    			append_dev(div41, a17);
+    			append_dev(a17, div40);
+    			append_dev(div40, div38);
+    			append_dev(div38, img4);
+    			append_dev(div40, t76);
+    			append_dev(div40, div39);
+    			append_dev(div39, h61);
+    			append_dev(div39, t78);
+    			append_dev(div39, small0);
+    			append_dev(div39, t80);
+    			append_dev(div39, small1);
+    			append_dev(div50, t82);
+    			append_dev(div50, div45);
+    			append_dev(div45, a18);
+    			append_dev(a18, div44);
+    			append_dev(div44, div42);
+    			append_dev(div42, img5);
+    			append_dev(div44, t83);
+    			append_dev(div44, div43);
+    			append_dev(div43, h62);
+    			append_dev(div43, t85);
+    			append_dev(div43, small2);
+    			append_dev(div43, t87);
+    			append_dev(div43, small3);
+    			append_dev(div50, t89);
+    			append_dev(div50, div49);
+    			append_dev(div49, a19);
+    			append_dev(a19, div48);
+    			append_dev(div48, div46);
+    			append_dev(div46, img6);
+    			append_dev(div48, t90);
+    			append_dev(div48, div47);
+    			append_dev(div47, h63);
+    			append_dev(div47, t92);
+    			append_dev(div47, small4);
+    			append_dev(div47, t94);
+    			append_dev(div47, small5);
+    			append_dev(body, t96);
+    			append_dev(body, div53);
+    			append_dev(div53, a20);
+    			append_dev(a20, span11);
+    			append_dev(span11, i7);
+    			append_dev(span11, t97);
+    			append_dev(div53, t98);
+    			append_dev(div53, a21);
+    			append_dev(a21, img7);
+    			append_dev(body, t99);
+    			append_dev(body, div60);
+    			append_dev(div60, div59);
     			append_dev(div59, div58);
-    			append_dev(div58, h67);
-    			append_dev(div58, t114);
-    			append_dev(div58, small12);
-    			append_dev(div58, t116);
-    			append_dev(div58, small13);
-    			append_dev(div65, t118);
-    			append_dev(div65, div64);
-    			append_dev(div64, a24);
-    			append_dev(a24, div63);
-    			append_dev(div63, div61);
-    			append_dev(div61, img11);
-    			append_dev(div63, t119);
-    			append_dev(div63, div62);
-    			append_dev(div62, h68);
-    			append_dev(div62, t121);
-    			append_dev(div62, small14);
-    			append_dev(div62, t123);
-    			append_dev(div62, small15);
-    			append_dev(div81, t125);
-    			append_dev(div81, div80);
-    			append_dev(div80, h21);
-    			append_dev(h21, span9);
-    			append_dev(div80, t127);
-    			append_dev(div80, div79);
-    			append_dev(div79, div70);
-    			append_dev(div70, a25);
-    			append_dev(a25, div69);
-    			append_dev(div69, div67);
-    			append_dev(div67, img12);
-    			append_dev(div69, t128);
-    			append_dev(div69, div68);
-    			append_dev(div68, h69);
-    			append_dev(div68, t130);
-    			append_dev(div68, small16);
-    			append_dev(div68, t132);
-    			append_dev(div68, small17);
-    			append_dev(div79, t134);
-    			append_dev(div79, div74);
-    			append_dev(div74, a26);
-    			append_dev(a26, div73);
-    			append_dev(div73, div71);
-    			append_dev(div71, img13);
-    			append_dev(div73, t135);
-    			append_dev(div73, div72);
-    			append_dev(div72, h610);
-    			append_dev(div72, t137);
-    			append_dev(div72, small18);
-    			append_dev(div72, t139);
-    			append_dev(div72, small19);
-    			append_dev(div79, t141);
-    			append_dev(div79, div78);
-    			append_dev(div78, a27);
-    			append_dev(a27, div77);
-    			append_dev(div77, div75);
-    			append_dev(div75, img14);
-    			append_dev(div77, t142);
-    			append_dev(div77, div76);
-    			append_dev(div76, h611);
-    			append_dev(div76, t144);
-    			append_dev(div76, small20);
-    			append_dev(div76, t146);
-    			append_dev(div76, small21);
-    			append_dev(body, t148);
-    			append_dev(body, div82);
-    			append_dev(div82, a28);
-    			append_dev(a28, span10);
-    			append_dev(span10, i6);
-    			append_dev(span10, t149);
-    			append_dev(div82, t150);
-    			append_dev(div82, a29);
-    			append_dev(a29, img15);
-    			append_dev(body, t151);
-    			append_dev(body, div109);
-    			append_dev(div109, div108);
-    			append_dev(div108, div107);
-    			append_dev(div107, div83);
-    			append_dev(div83, h51);
-    			append_dev(h51, img16);
-    			append_dev(h51, t152);
-    			append_dev(div83, t153);
-    			append_dev(div83, button1);
-    			append_dev(button1, span11);
-    			append_dev(div107, t155);
-    			append_dev(div107, div105);
-    			append_dev(div105, form1);
-    			append_dev(form1, div104);
-    			append_dev(div104, div87);
-    			append_dev(div87, a30);
-    			append_dev(a30, div86);
-    			append_dev(div86, div84);
-    			append_dev(div84, img17);
-    			append_dev(div86, t156);
-    			append_dev(div86, div85);
-    			append_dev(div85, h612);
-    			append_dev(div85, t158);
-    			append_dev(div85, small22);
-    			append_dev(div85, t160);
-    			append_dev(div85, small23);
-    			append_dev(div104, t162);
-    			append_dev(div104, div91);
-    			append_dev(div91, a31);
-    			append_dev(a31, div90);
-    			append_dev(div90, div88);
-    			append_dev(div88, img18);
-    			append_dev(div90, t163);
-    			append_dev(div90, div89);
-    			append_dev(div89, h613);
-    			append_dev(div89, t165);
-    			append_dev(div89, small24);
-    			append_dev(div89, t167);
-    			append_dev(div89, small25);
-    			append_dev(div104, t169);
-    			append_dev(div104, div95);
-    			append_dev(div95, a32);
-    			append_dev(a32, div94);
-    			append_dev(div94, div92);
-    			append_dev(div92, img19);
-    			append_dev(div94, t170);
-    			append_dev(div94, div93);
-    			append_dev(div93, h614);
-    			append_dev(div93, t172);
-    			append_dev(div93, small26);
-    			append_dev(div93, t174);
-    			append_dev(div93, small27);
-    			append_dev(div104, t176);
-    			append_dev(div104, div99);
-    			append_dev(div99, a33);
-    			append_dev(a33, div98);
-    			append_dev(div98, div96);
-    			append_dev(div96, img20);
-    			append_dev(div98, t177);
-    			append_dev(div98, div97);
-    			append_dev(div97, h615);
-    			append_dev(div97, t179);
-    			append_dev(div97, small28);
-    			append_dev(div97, t181);
-    			append_dev(div97, small29);
-    			append_dev(div104, t183);
-    			append_dev(div104, div103);
-    			append_dev(div103, a34);
-    			append_dev(a34, div102);
-    			append_dev(div102, div100);
-    			append_dev(div100, img21);
-    			append_dev(div102, t184);
-    			append_dev(div102, div101);
-    			append_dev(div101, h616);
-    			append_dev(div101, t186);
-    			append_dev(div101, small30);
-    			append_dev(div101, t188);
-    			append_dev(div101, small31);
-    			append_dev(div107, t190);
-    			append_dev(div107, div106);
-    			append_dev(div106, tbody0);
+    			append_dev(div58, div54);
+    			append_dev(div54, h51);
+    			append_dev(h51, img8);
+    			append_dev(h51, t100);
+    			append_dev(div54, t101);
+    			append_dev(div54, button1);
+    			append_dev(button1, span12);
+    			append_dev(div58, t103);
+    			append_dev(div58, div56);
+    			append_dev(div56, div55);
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				if (each_blocks[i]) {
+    					each_blocks[i].m(div55, null);
+    				}
+    			}
+
+    			append_dev(div58, t104);
+    			append_dev(div58, div57);
+    			append_dev(div57, tbody0);
     			append_dev(tbody0, tr0);
     			append_dev(tr0, td0);
-    			append_dev(td0, span12);
-    			append_dev(span12, strong0);
-    			append_dev(tr0, t192);
+    			append_dev(td0, span13);
+    			append_dev(span13, strong0);
+    			append_dev(tr0, t106);
     			append_dev(tr0, td1);
-    			append_dev(td1, span13);
-    			append_dev(tbody0, t194);
-    			append_dev(tbody0, tr1);
-    			append_dev(tr1, td2);
-    			append_dev(td2, span14);
+    			append_dev(td1, span14);
     			append_dev(span14, strong1);
-    			append_dev(tr1, t196);
-    			append_dev(tr1, td3);
-    			append_dev(td3, span15);
-    			append_dev(tbody0, t198);
-    			append_dev(tbody0, tr2);
-    			append_dev(tr2, td4);
-    			append_dev(td4, span16);
+    			append_dev(strong1, t107);
+    			append_dev(strong1, t108);
+    			append_dev(strong1, t109);
+    			append_dev(div57, t110);
+    			append_dev(div57, button2);
+    			append_dev(body, t112);
+    			append_dev(body, div79);
+    			append_dev(div79, div78);
+    			append_dev(div78, div77);
+    			append_dev(div77, div61);
+    			append_dev(div61, h52);
+    			append_dev(div61, t114);
+    			append_dev(div61, button3);
+    			append_dev(button3, span15);
+    			append_dev(div77, t116);
+    			append_dev(div77, div75);
+    			append_dev(div75, div74);
+    			append_dev(div74, div65);
+    			append_dev(div65, a22);
+    			append_dev(a22, div64);
+    			append_dev(div64, div62);
+    			append_dev(div62, img9);
+    			append_dev(div64, t117);
+    			append_dev(div64, div63);
+    			append_dev(div63, h64);
+    			append_dev(div63, t119);
+    			append_dev(div63, small6);
+    			append_dev(div63, t121);
+    			append_dev(div63, small7);
+    			append_dev(div74, t123);
+    			append_dev(div74, div69);
+    			append_dev(div69, a23);
+    			append_dev(a23, div68);
+    			append_dev(div68, div66);
+    			append_dev(div66, img10);
+    			append_dev(div68, t124);
+    			append_dev(div68, div67);
+    			append_dev(div67, h65);
+    			append_dev(div67, t126);
+    			append_dev(div67, small8);
+    			append_dev(div67, t128);
+    			append_dev(div67, small9);
+    			append_dev(div74, t130);
+    			append_dev(div74, div73);
+    			append_dev(div73, a24);
+    			append_dev(a24, div72);
+    			append_dev(div72, div70);
+    			append_dev(div70, img11);
+    			append_dev(div72, t131);
+    			append_dev(div72, div71);
+    			append_dev(div71, h66);
+    			append_dev(div71, t133);
+    			append_dev(div71, small10);
+    			append_dev(div71, t135);
+    			append_dev(div71, small11);
+    			append_dev(div77, t137);
+    			append_dev(div77, div76);
+    			append_dev(div76, tbody1);
+    			append_dev(tbody1, tr1);
+    			append_dev(tr1, td2);
+    			append_dev(td2, span16);
     			append_dev(span16, strong2);
-    			append_dev(tr2, t200);
+    			append_dev(tr1, t139);
+    			append_dev(tr1, td3);
+    			append_dev(td3, span17);
+    			append_dev(tbody1, t141);
+    			append_dev(tbody1, tr2);
+    			append_dev(tr2, td4);
+    			append_dev(td4, span18);
+    			append_dev(span18, strong3);
+    			append_dev(tr2, t143);
     			append_dev(tr2, td5);
-    			append_dev(td5, span17);
-    			append_dev(span17, strong3);
-    			append_dev(div106, t202);
-    			append_dev(div106, button2);
-    			append_dev(body, t204);
-    			append_dev(body, div128);
-    			append_dev(div128, div127);
-    			append_dev(div127, div126);
-    			append_dev(div126, div110);
-    			append_dev(div110, h52);
-    			append_dev(div110, t206);
-    			append_dev(div110, button3);
-    			append_dev(button3, span18);
-    			append_dev(div126, t208);
-    			append_dev(div126, div124);
-    			append_dev(div124, form2);
-    			append_dev(form2, div123);
-    			append_dev(div123, div114);
-    			append_dev(div114, a35);
-    			append_dev(a35, div113);
-    			append_dev(div113, div111);
-    			append_dev(div111, img22);
-    			append_dev(div113, t209);
-    			append_dev(div113, div112);
-    			append_dev(div112, h617);
-    			append_dev(div112, t211);
-    			append_dev(div112, small32);
-    			append_dev(div112, t213);
-    			append_dev(div112, small33);
-    			append_dev(div123, t215);
-    			append_dev(div123, div118);
-    			append_dev(div118, a36);
-    			append_dev(a36, div117);
-    			append_dev(div117, div115);
-    			append_dev(div115, img23);
-    			append_dev(div117, t216);
-    			append_dev(div117, div116);
-    			append_dev(div116, h618);
-    			append_dev(div116, t218);
-    			append_dev(div116, small34);
-    			append_dev(div116, t220);
-    			append_dev(div116, small35);
-    			append_dev(div123, t222);
-    			append_dev(div123, div122);
-    			append_dev(div122, a37);
-    			append_dev(a37, div121);
-    			append_dev(div121, div119);
-    			append_dev(div119, img24);
-    			append_dev(div121, t223);
-    			append_dev(div121, div120);
-    			append_dev(div120, h619);
-    			append_dev(div120, t225);
-    			append_dev(div120, small36);
-    			append_dev(div120, t227);
-    			append_dev(div120, small37);
-    			append_dev(div126, t229);
-    			append_dev(div126, div125);
-    			append_dev(div125, tbody1);
-    			append_dev(tbody1, tr3);
-    			append_dev(tr3, td6);
-    			append_dev(td6, span19);
+    			append_dev(td5, span19);
     			append_dev(span19, strong4);
-    			append_dev(tr3, t231);
-    			append_dev(tr3, td7);
-    			append_dev(td7, span20);
-    			append_dev(tbody1, t233);
-    			append_dev(tbody1, tr4);
-    			append_dev(tr4, td8);
-    			append_dev(td8, span21);
-    			append_dev(span21, strong5);
-    			append_dev(tr4, t235);
-    			append_dev(tr4, td9);
-    			append_dev(td9, span22);
-    			append_dev(span22, strong6);
-    			append_dev(div125, t237);
-    			append_dev(div125, button4);
-    			append_dev(body, t239);
+    			append_dev(div76, t145);
+    			append_dev(div76, button4);
+    			append_dev(body, t147);
     			if (if_block0) if_block0.m(body, null);
-    			append_dev(body, t240);
+    			append_dev(body, t148);
     			if (if_block1) if_block1.m(body, null);
-    			append_dev(body, t241);
+    			append_dev(body, t149);
     			if (if_block2) if_block2.m(body, null);
+    			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(div36, "click", /*click_handler*/ ctx[4], false, false, false, false),
-    					listen_dev(div40, "click", /*click_handler_1*/ ctx[5], false, false, false, false),
-    					listen_dev(div44, "click", /*click_handler_2*/ ctx[6], false, false, false, false),
-    					listen_dev(div48, "click", /*click_handler_3*/ ctx[7], false, false, false, false),
-    					listen_dev(div52, "click", /*click_handler_4*/ ctx[8], false, false, false, false),
-    					listen_dev(div56, "click", /*click_handler_5*/ ctx[9], false, false, false, false),
-    					listen_dev(div60, "click", /*click_handler_6*/ ctx[10], false, false, false, false),
-    					listen_dev(div64, "click", /*click_handler_7*/ ctx[11], false, false, false, false),
-    					listen_dev(div70, "click", /*click_handler_8*/ ctx[12], false, false, false, false),
-    					listen_dev(div74, "click", /*click_handler_9*/ ctx[13], false, false, false, false),
-    					listen_dev(div78, "click", /*click_handler_10*/ ctx[14], false, false, false, false),
-    					listen_dev(a29, "click", /*scannerActive*/ ctx[3], false, false, false, false),
-    					listen_dev(div87, "click", /*click_handler_11*/ ctx[15], false, false, false, false),
-    					listen_dev(div91, "click", /*click_handler_12*/ ctx[16], false, false, false, false),
-    					listen_dev(div95, "click", /*click_handler_13*/ ctx[17], false, false, false, false),
-    					listen_dev(div99, "click", /*click_handler_14*/ ctx[18], false, false, false, false),
-    					listen_dev(div103, "click", /*click_handler_15*/ ctx[19], false, false, false, false),
-    					listen_dev(div114, "click", /*click_handler_16*/ ctx[20], false, false, false, false),
-    					listen_dev(div118, "click", /*click_handler_17*/ ctx[21], false, false, false, false),
-    					listen_dev(div122, "click", /*click_handler_18*/ ctx[22], false, false, false, false),
-    					listen_dev(button4, "click", /*click_handler_19*/ ctx[23], false, false, false, false)
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[12]),
+    					listen_dev(input0, "keypress", /*prepareSearch*/ ctx[10], false, false, false, false),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[13]),
+    					listen_dev(div33, "click", /*getProducts*/ ctx[8], false, false, false, false),
+    					listen_dev(div41, "click", /*click_handler_1*/ ctx[15], false, false, false, false),
+    					listen_dev(div45, "click", /*click_handler_2*/ ctx[16], false, false, false, false),
+    					listen_dev(div49, "click", /*click_handler_3*/ ctx[17], false, false, false, false),
+    					listen_dev(a21, "click", /*scannerActive*/ ctx[7], false, false, false, false),
+    					listen_dev(button2, "click", /*paymentProceed*/ ctx[11], false, false, false, false),
+    					listen_dev(div65, "click", /*click_handler_4*/ ctx[18], false, false, false, false),
+    					listen_dev(div69, "click", /*click_handler_5*/ ctx[19], false, false, false, false),
+    					listen_dev(div73, "click", /*click_handler_6*/ ctx[20], false, false, false, false),
+    					listen_dev(button4, "click", /*click_handler_7*/ ctx[21], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*car*/ 2) set_data_dev(t48, /*car*/ ctx[1]);
-    			if (dirty[0] & /*car*/ 2) set_data_dev(t149, /*car*/ ctx[1]);
+    			if (dirty[0] & /*products*/ 16 && input0.value !== /*products*/ ctx[4].filters.name) {
+    				set_input_value(input0, /*products*/ ctx[4].filters.name);
+    			}
 
-    			if (/*car*/ ctx[1] > 0) {
+    			if ((!current || dirty[0] & /*product*/ 64) && t49_value !== (t49_value = /*product*/ ctx[6].length + "")) set_data_dev(t49, t49_value);
+
+    			if (dirty[0] & /*products*/ 16 && input1.value !== /*products*/ ctx[4].filters.name) {
+    				set_input_value(input1, /*products*/ ctx[4].filters.name);
+    			}
+
+    			if (dirty[0] & /*addProduct, products*/ 528) {
+    				each_value_1 = /*products*/ ctx[4].list;
+    				validate_each_argument(each_value_1);
+    				let i;
+
+    				for (i = 0; i < each_value_1.length; i += 1) {
+    					const child_ctx = get_each_context_1(ctx, each_value_1, i);
+
+    					if (each_blocks_1[i]) {
+    						each_blocks_1[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks_1[i] = create_each_block_1(child_ctx);
+    						each_blocks_1[i].c();
+    						each_blocks_1[i].m(div36, null);
+    					}
+    				}
+
+    				for (; i < each_blocks_1.length; i += 1) {
+    					each_blocks_1[i].d(1);
+    				}
+
+    				each_blocks_1.length = each_value_1.length;
+    			}
+
+    			if ((!current || dirty[0] & /*product*/ 64) && t97_value !== (t97_value = /*product*/ ctx[6].length + "")) set_data_dev(t97, t97_value);
+
+    			if (dirty[0] & /*product*/ 64) {
+    				each_value = /*product*/ ctx[6];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div55, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (!current || dirty[0] & /*totalMoney*/ 32) set_data_dev(t108, /*totalMoney*/ ctx[5]);
+
+    			if (/*gameActive*/ ctx[2]) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
     					if_block0 = create_if_block_2(ctx);
     					if_block0.c();
-    					if_block0.m(body, t240);
+    					if_block0.m(body, t148);
     				}
     			} else if (if_block0) {
     				if_block0.d(1);
@@ -5436,14 +8182,14 @@ var app = (function () {
     				} else {
     					if_block1 = create_if_block_1(ctx);
     					if_block1.c();
-    					if_block1.m(body, t241);
+    					if_block1.m(body, t149);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
     			}
 
-    			if (/*gameOpencasine*/ ctx[2] == true) {
+    			if (/*gameOpencasine*/ ctx[3] == true) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
     				} else {
@@ -5456,10 +8202,20 @@ var app = (function () {
     				if_block2 = null;
     			}
     		},
-    		i: noop,
-    		o: noop,
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(toaster.$$.fragment, local);
+    			current = true;
+    		},
+    		o: function outro(local) {
+    			transition_out(toaster.$$.fragment, local);
+    			current = false;
+    		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(main);
+    			destroy_component(toaster);
+    			destroy_each(each_blocks_1, detaching);
+    			destroy_each(each_blocks, detaching);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
@@ -5484,11 +8240,15 @@ var app = (function () {
     	validate_slots('Home', slots, []);
     	let gameOpen = false;
     	let car = 0;
-    	let gamescanner = false;
+    	let gameActive = false;
     	let gameOpencasine = false;
+    	let products = { list: [], pages: [], filters: {} };
+    	let totalMoney = 0;
 
     	//Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     	let scanner = null;
+
+    	let product = [];
 
     	let inforQR = {
     		organization: "Sazon del Pato",
@@ -5539,14 +8299,72 @@ var app = (function () {
     		qrCodeElement.innerHTML = qr.createImgTag(4);
     	}
 
+    	onMount(async () => {
+    		await getProducts();
+    	});
+
+    	const getProducts = async () => {
+    		try {
+    			var data = await ServerConnection.getproductos(products.filters);
+    			$$invalidate(4, products.xpagina = data.xpagina, products);
+    			$$invalidate(4, products.pagina = data.pagina, products);
+    			$$invalidate(4, products.total = data.total, products);
+    			$$invalidate(4, products.list = data.list, products);
+    		} catch(e) {
+    			toast('Hello Darkness!', {
+    				icon: '👏',
+    				style: 'border-radius: 200px; background: #333; color: #fff;'
+    			});
+    		}
+    	};
+
+    	function addProduct(value) {
+    		$$invalidate(6, product = [...product, value]);
+    		console.log(product);
+    		calculatePrice(product);
+    	}
+
+    	function calculatePrice(product) {
+    		$$invalidate(5, totalMoney = 0);
+
+    		product.forEach(element => {
+    			$$invalidate(5, totalMoney += element.totalmoney);
+    		});
+    	}
+
+    	const prepareSearch = e => {
+    		if (e.charCode === 13) {
+    			getProducts();
+    		}
+    	};
+
+    	const paymentProceed = () => {
+    		toast("GAME: Para ganar premios y ofertas. compite y acomula puntos jugando con nosotros", {
+    			icon: '👏',
+    			style: ' background: #333; color: #fff;background-image: url("img/anuncio.avif");width:100%;height:100px; background-repeat: no-repeat, repeat; background-position: center;'
+    		});
+
+    		$$invalidate(2, gameActive = true);
+    	};
+
     	const writable_props = [];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Home> was created with unknown prop '${key}'`);
     	});
 
-    	const click_handler = () => {
-    		$$invalidate(1, car++, car);
+    	function input0_input_handler() {
+    		products.filters.name = this.value;
+    		$$invalidate(4, products);
+    	}
+
+    	function input1_input_handler() {
+    		products.filters.name = this.value;
+    		$$invalidate(4, products);
+    	}
+
+    	const click_handler = value => {
+    		addProduct(value);
     	};
 
     	const click_handler_1 = () => {
@@ -5574,95 +8392,61 @@ var app = (function () {
     	};
 
     	const click_handler_7 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_8 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_9 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_10 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_11 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_12 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_13 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_14 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_15 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_16 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_17 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_18 = () => {
-    		$$invalidate(1, car++, car);
-    	};
-
-    	const click_handler_19 = () => {
     		location.reload();
     	};
 
-    	const click_handler_20 = () => {
+    	const click_handler_8 = () => {
     		$$invalidate(0, gameOpen = true);
     	};
 
-    	const click_handler_21 = () => {
-    		$$invalidate(2, gameOpencasine = true);
+    	const click_handler_9 = () => {
+    		$$invalidate(3, gameOpencasine = true);
     	};
 
-    	const click_handler_22 = () => {
+    	const click_handler_10 = () => {
     		$$invalidate(0, gameOpen = false);
     	};
 
-    	const click_handler_23 = () => {
-    		$$invalidate(2, gameOpencasine = false);
+    	const click_handler_11 = () => {
+    		$$invalidate(3, gameOpencasine = false);
     	};
 
     	$$self.$capture_state = () => ({
+    		toast,
+    		Toaster,
     		onMount,
+    		server: ServerConnection,
     		QRCode,
     		gameOpen,
     		car,
-    		gamescanner,
+    		gameActive,
     		gameOpencasine,
+    		products,
+    		totalMoney,
     		scanner,
+    		product,
     		inforQR,
     		qr,
     		scannerActive,
     		initBarcodeScanner,
     		resultscanner,
-    		showQRCode
+    		showQRCode,
+    		getProducts,
+    		addProduct,
+    		calculatePrice,
+    		prepareSearch,
+    		paymentProceed
     	});
 
     	$$self.$inject_state = $$props => {
     		if ('gameOpen' in $$props) $$invalidate(0, gameOpen = $$props.gameOpen);
     		if ('car' in $$props) $$invalidate(1, car = $$props.car);
-    		if ('gamescanner' in $$props) gamescanner = $$props.gamescanner;
-    		if ('gameOpencasine' in $$props) $$invalidate(2, gameOpencasine = $$props.gameOpencasine);
+    		if ('gameActive' in $$props) $$invalidate(2, gameActive = $$props.gameActive);
+    		if ('gameOpencasine' in $$props) $$invalidate(3, gameOpencasine = $$props.gameOpencasine);
+    		if ('products' in $$props) $$invalidate(4, products = $$props.products);
+    		if ('totalMoney' in $$props) $$invalidate(5, totalMoney = $$props.totalMoney);
     		if ('scanner' in $$props) scanner = $$props.scanner;
+    		if ('product' in $$props) $$invalidate(6, product = $$props.product);
     		if ('inforQR' in $$props) inforQR = $$props.inforQR;
     		if ('qr' in $$props) qr = $$props.qr;
     	};
@@ -5674,8 +8458,18 @@ var app = (function () {
     	return [
     		gameOpen,
     		car,
+    		gameActive,
     		gameOpencasine,
+    		products,
+    		totalMoney,
+    		product,
     		scannerActive,
+    		getProducts,
+    		addProduct,
+    		prepareSearch,
+    		paymentProceed,
+    		input0_input_handler,
+    		input1_input_handler,
     		click_handler,
     		click_handler_1,
     		click_handler_2,
@@ -5687,19 +8481,7 @@ var app = (function () {
     		click_handler_8,
     		click_handler_9,
     		click_handler_10,
-    		click_handler_11,
-    		click_handler_12,
-    		click_handler_13,
-    		click_handler_14,
-    		click_handler_15,
-    		click_handler_16,
-    		click_handler_17,
-    		click_handler_18,
-    		click_handler_19,
-    		click_handler_20,
-    		click_handler_21,
-    		click_handler_22,
-    		click_handler_23
+    		click_handler_11
     	];
     }
 
