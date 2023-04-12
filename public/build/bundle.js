@@ -437,7 +437,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\home.svelte";
 
-    // (579:8) {#if car>0}
+    // (578:8) {#if car>0}
     function create_if_block_2(ctx) {
     	let div2;
     	let input;
@@ -473,34 +473,34 @@ var app = (function () {
     			attr_dev(input, "type", "checkbox");
     			attr_dev(input, "id", "btn-mas");
     			attr_dev(input, "class", "svelte-d9yz2r");
-    			add_location(input, file$1, 580, 16, 36792);
+    			add_location(input, file$1, 579, 16, 36790);
     			attr_dev(img0, "class", "img-game svelte-d9yz2r");
     			if (!src_url_equal(img0.src, img0_src_value = "img/casino.jpg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "45px");
     			attr_dev(img0, "height", "45px");
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$1, 582, 34, 36901);
+    			add_location(img0, file$1, 581, 34, 36899);
     			attr_dev(a0, "href", "#");
     			attr_dev(a0, "class", "svelte-d9yz2r");
-    			add_location(a0, file$1, 582, 20, 36887);
+    			add_location(a0, file$1, 581, 20, 36885);
     			attr_dev(img1, "class", "img-game svelte-d9yz2r");
     			if (!src_url_equal(img1.src, img1_src_value = "img/ruleta.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "width", "45px");
     			attr_dev(img1, "height", "45px");
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$1, 583, 34, 37050);
+    			add_location(img1, file$1, 582, 34, 37048);
     			attr_dev(a1, "href", "#");
     			attr_dev(a1, "class", "svelte-d9yz2r");
-    			add_location(a1, file$1, 583, 20, 37036);
+    			add_location(a1, file$1, 582, 20, 37034);
     			attr_dev(div0, "class", "redes svelte-d9yz2r");
-    			add_location(div0, file$1, 581, 16, 36846);
+    			add_location(div0, file$1, 580, 16, 36844);
     			attr_dev(label, "for", "btn-mas");
     			attr_dev(label, "class", "fa fa-plus svelte-d9yz2r");
-    			add_location(label, file$1, 586, 20, 37254);
+    			add_location(label, file$1, 585, 20, 37252);
     			attr_dev(div1, "class", "btn-mas svelte-d9yz2r");
-    			add_location(div1, file$1, 585, 16, 37211);
+    			add_location(div1, file$1, 584, 16, 37209);
     			attr_dev(div2, "class", "container svelte-d9yz2r");
-    			add_location(div2, file$1, 579, 12, 36751);
+    			add_location(div2, file$1, 578, 12, 36749);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -537,14 +537,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(579:8) {#if car>0}",
+    		source: "(578:8) {#if car>0}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (593:8) {#if gameOpen==true}
+    // (592:8) {#if gameOpen==true}
     function create_if_block_1(ctx) {
     	let i;
     	let t;
@@ -564,13 +564,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 593, 12, 37417);
+    			add_location(i, file$1, 592, 12, 37415);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 594, 12, 37589);
+    			add_location(iframe, file$1, 593, 12, 37587);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -596,14 +596,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(593:8) {#if gameOpen==true}",
+    		source: "(592:8) {#if gameOpen==true}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (598:8) {#if gameOpencasine==true}
+    // (597:8) {#if gameOpencasine==true}
     function create_if_block(ctx) {
     	let i;
     	let t;
@@ -623,13 +623,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 598, 12, 38217);
+    			add_location(i, file$1, 597, 12, 38215);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 599, 12, 38395);
+    			add_location(iframe, file$1, 598, 12, 38393);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -655,7 +655,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(598:8) {#if gameOpencasine==true}",
+    		source: "(597:8) {#if gameOpencasine==true}",
     		ctx
     	});
 

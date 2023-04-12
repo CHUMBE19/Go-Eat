@@ -575,7 +575,6 @@
                 </div>
             </div>
         </div>
-
         {#if car>0}
             <div class="container">
                 <input type="checkbox" id="btn-mas">
