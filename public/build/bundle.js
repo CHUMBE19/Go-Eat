@@ -1,5 +1,5 @@
 
-(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
+(function(l, r) { if (!l || l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (self.location.host || 'localhost').split(':')[0] + ':35730/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.getElementsByTagName('head')[0].appendChild(r) })(self.document);
 var app = (function () {
     'use strict';
 
@@ -437,34 +437,156 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\home.svelte";
 
-    // (579:8) {#if car>0}
-    function create_if_block_1(ctx) {
-    	let img;
-    	let img_src_value;
+    // (578:8) {#if car>0}
+    function create_if_block_2(ctx) {
+    	let div2;
+    	let input;
+    	let t0;
+    	let div0;
+    	let a0;
+    	let img0;
+    	let img0_src_value;
+    	let t1;
+    	let a1;
+    	let img1;
+    	let img1_src_value;
+    	let t2;
+    	let div1;
+    	let label;
     	let mounted;
     	let dispose;
 
     	const block = {
     		c: function create() {
-    			img = element("img");
-    			attr_dev(img, "class", "btn btn-game back-to-game");
-    			if (!src_url_equal(img.src, img_src_value = "img/game.png")) attr_dev(img, "src", img_src_value);
-    			attr_dev(img, "alt", "");
-    			attr_dev(img, "width", "80");
-    			attr_dev(img, "height", "70");
-    			add_location(img, file$1, 579, 12, 36722);
+    			div2 = element("div");
+    			input = element("input");
+    			t0 = space();
+    			div0 = element("div");
+    			a0 = element("a");
+    			img0 = element("img");
+    			t1 = space();
+    			a1 = element("a");
+    			img1 = element("img");
+    			t2 = space();
+    			div1 = element("div");
+    			label = element("label");
+    			attr_dev(input, "type", "checkbox");
+    			attr_dev(input, "id", "btn-mas");
+    			attr_dev(input, "class", "svelte-d9yz2r");
+    			add_location(input, file$1, 579, 16, 36790);
+    			attr_dev(img0, "class", "img-game svelte-d9yz2r");
+    			if (!src_url_equal(img0.src, img0_src_value = "img/casino.jpg")) attr_dev(img0, "src", img0_src_value);
+    			attr_dev(img0, "width", "45px");
+    			attr_dev(img0, "height", "45px");
+    			attr_dev(img0, "alt", "");
+    			add_location(img0, file$1, 581, 34, 36899);
+    			attr_dev(a0, "href", "#");
+    			attr_dev(a0, "class", "svelte-d9yz2r");
+    			add_location(a0, file$1, 581, 20, 36885);
+    			attr_dev(img1, "class", "img-game svelte-d9yz2r");
+    			if (!src_url_equal(img1.src, img1_src_value = "img/ruleta.jpg")) attr_dev(img1, "src", img1_src_value);
+    			attr_dev(img1, "width", "45px");
+    			attr_dev(img1, "height", "45px");
+    			attr_dev(img1, "alt", "");
+    			add_location(img1, file$1, 582, 34, 37048);
+    			attr_dev(a1, "href", "#");
+    			attr_dev(a1, "class", "svelte-d9yz2r");
+    			add_location(a1, file$1, 582, 20, 37034);
+    			attr_dev(div0, "class", "redes svelte-d9yz2r");
+    			add_location(div0, file$1, 580, 16, 36844);
+    			attr_dev(label, "for", "btn-mas");
+    			attr_dev(label, "class", "fa fa-plus svelte-d9yz2r");
+    			add_location(label, file$1, 585, 20, 37252);
+    			attr_dev(div1, "class", "btn-mas svelte-d9yz2r");
+    			add_location(div1, file$1, 584, 16, 37209);
+    			attr_dev(div2, "class", "container svelte-d9yz2r");
+    			add_location(div2, file$1, 578, 12, 36749);
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, img, anchor);
+    			insert_dev(target, div2, anchor);
+    			append_dev(div2, input);
+    			append_dev(div2, t0);
+    			append_dev(div2, div0);
+    			append_dev(div0, a0);
+    			append_dev(a0, img0);
+    			append_dev(div0, t1);
+    			append_dev(div0, a1);
+    			append_dev(a1, img1);
+    			append_dev(div2, t2);
+    			append_dev(div2, div1);
+    			append_dev(div1, label);
 
     			if (!mounted) {
-    				dispose = listen_dev(img, "click", /*click_handler_20*/ ctx[23], false, false, false, false);
+    				dispose = [
+    					listen_dev(img0, "click", /*click_handler_20*/ ctx[24], false, false, false, false),
+    					listen_dev(img1, "click", /*click_handler_21*/ ctx[25], false, false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: noop,
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(img);
+    			if (detaching) detach_dev(div2);
+    			mounted = false;
+    			run_all(dispose);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_2.name,
+    		type: "if",
+    		source: "(578:8) {#if car>0}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (592:8) {#if gameOpen==true}
+    function create_if_block_1(ctx) {
+    	let i;
+    	let t;
+    	let iframe;
+    	let iframe_src_value;
+    	let mounted;
+    	let dispose;
+
+    	const block = {
+    		c: function create() {
+    			i = element("i");
+    			t = space();
+    			iframe = element("iframe");
+    			attr_dev(i, "class", "fa fa-times back-to-times");
+    			set_style(i, "color", "yellow");
+    			set_style(i, "float", "right");
+    			set_style(i, "margin", "15px");
+    			set_style(i, "margin-right", "18px");
+    			set_style(i, "cursor", "pointer");
+    			add_location(i, file$1, 592, 12, 37415);
+    			attr_dev(iframe, "class", "back-to-iframe");
+    			attr_dev(iframe, "width", "100%");
+    			attr_dev(iframe, "height", "100%");
+    			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
+    			attr_dev(iframe, "frameborder", "0");
+    			add_location(iframe, file$1, 593, 12, 37587);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, i, anchor);
+    			insert_dev(target, t, anchor);
+    			insert_dev(target, iframe, anchor);
+
+    			if (!mounted) {
+    				dispose = listen_dev(i, "click", /*click_handler_22*/ ctx[26], false, false, false, false);
+    				mounted = true;
+    			}
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(i);
+    			if (detaching) detach_dev(t);
+    			if (detaching) detach_dev(iframe);
     			mounted = false;
     			dispose();
     		}
@@ -474,14 +596,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(579:8) {#if car>0}",
+    		source: "(592:8) {#if gameOpen==true}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (584:8) {#if gameOpen==true}
+    // (597:8) {#if gameOpencasine==true}
     function create_if_block(ctx) {
     	let i;
     	let t;
@@ -501,13 +623,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 584, 12, 36913);
+    			add_location(i, file$1, 597, 12, 38215);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
-    			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
+    			if (!src_url_equal(iframe.src, iframe_src_value = "https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 585, 12, 37085);
+    			add_location(iframe, file$1, 598, 12, 38393);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -515,7 +637,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_21*/ ctx[24], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_23*/ ctx[27], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -533,7 +655,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(584:8) {#if gameOpen==true}",
+    		source: "(597:8) {#if gameOpencasine==true}",
     		ctx
     	});
 
@@ -1040,10 +1162,12 @@ var app = (function () {
     	let button4;
     	let t238;
     	let t239;
+    	let t240;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*car*/ ctx[1] > 0 && create_if_block_1(ctx);
-    	let if_block1 = /*gameOpen*/ ctx[0] == true && create_if_block(ctx);
+    	let if_block0 = /*car*/ ctx[1] > 0 && create_if_block_2(ctx);
+    	let if_block1 = /*gameOpen*/ ctx[0] == true && create_if_block_1(ctx);
+    	let if_block2 = /*gameOpencasine*/ ctx[2] == true && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -1621,835 +1745,837 @@ var app = (function () {
     			if (if_block0) if_block0.c();
     			t239 = space();
     			if (if_block1) if_block1.c();
+    			t240 = space();
+    			if (if_block2) if_block2.c();
     			if (!src_url_equal(img0.src, img0_src_value = "img/goeat.png")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "80");
     			attr_dev(img0, "height", "80");
     			set_style(img0, "margin-top", "-26px");
-    			add_location(img0, file$1, 49, 20, 1343);
+    			add_location(img0, file$1, 50, 20, 1374);
     			attr_dev(span0, "class", "h1 text-uppercase text-primary");
-    			add_location(span0, file$1, 51, 24, 1500);
+    			add_location(span0, file$1, 52, 24, 1531);
     			attr_dev(span1, "class", "h1 text-uppercase text-dark");
-    			add_location(span1, file$1, 52, 24, 1580);
+    			add_location(span1, file$1, 53, 24, 1611);
     			attr_dev(a0, "class", "text-decoration-none");
-    			add_location(a0, file$1, 50, 20, 1441);
+    			add_location(a0, file$1, 51, 20, 1472);
     			attr_dev(div0, "class", "col-lg-4");
-    			add_location(div0, file$1, 48, 16, 1299);
+    			add_location(div0, file$1, 49, 16, 1330);
     			attr_dev(input, "type", "text");
     			attr_dev(input, "class", "form-control");
     			attr_dev(input, "placeholder", "Search for products");
-    			add_location(input, file$1, 58, 28, 1857);
+    			add_location(input, file$1, 59, 28, 1888);
     			attr_dev(i0, "class", "fa fa-search");
-    			add_location(i0, file$1, 61, 36, 2124);
+    			add_location(i0, file$1, 62, 36, 2155);
     			attr_dev(span2, "class", "input-group-text bg-transparent text-primary");
-    			add_location(span2, file$1, 60, 32, 2027);
+    			add_location(span2, file$1, 61, 32, 2058);
     			attr_dev(div1, "class", "input-group-append");
-    			add_location(div1, file$1, 59, 28, 1961);
+    			add_location(div1, file$1, 60, 28, 1992);
     			attr_dev(div2, "class", "input-group");
-    			add_location(div2, file$1, 57, 24, 1802);
+    			add_location(div2, file$1, 58, 24, 1833);
     			attr_dev(form0, "action", "");
-    			add_location(form0, file$1, 56, 20, 1760);
+    			add_location(form0, file$1, 57, 20, 1791);
     			attr_dev(div3, "class", "col-lg-4 col-6 text-left");
-    			add_location(div3, file$1, 55, 16, 1700);
+    			add_location(div3, file$1, 56, 16, 1731);
     			attr_dev(p0, "class", "m-0");
-    			add_location(p0, file$1, 68, 20, 2393);
+    			add_location(p0, file$1, 69, 20, 2424);
     			attr_dev(h50, "class", "m-0");
-    			add_location(h50, file$1, 69, 20, 2453);
+    			add_location(h50, file$1, 70, 20, 2484);
     			attr_dev(div4, "class", "col-lg-4 col-6 text-right");
-    			add_location(div4, file$1, 67, 16, 2332);
+    			add_location(div4, file$1, 68, 16, 2363);
     			attr_dev(div5, "class", "row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex");
-    			add_location(div5, file$1, 47, 12, 1206);
+    			add_location(div5, file$1, 48, 12, 1237);
     			attr_dev(div6, "class", "container-fluid");
-    			add_location(div6, file$1, 46, 8, 1163);
+    			add_location(div6, file$1, 47, 8, 1194);
     			attr_dev(i1, "class", "fa fa-bars mr-2");
-    			add_location(i1, file$1, 81, 50, 3011);
+    			add_location(i1, file$1, 82, 50, 3042);
     			attr_dev(h60, "class", "text-dark m-0");
-    			add_location(h60, file$1, 81, 24, 2985);
+    			add_location(h60, file$1, 82, 24, 3016);
     			attr_dev(i2, "class", "fa fa-angle-down text-dark");
-    			add_location(i2, file$1, 82, 24, 3083);
+    			add_location(i2, file$1, 83, 24, 3114);
     			attr_dev(a1, "class", "btn d-flex align-items-center justify-content-between bg-primary w-100");
     			attr_dev(a1, "data-toggle", "collapse");
     			attr_dev(a1, "href", "#navbar-vertical");
     			set_style(a1, "height", "65px");
     			set_style(a1, "padding", "0 30px");
-    			add_location(a1, file$1, 80, 20, 2791);
+    			add_location(a1, file$1, 81, 20, 2822);
     			attr_dev(a2, "href", "");
     			attr_dev(a2, "class", "nav-item nav-link");
-    			add_location(a2, file$1, 87, 28, 3506);
+    			add_location(a2, file$1, 88, 28, 3537);
     			attr_dev(a3, "href", "");
     			attr_dev(a3, "class", "nav-item nav-link");
-    			add_location(a3, file$1, 88, 28, 3587);
+    			add_location(a3, file$1, 89, 28, 3618);
     			attr_dev(a4, "href", "");
     			attr_dev(a4, "class", "nav-item nav-link");
-    			add_location(a4, file$1, 89, 28, 3664);
+    			add_location(a4, file$1, 90, 28, 3695);
     			attr_dev(a5, "href", "");
     			attr_dev(a5, "class", "nav-item nav-link");
-    			add_location(a5, file$1, 90, 28, 3744);
+    			add_location(a5, file$1, 91, 28, 3775);
     			attr_dev(a6, "href", "");
     			attr_dev(a6, "class", "nav-item nav-link");
-    			add_location(a6, file$1, 91, 28, 3824);
+    			add_location(a6, file$1, 92, 28, 3855);
     			attr_dev(div7, "class", "nav-item dropdown dropright");
-    			add_location(div7, file$1, 86, 28, 3435);
+    			add_location(div7, file$1, 87, 28, 3466);
     			attr_dev(div8, "class", "navbar-nav w-100");
-    			add_location(div8, file$1, 85, 24, 3375);
+    			add_location(div8, file$1, 86, 24, 3406);
     			attr_dev(nav0, "class", "collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light");
     			attr_dev(nav0, "id", "navbar-vertical");
     			set_style(nav0, "width", "calc(100% - 30px)");
     			set_style(nav0, "z-index", "999");
-    			add_location(nav0, file$1, 84, 20, 3173);
+    			add_location(nav0, file$1, 85, 20, 3204);
     			attr_dev(div9, "class", "col-lg-3 d-none d-lg-block");
-    			add_location(div9, file$1, 79, 16, 2729);
+    			add_location(div9, file$1, 80, 16, 2760);
     			attr_dev(span3, "class", "navbar-toggler-icon");
-    			add_location(span3, file$1, 98, 28, 4263);
+    			add_location(span3, file$1, 99, 28, 4294);
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "navbar-toggler");
     			attr_dev(button0, "data-toggle", "collapse");
     			attr_dev(button0, "data-target", "#navbarCollapse");
-    			add_location(button0, file$1, 97, 24, 4135);
+    			add_location(button0, file$1, 98, 24, 4166);
     			attr_dev(span4, "class", "h1 text-uppercase text-dark bg-light px-2");
-    			add_location(span4, file$1, 101, 28, 4453);
+    			add_location(span4, file$1, 102, 28, 4484);
     			attr_dev(span5, "class", "h1 text-uppercase text-light bg-primary px-2 ml-n1");
-    			add_location(span5, file$1, 102, 28, 4548);
+    			add_location(span5, file$1, 103, 28, 4579);
     			attr_dev(a7, "href", "");
     			attr_dev(a7, "class", "text-decoration-none d-block d-lg-none");
-    			add_location(a7, file$1, 100, 24, 4365);
+    			add_location(a7, file$1, 101, 24, 4396);
     			attr_dev(a8, "href", "index.html");
     			attr_dev(a8, "class", "nav-item nav-link active");
-    			add_location(a8, file$1, 106, 32, 4862);
+    			add_location(a8, file$1, 107, 32, 4893);
     			attr_dev(a9, "href", "shop.html");
     			attr_dev(a9, "class", "nav-item nav-link");
-    			add_location(a9, file$1, 107, 32, 4958);
+    			add_location(a9, file$1, 108, 32, 4989);
     			attr_dev(a10, "href", "detail.html");
     			attr_dev(a10, "class", "nav-item nav-link");
-    			add_location(a10, file$1, 108, 32, 5046);
+    			add_location(a10, file$1, 109, 32, 5077);
     			attr_dev(i3, "class", "fa fa-angle-down mt-1");
-    			add_location(i3, file$1, 110, 110, 5286);
+    			add_location(i3, file$1, 111, 110, 5317);
     			attr_dev(a11, "href", "#");
     			attr_dev(a11, "class", "nav-link dropdown-toggle");
     			attr_dev(a11, "data-toggle", "dropdown");
-    			add_location(a11, file$1, 110, 36, 5212);
+    			add_location(a11, file$1, 111, 36, 5243);
     			attr_dev(a12, "href", "cart.html");
     			attr_dev(a12, "class", "dropdown-item");
-    			add_location(a12, file$1, 112, 40, 5468);
+    			add_location(a12, file$1, 113, 40, 5499);
     			attr_dev(a13, "href", "checkout.html");
     			attr_dev(a13, "class", "dropdown-item");
-    			add_location(a13, file$1, 113, 40, 5569);
+    			add_location(a13, file$1, 114, 40, 5600);
     			attr_dev(div10, "class", "dropdown-menu bg-primary rounded-0 border-0 m-0");
-    			add_location(div10, file$1, 111, 36, 5365);
+    			add_location(div10, file$1, 112, 36, 5396);
     			attr_dev(div11, "class", "nav-item dropdown");
-    			add_location(div11, file$1, 109, 32, 5143);
+    			add_location(div11, file$1, 110, 32, 5174);
     			attr_dev(a14, "href", "contact.html");
     			attr_dev(a14, "class", "nav-item nav-link");
-    			add_location(a14, file$1, 116, 32, 5745);
+    			add_location(a14, file$1, 117, 32, 5776);
     			attr_dev(div12, "class", "navbar-nav mr-auto py-0");
-    			add_location(div12, file$1, 105, 28, 4791);
+    			add_location(div12, file$1, 106, 28, 4822);
     			attr_dev(i4, "class", "fas fa-heart text-primary");
-    			add_location(i4, file$1, 120, 36, 6027);
+    			add_location(i4, file$1, 121, 36, 6058);
     			attr_dev(span6, "class", "badge text-secondary border border-secondary rounded-circle");
     			set_style(span6, "padding-bottom", "2px");
-    			add_location(span6, file$1, 121, 36, 6106);
+    			add_location(span6, file$1, 122, 36, 6137);
     			attr_dev(a15, "href", "#");
     			attr_dev(a15, "class", "btn px-0");
-    			add_location(a15, file$1, 119, 32, 5960);
+    			add_location(a15, file$1, 120, 32, 5991);
     			attr_dev(i5, "class", "fas fa-shopping-cart text-primary");
-    			add_location(i5, file$1, 124, 36, 6416);
+    			add_location(i5, file$1, 125, 36, 6447);
     			attr_dev(span7, "class", "badge text-secondary border border-secondary rounded-circle");
     			set_style(span7, "padding-bottom", "2px");
-    			add_location(span7, file$1, 125, 36, 6503);
+    			add_location(span7, file$1, 126, 36, 6534);
     			attr_dev(a16, "href", "#");
     			attr_dev(a16, "class", "btn px-0 ml-3");
     			attr_dev(a16, "data-toggle", "modal");
     			attr_dev(a16, "data-target", ".bd-example-modal-sm");
-    			add_location(a16, file$1, 123, 32, 6289);
+    			add_location(a16, file$1, 124, 32, 6320);
     			attr_dev(div13, "class", "navbar-nav ml-auto py-0 d-none d-lg-block");
-    			add_location(div13, file$1, 118, 28, 5871);
+    			add_location(div13, file$1, 119, 28, 5902);
     			attr_dev(div14, "class", "collapse navbar-collapse justify-content-between");
     			attr_dev(div14, "id", "navbarCollapse");
-    			add_location(div14, file$1, 104, 24, 4679);
+    			add_location(div14, file$1, 105, 24, 4710);
     			attr_dev(nav1, "class", "navbar-perfile navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0");
-    			add_location(nav1, file$1, 96, 20, 4019);
+    			add_location(nav1, file$1, 97, 20, 4050);
     			attr_dev(div15, "class", "col-lg-9");
-    			add_location(div15, file$1, 95, 16, 3975);
+    			add_location(div15, file$1, 96, 16, 4006);
     			attr_dev(div16, "class", "row px-xl-5");
-    			add_location(div16, file$1, 78, 12, 2686);
+    			add_location(div16, file$1, 79, 12, 2717);
     			attr_dev(div17, "class", "container-fluid bg-dark mb-30");
-    			add_location(div17, file$1, 77, 8, 2629);
+    			add_location(div17, file$1, 78, 8, 2660);
     			attr_dev(li0, "data-target", "#header-carousel");
     			attr_dev(li0, "data-slide-to", "0");
     			attr_dev(li0, "class", "active");
-    			add_location(li0, file$1, 142, 32, 7275);
+    			add_location(li0, file$1, 143, 32, 7306);
     			attr_dev(li1, "data-target", "#header-carousel");
     			attr_dev(li1, "data-slide-to", "1");
-    			add_location(li1, file$1, 143, 32, 7382);
+    			add_location(li1, file$1, 144, 32, 7413);
     			attr_dev(li2, "data-target", "#header-carousel");
     			attr_dev(li2, "data-slide-to", "2");
-    			add_location(li2, file$1, 144, 32, 7474);
+    			add_location(li2, file$1, 145, 32, 7505);
     			attr_dev(ol, "class", "carousel-indicators");
-    			add_location(ol, file$1, 141, 28, 7209);
+    			add_location(ol, file$1, 142, 28, 7240);
     			attr_dev(img1, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img1.src, img1_src_value = "img/carousel-1.jpg")) attr_dev(img1, "src", img1_src_value);
     			set_style(img1, "object-fit", "cover");
-    			add_location(img1, file$1, 148, 36, 7772);
+    			add_location(img1, file$1, 149, 36, 7803);
     			attr_dev(h10, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h10, file$1, 151, 44, 8127);
+    			add_location(h10, file$1, 152, 44, 8158);
     			attr_dev(p1, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p1, file$1, 152, 44, 8266);
+    			add_location(p1, file$1, 153, 44, 8297);
     			attr_dev(div18, "class", "p-3");
     			set_style(div18, "max-width", "700px");
-    			add_location(div18, file$1, 150, 40, 8038);
+    			add_location(div18, file$1, 151, 40, 8069);
     			attr_dev(div19, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div19, file$1, 149, 36, 7905);
+    			add_location(div19, file$1, 150, 36, 7936);
     			attr_dev(div20, "class", "carousel-item position-relative active");
     			set_style(div20, "height", "220px");
-    			add_location(div20, file$1, 147, 32, 7659);
+    			add_location(div20, file$1, 148, 32, 7690);
     			attr_dev(img2, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img2.src, img2_src_value = "img/carousel-2.jpg")) attr_dev(img2, "src", img2_src_value);
     			set_style(img2, "object-fit", "cover");
-    			add_location(img2, file$1, 157, 36, 8659);
+    			add_location(img2, file$1, 158, 36, 8690);
     			attr_dev(h11, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h11, file$1, 160, 44, 9014);
+    			add_location(h11, file$1, 161, 44, 9045);
     			attr_dev(p2, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p2, file$1, 161, 44, 9154);
+    			add_location(p2, file$1, 162, 44, 9185);
     			attr_dev(div21, "class", "p-3");
     			set_style(div21, "max-width", "700px");
-    			add_location(div21, file$1, 159, 40, 8925);
+    			add_location(div21, file$1, 160, 40, 8956);
     			attr_dev(div22, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div22, file$1, 158, 36, 8792);
+    			add_location(div22, file$1, 159, 36, 8823);
     			attr_dev(div23, "class", "carousel-item position-relative");
     			set_style(div23, "height", "220px");
-    			add_location(div23, file$1, 156, 32, 8553);
+    			add_location(div23, file$1, 157, 32, 8584);
     			attr_dev(img3, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img3.src, img3_src_value = "img/carousel-3.jpg")) attr_dev(img3, "src", img3_src_value);
     			set_style(img3, "object-fit", "cover");
-    			add_location(img3, file$1, 166, 36, 9537);
+    			add_location(img3, file$1, 167, 36, 9568);
     			attr_dev(h12, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h12, file$1, 169, 44, 9892);
+    			add_location(h12, file$1, 170, 44, 9923);
     			attr_dev(p3, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p3, file$1, 170, 44, 10031);
+    			add_location(p3, file$1, 171, 44, 10062);
     			attr_dev(div24, "class", "p-3");
     			set_style(div24, "max-width", "700px");
-    			add_location(div24, file$1, 168, 40, 9803);
+    			add_location(div24, file$1, 169, 40, 9834);
     			attr_dev(div25, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div25, file$1, 167, 36, 9670);
+    			add_location(div25, file$1, 168, 36, 9701);
     			attr_dev(div26, "class", "carousel-item position-relative");
     			set_style(div26, "height", "220px");
-    			add_location(div26, file$1, 165, 32, 9431);
+    			add_location(div26, file$1, 166, 32, 9462);
     			attr_dev(div27, "class", "carousel-inner");
-    			add_location(div27, file$1, 146, 28, 7597);
+    			add_location(div27, file$1, 147, 28, 7628);
     			attr_dev(div28, "id", "header-carousel");
     			attr_dev(div28, "class", "carousel slide carousel-fade mb-30 mb-lg-0");
     			attr_dev(div28, "data-ride", "carousel");
-    			add_location(div28, file$1, 140, 24, 7081);
+    			add_location(div28, file$1, 141, 24, 7112);
     			attr_dev(div29, "class", "col-lg-12");
-    			add_location(div29, file$1, 139, 20, 7032);
+    			add_location(div29, file$1, 140, 20, 7063);
     			attr_dev(div30, "class", "row px-xl-4");
-    			add_location(div30, file$1, 138, 16, 6985);
+    			add_location(div30, file$1, 139, 16, 7016);
     			attr_dev(div31, "class", "container-fluid");
-    			add_location(div31, file$1, 137, 12, 6938);
+    			add_location(div31, file$1, 138, 12, 6969);
     			attr_dev(span8, "class", "bg-secondary pr-3");
-    			add_location(span8, file$1, 183, 88, 10609);
+    			add_location(span8, file$1, 184, 88, 10640);
     			attr_dev(h20, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
-    			add_location(h20, file$1, 183, 16, 10537);
+    			add_location(h20, file$1, 184, 16, 10568);
     			attr_dev(img4, "class", "img-fluid");
     			if (!src_url_equal(img4.src, img4_src_value = "img/cat-1.jpg")) attr_dev(img4, "src", img4_src_value);
     			attr_dev(img4, "alt", "");
     			set_style(img4, "height", "119px");
-    			add_location(img4, file$1, 189, 36, 11102);
+    			add_location(img4, file$1, 190, 36, 11133);
     			attr_dev(div32, "class", "overflow-hidden");
     			set_style(div32, "width", "120px");
     			set_style(div32, "height", "120px");
-    			add_location(div32, file$1, 188, 32, 10998);
-    			add_location(h61, file$1, 192, 36, 11315);
+    			add_location(div32, file$1, 189, 32, 11029);
+    			add_location(h61, file$1, 193, 36, 11346);
     			attr_dev(small0, "class", "text-body");
-    			add_location(small0, file$1, 193, 36, 11382);
-    			attr_dev(small1, "class", "text-price svelte-ov6l8o");
-    			add_location(small1, file$1, 194, 36, 11465);
+    			add_location(small0, file$1, 194, 36, 11413);
+    			attr_dev(small1, "class", "text-price svelte-d9yz2r");
+    			add_location(small1, file$1, 195, 36, 11496);
     			attr_dev(div33, "class", "flex-fill pl-3");
-    			add_location(div33, file$1, 191, 32, 11249);
+    			add_location(div33, file$1, 192, 32, 11280);
     			attr_dev(div34, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div34, file$1, 187, 28, 10911);
+    			add_location(div34, file$1, 188, 28, 10942);
     			attr_dev(a17, "href", "#");
     			attr_dev(a17, "class", "text-decoration-none");
-    			add_location(a17, file$1, 186, 24, 10840);
-    			attr_dev(div35, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div35, file$1, 185, 20, 10730);
+    			add_location(a17, file$1, 187, 24, 10871);
+    			attr_dev(div35, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div35, file$1, 186, 20, 10761);
     			attr_dev(img5, "class", "img-fluid");
     			if (!src_url_equal(img5.src, img5_src_value = "img/cat-2.avif")) attr_dev(img5, "src", img5_src_value);
     			attr_dev(img5, "alt", "");
     			set_style(img5, "height", "119px");
-    			add_location(img5, file$1, 203, 36, 12047);
+    			add_location(img5, file$1, 204, 36, 12078);
     			attr_dev(div36, "class", "overflow-hidden");
     			set_style(div36, "width", "120px");
     			set_style(div36, "height", "120px");
-    			add_location(div36, file$1, 202, 32, 11943);
-    			add_location(h62, file$1, 206, 36, 12261);
+    			add_location(div36, file$1, 203, 32, 11974);
+    			add_location(h62, file$1, 207, 36, 12292);
     			attr_dev(small2, "class", "text-body");
-    			add_location(small2, file$1, 207, 36, 12316);
-    			attr_dev(small3, "class", "text-price svelte-ov6l8o");
-    			add_location(small3, file$1, 208, 36, 12399);
+    			add_location(small2, file$1, 208, 36, 12347);
+    			attr_dev(small3, "class", "text-price svelte-d9yz2r");
+    			add_location(small3, file$1, 209, 36, 12430);
     			attr_dev(div37, "class", "flex-fill pl-3");
-    			add_location(div37, file$1, 205, 32, 12195);
+    			add_location(div37, file$1, 206, 32, 12226);
     			attr_dev(div38, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div38, file$1, 201, 28, 11847);
+    			add_location(div38, file$1, 202, 28, 11878);
     			attr_dev(a18, "href", "#");
     			attr_dev(a18, "class", "text-decoration-none");
-    			add_location(a18, file$1, 200, 24, 11775);
-    			attr_dev(div39, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div39, file$1, 199, 20, 11664);
+    			add_location(a18, file$1, 201, 24, 11806);
+    			attr_dev(div39, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div39, file$1, 200, 20, 11695);
     			attr_dev(img6, "class", "img-fluid");
     			if (!src_url_equal(img6.src, img6_src_value = "img/cat-3.jpg")) attr_dev(img6, "src", img6_src_value);
     			attr_dev(img6, "alt", "");
     			set_style(img6, "height", "119px");
     			set_style(img6, "width", "120px");
-    			add_location(img6, file$1, 217, 36, 12971);
+    			add_location(img6, file$1, 218, 36, 13002);
     			attr_dev(div40, "class", "overflow-hidden");
     			set_style(div40, "width", "120px");
     			set_style(div40, "height", "120px");
-    			add_location(div40, file$1, 216, 32, 12867);
-    			add_location(h63, file$1, 220, 36, 13196);
+    			add_location(div40, file$1, 217, 32, 12898);
+    			add_location(h63, file$1, 221, 36, 13227);
     			attr_dev(small4, "class", "text-body");
-    			add_location(small4, file$1, 221, 36, 13265);
-    			attr_dev(small5, "class", "text-price svelte-ov6l8o");
-    			add_location(small5, file$1, 222, 36, 13348);
+    			add_location(small4, file$1, 222, 36, 13296);
+    			attr_dev(small5, "class", "text-price svelte-d9yz2r");
+    			add_location(small5, file$1, 223, 36, 13379);
     			attr_dev(div41, "class", "flex-fill pl-3");
-    			add_location(div41, file$1, 219, 32, 13130);
+    			add_location(div41, file$1, 220, 32, 13161);
     			attr_dev(div42, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div42, file$1, 215, 28, 12771);
+    			add_location(div42, file$1, 216, 28, 12802);
     			attr_dev(a19, "class", "text-decoration-none");
-    			add_location(a19, file$1, 214, 24, 12709);
-    			attr_dev(div43, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div43, file$1, 213, 20, 12598);
+    			add_location(a19, file$1, 215, 24, 12740);
+    			attr_dev(div43, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div43, file$1, 214, 20, 12629);
     			attr_dev(img7, "class", "img-fluid");
     			if (!src_url_equal(img7.src, img7_src_value = "img/cat-4.jpg")) attr_dev(img7, "src", img7_src_value);
     			attr_dev(img7, "alt", "");
     			set_style(img7, "height", "119px");
-    			add_location(img7, file$1, 232, 36, 13998);
+    			add_location(img7, file$1, 233, 36, 14029);
     			attr_dev(div44, "class", "overflow-hidden");
     			set_style(div44, "width", "120px");
     			set_style(div44, "height", "120px");
-    			add_location(div44, file$1, 231, 32, 13894);
-    			add_location(h64, file$1, 235, 36, 14211);
+    			add_location(div44, file$1, 232, 32, 13925);
+    			add_location(h64, file$1, 236, 36, 14242);
     			attr_dev(small6, "class", "text-body");
-    			add_location(small6, file$1, 236, 36, 14272);
-    			attr_dev(small7, "class", "text-price svelte-ov6l8o");
-    			add_location(small7, file$1, 237, 36, 14355);
+    			add_location(small6, file$1, 237, 36, 14303);
+    			attr_dev(small7, "class", "text-price svelte-d9yz2r");
+    			add_location(small7, file$1, 238, 36, 14386);
     			attr_dev(div45, "class", "flex-fill pl-3");
-    			add_location(div45, file$1, 234, 32, 14145);
+    			add_location(div45, file$1, 235, 32, 14176);
     			attr_dev(div46, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div46, file$1, 230, 28, 13798);
+    			add_location(div46, file$1, 231, 28, 13829);
     			attr_dev(a20, "class", "text-decoration-none");
-    			add_location(a20, file$1, 229, 24, 13736);
-    			attr_dev(div47, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div47, file$1, 228, 20, 13625);
+    			add_location(a20, file$1, 230, 24, 13767);
+    			attr_dev(div47, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div47, file$1, 229, 20, 13656);
     			attr_dev(img8, "class", "img-fluid");
     			if (!src_url_equal(img8.src, img8_src_value = "img/cat-5.jpg")) attr_dev(img8, "src", img8_src_value);
     			attr_dev(img8, "alt", "");
     			set_style(img8, "height", "119px");
-    			add_location(img8, file$1, 246, 36, 14926);
+    			add_location(img8, file$1, 247, 36, 14957);
     			attr_dev(div48, "class", "overflow-hidden");
     			set_style(div48, "width", "120px");
     			set_style(div48, "height", "120px");
-    			add_location(div48, file$1, 245, 32, 14822);
-    			add_location(h65, file$1, 249, 36, 15139);
+    			add_location(div48, file$1, 246, 32, 14853);
+    			add_location(h65, file$1, 250, 36, 15170);
     			attr_dev(small8, "class", "text-body");
-    			add_location(small8, file$1, 250, 36, 15206);
-    			attr_dev(small9, "class", "text-price svelte-ov6l8o");
-    			add_location(small9, file$1, 251, 36, 15289);
+    			add_location(small8, file$1, 251, 36, 15237);
+    			attr_dev(small9, "class", "text-price svelte-d9yz2r");
+    			add_location(small9, file$1, 252, 36, 15320);
     			attr_dev(div49, "class", "flex-fill pl-3");
-    			add_location(div49, file$1, 248, 32, 15073);
+    			add_location(div49, file$1, 249, 32, 15104);
     			attr_dev(div50, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div50, file$1, 244, 28, 14726);
+    			add_location(div50, file$1, 245, 28, 14757);
     			attr_dev(a21, "class", "text-decoration-none");
-    			add_location(a21, file$1, 243, 24, 14664);
-    			attr_dev(div51, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div51, file$1, 242, 20, 14553);
+    			add_location(a21, file$1, 244, 24, 14695);
+    			attr_dev(div51, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div51, file$1, 243, 20, 14584);
     			attr_dev(img9, "class", "img-fluid");
     			if (!src_url_equal(img9.src, img9_src_value = "img/cat-6.jpg")) attr_dev(img9, "src", img9_src_value);
     			attr_dev(img9, "alt", "");
     			set_style(img9, "height", "119px");
-    			add_location(img9, file$1, 260, 36, 15862);
+    			add_location(img9, file$1, 261, 36, 15893);
     			attr_dev(div52, "class", "overflow-hidden");
     			set_style(div52, "width", "120px");
     			set_style(div52, "height", "120px");
-    			add_location(div52, file$1, 259, 32, 15758);
-    			add_location(h66, file$1, 263, 36, 16075);
+    			add_location(div52, file$1, 260, 32, 15789);
+    			add_location(h66, file$1, 264, 36, 16106);
     			attr_dev(small10, "class", "text-body");
-    			add_location(small10, file$1, 264, 36, 16136);
-    			attr_dev(small11, "class", "text-price svelte-ov6l8o");
-    			add_location(small11, file$1, 265, 36, 16219);
+    			add_location(small10, file$1, 265, 36, 16167);
+    			attr_dev(small11, "class", "text-price svelte-d9yz2r");
+    			add_location(small11, file$1, 266, 36, 16250);
     			attr_dev(div53, "class", "flex-fill pl-3");
-    			add_location(div53, file$1, 262, 32, 16009);
+    			add_location(div53, file$1, 263, 32, 16040);
     			attr_dev(div54, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div54, file$1, 258, 28, 15662);
+    			add_location(div54, file$1, 259, 28, 15693);
     			attr_dev(a22, "class", "text-decoration-none");
-    			add_location(a22, file$1, 257, 24, 15599);
-    			attr_dev(div55, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div55, file$1, 256, 20, 15488);
+    			add_location(a22, file$1, 258, 24, 15630);
+    			attr_dev(div55, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div55, file$1, 257, 20, 15519);
     			attr_dev(img10, "class", "img-fluid");
     			if (!src_url_equal(img10.src, img10_src_value = "img/cat-7.avif")) attr_dev(img10, "src", img10_src_value);
     			attr_dev(img10, "alt", "");
     			set_style(img10, "height", "119px");
-    			add_location(img10, file$1, 274, 36, 16791);
+    			add_location(img10, file$1, 275, 36, 16822);
     			attr_dev(div56, "class", "overflow-hidden");
     			set_style(div56, "width", "120px");
     			set_style(div56, "height", "120px");
-    			add_location(div56, file$1, 273, 32, 16687);
-    			add_location(h67, file$1, 277, 36, 17005);
+    			add_location(div56, file$1, 274, 32, 16718);
+    			add_location(h67, file$1, 278, 36, 17036);
     			attr_dev(small12, "class", "text-body");
-    			add_location(small12, file$1, 278, 36, 17068);
-    			attr_dev(small13, "class", "text-price svelte-ov6l8o");
-    			add_location(small13, file$1, 279, 36, 17151);
+    			add_location(small12, file$1, 279, 36, 17099);
+    			attr_dev(small13, "class", "text-price svelte-d9yz2r");
+    			add_location(small13, file$1, 280, 36, 17182);
     			attr_dev(div57, "class", "flex-fill pl-3");
-    			add_location(div57, file$1, 276, 32, 16939);
+    			add_location(div57, file$1, 277, 32, 16970);
     			attr_dev(div58, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div58, file$1, 272, 28, 16591);
+    			add_location(div58, file$1, 273, 28, 16622);
     			attr_dev(a23, "class", "text-decoration-none");
-    			add_location(a23, file$1, 271, 24, 16529);
-    			attr_dev(div59, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div59, file$1, 270, 20, 16418);
+    			add_location(a23, file$1, 272, 24, 16560);
+    			attr_dev(div59, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div59, file$1, 271, 20, 16449);
     			attr_dev(img11, "class", "img-fluid");
     			if (!src_url_equal(img11.src, img11_src_value = "img/cat-8.jpg")) attr_dev(img11, "src", img11_src_value);
     			attr_dev(img11, "alt", "");
     			set_style(img11, "height", "119px");
-    			add_location(img11, file$1, 288, 36, 17723);
+    			add_location(img11, file$1, 289, 36, 17754);
     			attr_dev(div60, "class", "overflow-hidden");
     			set_style(div60, "width", "120px");
     			set_style(div60, "height", "120px");
-    			add_location(div60, file$1, 287, 32, 17619);
-    			add_location(h68, file$1, 291, 36, 17936);
+    			add_location(div60, file$1, 288, 32, 17650);
+    			add_location(h68, file$1, 292, 36, 17967);
     			attr_dev(small14, "class", "text-body");
-    			add_location(small14, file$1, 292, 36, 18005);
-    			attr_dev(small15, "class", "text-price svelte-ov6l8o");
-    			add_location(small15, file$1, 293, 36, 18088);
+    			add_location(small14, file$1, 293, 36, 18036);
+    			attr_dev(small15, "class", "text-price svelte-d9yz2r");
+    			add_location(small15, file$1, 294, 36, 18119);
     			attr_dev(div61, "class", "flex-fill pl-3");
-    			add_location(div61, file$1, 290, 32, 17870);
+    			add_location(div61, file$1, 291, 32, 17901);
     			attr_dev(div62, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div62, file$1, 286, 28, 17523);
+    			add_location(div62, file$1, 287, 28, 17554);
     			attr_dev(a24, "class", "text-decoration-none");
-    			add_location(a24, file$1, 285, 24, 17461);
-    			attr_dev(div63, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div63, file$1, 284, 20, 17350);
+    			add_location(a24, file$1, 286, 24, 17492);
+    			attr_dev(div63, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div63, file$1, 285, 20, 17381);
     			attr_dev(div64, "class", "row px-xl-5 pb-3");
-    			add_location(div64, file$1, 184, 16, 10678);
+    			add_location(div64, file$1, 185, 16, 10709);
     			attr_dev(div65, "class", "container-fluid");
-    			add_location(div65, file$1, 182, 12, 10490);
+    			add_location(div65, file$1, 183, 12, 10521);
     			attr_dev(span9, "class", "bg-secondary pr-3");
-    			add_location(span9, file$1, 302, 88, 18461);
+    			add_location(span9, file$1, 303, 88, 18492);
     			attr_dev(h21, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
-    			add_location(h21, file$1, 302, 16, 18389);
+    			add_location(h21, file$1, 303, 16, 18420);
     			attr_dev(img12, "class", "img-fluid");
     			if (!src_url_equal(img12.src, img12_src_value = "img/cat-9.webp")) attr_dev(img12, "src", img12_src_value);
     			attr_dev(img12, "alt", "");
     			set_style(img12, "height", "119px");
-    			add_location(img12, file$1, 308, 36, 18946);
+    			add_location(img12, file$1, 309, 36, 18977);
     			attr_dev(div66, "class", "overflow-hidden");
     			set_style(div66, "width", "120px");
     			set_style(div66, "height", "120px");
-    			add_location(div66, file$1, 307, 32, 18842);
-    			add_location(h69, file$1, 311, 36, 19160);
+    			add_location(div66, file$1, 308, 32, 18873);
+    			add_location(h69, file$1, 312, 36, 19191);
     			attr_dev(small16, "class", "text-body");
-    			add_location(small16, file$1, 312, 36, 19216);
-    			attr_dev(small17, "class", "text-price svelte-ov6l8o");
-    			add_location(small17, file$1, 313, 36, 19298);
+    			add_location(small16, file$1, 313, 36, 19247);
+    			attr_dev(small17, "class", "text-price svelte-d9yz2r");
+    			add_location(small17, file$1, 314, 36, 19329);
     			attr_dev(div67, "class", "flex-fill pl-3");
-    			add_location(div67, file$1, 310, 32, 19094);
+    			add_location(div67, file$1, 311, 32, 19125);
     			attr_dev(div68, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div68, file$1, 306, 28, 18755);
+    			add_location(div68, file$1, 307, 28, 18786);
     			attr_dev(a25, "class", "text-decoration-none");
-    			add_location(a25, file$1, 305, 24, 18693);
-    			attr_dev(div69, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div69, file$1, 304, 20, 18582);
+    			add_location(a25, file$1, 306, 24, 18724);
+    			attr_dev(div69, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div69, file$1, 305, 20, 18613);
     			attr_dev(img13, "class", "img-fluid");
     			if (!src_url_equal(img13.src, img13_src_value = "img/cat-10.png")) attr_dev(img13, "src", img13_src_value);
     			attr_dev(img13, "alt", "");
     			set_style(img13, "height", "119px");
-    			add_location(img13, file$1, 322, 36, 19869);
+    			add_location(img13, file$1, 323, 36, 19900);
     			attr_dev(div70, "class", "overflow-hidden");
     			set_style(div70, "width", "120px");
     			set_style(div70, "height", "120px");
-    			add_location(div70, file$1, 321, 32, 19765);
-    			add_location(h610, file$1, 325, 36, 20083);
+    			add_location(div70, file$1, 322, 32, 19796);
+    			add_location(h610, file$1, 326, 36, 20114);
     			attr_dev(small18, "class", "text-body");
-    			add_location(small18, file$1, 326, 36, 20139);
-    			attr_dev(small19, "class", "text-price svelte-ov6l8o");
-    			add_location(small19, file$1, 327, 36, 20222);
+    			add_location(small18, file$1, 327, 36, 20170);
+    			attr_dev(small19, "class", "text-price svelte-d9yz2r");
+    			add_location(small19, file$1, 328, 36, 20253);
     			attr_dev(div71, "class", "flex-fill pl-3");
-    			add_location(div71, file$1, 324, 32, 20017);
+    			add_location(div71, file$1, 325, 32, 20048);
     			attr_dev(div72, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div72, file$1, 320, 28, 19669);
+    			add_location(div72, file$1, 321, 28, 19700);
     			attr_dev(a26, "class", "text-decoration-none");
-    			add_location(a26, file$1, 319, 24, 19607);
-    			attr_dev(div73, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div73, file$1, 318, 20, 19496);
+    			add_location(a26, file$1, 320, 24, 19638);
+    			attr_dev(div73, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div73, file$1, 319, 20, 19527);
     			attr_dev(img14, "class", "img-fluid");
     			if (!src_url_equal(img14.src, img14_src_value = "img/cat-11.webp")) attr_dev(img14, "src", img14_src_value);
     			attr_dev(img14, "alt", "");
     			set_style(img14, "height", "119px");
     			set_style(img14, "width", "120px");
-    			add_location(img14, file$1, 336, 36, 20793);
+    			add_location(img14, file$1, 337, 36, 20824);
     			attr_dev(div74, "class", "overflow-hidden");
     			set_style(div74, "width", "120px");
     			set_style(div74, "height", "120px");
-    			add_location(div74, file$1, 335, 32, 20689);
-    			add_location(h611, file$1, 339, 36, 21020);
+    			add_location(div74, file$1, 336, 32, 20720);
+    			add_location(h611, file$1, 340, 36, 21051);
     			attr_dev(small20, "class", "text-body");
-    			add_location(small20, file$1, 340, 36, 21077);
-    			attr_dev(small21, "class", "text-price svelte-ov6l8o");
-    			add_location(small21, file$1, 341, 36, 21160);
+    			add_location(small20, file$1, 341, 36, 21108);
+    			attr_dev(small21, "class", "text-price svelte-d9yz2r");
+    			add_location(small21, file$1, 342, 36, 21191);
     			attr_dev(div75, "class", "flex-fill pl-3");
-    			add_location(div75, file$1, 338, 32, 20954);
+    			add_location(div75, file$1, 339, 32, 20985);
     			attr_dev(div76, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div76, file$1, 334, 28, 20593);
+    			add_location(div76, file$1, 335, 28, 20624);
     			attr_dev(a27, "class", "text-decoration-none");
-    			add_location(a27, file$1, 333, 24, 20531);
-    			attr_dev(div77, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div77, file$1, 332, 20, 20420);
+    			add_location(a27, file$1, 334, 24, 20562);
+    			attr_dev(div77, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div77, file$1, 333, 20, 20451);
     			attr_dev(div78, "class", "row px-xl-5 pb-3");
-    			add_location(div78, file$1, 303, 16, 18530);
+    			add_location(div78, file$1, 304, 16, 18561);
     			attr_dev(div79, "class", "container-fluid pt-5");
-    			add_location(div79, file$1, 301, 12, 18337);
-    			attr_dev(div80, "class", "content-page svelte-ov6l8o");
-    			add_location(div80, file$1, 135, 8, 6857);
+    			add_location(div79, file$1, 302, 12, 18368);
+    			attr_dev(div80, "class", "content-page svelte-d9yz2r");
+    			add_location(div80, file$1, 136, 8, 6888);
     			attr_dev(i6, "class", "fas fa-shopping-cart");
     			set_style(i6, "color", "red");
     			set_style(i6, "font-size", "15px");
-    			add_location(i6, file$1, 354, 78, 21664);
+    			add_location(i6, file$1, 355, 78, 21695);
     			set_style(span10, "padding-bottom", "2px");
     			set_style(span10, "color", "red");
     			set_style(span10, "font-size", "10px");
-    			add_location(span10, file$1, 354, 16, 21602);
+    			add_location(span10, file$1, 355, 16, 21633);
     			attr_dev(a28, "href", "#");
     			attr_dev(a28, "class", "btn px-0 ");
     			set_style(a28, "margin-left", "3px");
     			attr_dev(a28, "data-toggle", "modal");
     			attr_dev(a28, "data-target", ".bd-example-modal-sm");
-    			add_location(a28, file$1, 353, 12, 21471);
+    			add_location(a28, file$1, 354, 12, 21502);
     			if (!src_url_equal(img15.src, img15_src_value = "img/scanner.png")) attr_dev(img15, "src", img15_src_value);
     			attr_dev(img15, "alt", "");
     			attr_dev(img15, "width", "25");
     			attr_dev(img15, "height", "25");
-    			add_location(img15, file$1, 357, 16, 21881);
+    			add_location(img15, file$1, 358, 16, 21912);
     			attr_dev(a29, "href", "#");
     			attr_dev(a29, "class", "btn px-0 ");
     			set_style(a29, "margin-left", "3px");
-    			add_location(a29, file$1, 356, 12, 21780);
-    			attr_dev(div81, "class", "card back-to-card bg-dark svelte-ov6l8o");
-    			add_location(div81, file$1, 352, 8, 21417);
+    			add_location(a29, file$1, 357, 12, 21811);
+    			attr_dev(div81, "class", "card back-to-card bg-dark svelte-d9yz2r");
+    			add_location(div81, file$1, 353, 8, 21448);
     			if (!src_url_equal(img16.src, img16_src_value = "img/goeat.png")) attr_dev(img16, "src", img16_src_value);
     			attr_dev(img16, "width", "40");
     			attr_dev(img16, "height", "40");
-    			add_location(img16, file$1, 366, 72, 22330);
+    			add_location(img16, file$1, 367, 72, 22361);
     			attr_dev(h51, "class", "modal-title");
     			attr_dev(h51, "id", "exampleModalLabel");
-    			add_location(h51, file$1, 366, 24, 22282);
+    			add_location(h51, file$1, 367, 24, 22313);
     			attr_dev(span11, "aria-hidden", "true");
-    			add_location(span11, file$1, 368, 24, 22519);
+    			add_location(span11, file$1, 369, 24, 22550);
     			attr_dev(button1, "type", "button");
     			attr_dev(button1, "class", "close");
     			attr_dev(button1, "data-dismiss", "modal");
     			attr_dev(button1, "aria-label", "Close");
-    			add_location(button1, file$1, 367, 24, 22417);
+    			add_location(button1, file$1, 368, 24, 22448);
     			attr_dev(div82, "class", "modal-header");
-    			add_location(div82, file$1, 365, 20, 22230);
+    			add_location(div82, file$1, 366, 20, 22261);
     			attr_dev(img17, "class", "img-fluid");
     			if (!src_url_equal(img17.src, img17_src_value = "img/cat-9.webp")) attr_dev(img17, "src", img17_src_value);
     			attr_dev(img17, "alt", "");
     			set_style(img17, "height", "70px");
-    			add_location(img17, file$1, 379, 48, 23343);
+    			add_location(img17, file$1, 380, 48, 23374);
     			attr_dev(div83, "class", "overflow-hidden");
     			set_style(div83, "width", "100px");
     			set_style(div83, "height", "70px");
-    			add_location(div83, file$1, 378, 44, 23228);
-    			add_location(h612, file$1, 382, 48, 23592);
+    			add_location(div83, file$1, 379, 44, 23259);
+    			add_location(h612, file$1, 383, 48, 23623);
     			attr_dev(small22, "class", "text-body");
-    			add_location(small22, file$1, 383, 48, 23660);
-    			attr_dev(small23, "class", "text-price svelte-ov6l8o");
-    			add_location(small23, file$1, 384, 48, 23754);
+    			add_location(small22, file$1, 384, 48, 23691);
+    			attr_dev(small23, "class", "text-price svelte-d9yz2r");
+    			add_location(small23, file$1, 385, 48, 23785);
     			attr_dev(div84, "class", "flex-fill pl-3");
-    			add_location(div84, file$1, 381, 44, 23514);
+    			add_location(div84, file$1, 382, 44, 23545);
     			attr_dev(div85, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div85, file$1, 377, 40, 23129);
+    			add_location(div85, file$1, 378, 40, 23160);
     			attr_dev(a30, "href", "#");
     			attr_dev(a30, "class", "text-decoration-none");
-    			add_location(a30, file$1, 376, 36, 23045);
-    			attr_dev(div86, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div86, file$1, 375, 32, 22922);
+    			add_location(a30, file$1, 377, 36, 23076);
+    			attr_dev(div86, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div86, file$1, 376, 32, 22953);
     			attr_dev(img18, "class", "img-fluid");
     			if (!src_url_equal(img18.src, img18_src_value = "img/cat-10.png")) attr_dev(img18, "src", img18_src_value);
     			attr_dev(img18, "alt", "");
     			set_style(img18, "height", "70px");
-    			add_location(img18, file$1, 394, 48, 24534);
+    			add_location(img18, file$1, 395, 48, 24565);
     			attr_dev(div87, "class", "overflow-hidden");
     			set_style(div87, "width", "100px");
     			set_style(div87, "height", "70px");
-    			add_location(div87, file$1, 393, 44, 24419);
-    			add_location(h613, file$1, 397, 48, 24783);
+    			add_location(div87, file$1, 394, 44, 24450);
+    			add_location(h613, file$1, 398, 48, 24814);
     			attr_dev(small24, "class", "text-body");
-    			add_location(small24, file$1, 398, 48, 24851);
-    			attr_dev(small25, "class", "text-price svelte-ov6l8o");
-    			add_location(small25, file$1, 399, 48, 24946);
+    			add_location(small24, file$1, 399, 48, 24882);
+    			attr_dev(small25, "class", "text-price svelte-d9yz2r");
+    			add_location(small25, file$1, 400, 48, 24977);
     			attr_dev(div88, "class", "flex-fill pl-3");
-    			add_location(div88, file$1, 396, 44, 24705);
+    			add_location(div88, file$1, 397, 44, 24736);
     			attr_dev(div89, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div89, file$1, 392, 40, 24311);
+    			add_location(div89, file$1, 393, 40, 24342);
     			attr_dev(a31, "href", "#");
     			attr_dev(a31, "class", "text-decoration-none");
-    			add_location(a31, file$1, 391, 36, 24227);
-    			attr_dev(div90, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div90, file$1, 390, 32, 24104);
+    			add_location(a31, file$1, 392, 36, 24258);
+    			attr_dev(div90, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div90, file$1, 391, 32, 24135);
     			attr_dev(img19, "class", "img-fluid");
     			if (!src_url_equal(img19.src, img19_src_value = "img/cat-11.webp")) attr_dev(img19, "src", img19_src_value);
     			attr_dev(img19, "alt", "");
     			set_style(img19, "height", "70px");
-    			add_location(img19, file$1, 409, 48, 25726);
+    			add_location(img19, file$1, 410, 48, 25757);
     			attr_dev(div91, "class", "overflow-hidden");
     			set_style(div91, "width", "100px");
     			set_style(div91, "height", "70px");
-    			add_location(div91, file$1, 408, 44, 25611);
-    			add_location(h614, file$1, 412, 48, 25976);
+    			add_location(div91, file$1, 409, 44, 25642);
+    			add_location(h614, file$1, 413, 48, 26007);
     			attr_dev(small26, "class", "text-body");
-    			add_location(small26, file$1, 413, 48, 26045);
-    			attr_dev(small27, "class", "text-price svelte-ov6l8o");
-    			add_location(small27, file$1, 414, 48, 26140);
+    			add_location(small26, file$1, 414, 48, 26076);
+    			attr_dev(small27, "class", "text-price svelte-d9yz2r");
+    			add_location(small27, file$1, 415, 48, 26171);
     			attr_dev(div92, "class", "flex-fill pl-3");
-    			add_location(div92, file$1, 411, 44, 25898);
+    			add_location(div92, file$1, 412, 44, 25929);
     			attr_dev(div93, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div93, file$1, 407, 40, 25503);
+    			add_location(div93, file$1, 408, 40, 25534);
     			attr_dev(a32, "href", "#");
     			attr_dev(a32, "class", "text-decoration-none");
-    			add_location(a32, file$1, 406, 36, 25419);
-    			attr_dev(div94, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div94, file$1, 405, 32, 25296);
+    			add_location(a32, file$1, 407, 36, 25450);
+    			attr_dev(div94, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div94, file$1, 406, 32, 25327);
     			attr_dev(img20, "class", "img-fluid");
     			if (!src_url_equal(img20.src, img20_src_value = "img/cat-11.webp")) attr_dev(img20, "src", img20_src_value);
     			attr_dev(img20, "alt", "");
     			set_style(img20, "height", "70px");
-    			add_location(img20, file$1, 425, 48, 26993);
+    			add_location(img20, file$1, 426, 48, 27024);
     			attr_dev(div95, "class", "overflow-hidden");
     			set_style(div95, "width", "100px");
     			set_style(div95, "height", "70px");
-    			add_location(div95, file$1, 424, 44, 26878);
-    			add_location(h615, file$1, 428, 48, 27243);
+    			add_location(div95, file$1, 425, 44, 26909);
+    			add_location(h615, file$1, 429, 48, 27274);
     			attr_dev(small28, "class", "text-body");
-    			add_location(small28, file$1, 429, 48, 27312);
-    			attr_dev(small29, "class", "text-price svelte-ov6l8o");
-    			add_location(small29, file$1, 430, 48, 27407);
+    			add_location(small28, file$1, 430, 48, 27343);
+    			attr_dev(small29, "class", "text-price svelte-d9yz2r");
+    			add_location(small29, file$1, 431, 48, 27438);
     			attr_dev(div96, "class", "flex-fill pl-3");
-    			add_location(div96, file$1, 427, 44, 27165);
+    			add_location(div96, file$1, 428, 44, 27196);
     			attr_dev(div97, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div97, file$1, 423, 40, 26770);
+    			add_location(div97, file$1, 424, 40, 26801);
     			attr_dev(a33, "class", "text-decoration-none");
-    			add_location(a33, file$1, 422, 36, 26696);
-    			attr_dev(div98, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div98, file$1, 420, 32, 26490);
+    			add_location(a33, file$1, 423, 36, 26727);
+    			attr_dev(div98, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div98, file$1, 421, 32, 26521);
     			attr_dev(img21, "class", "img-fluid");
     			if (!src_url_equal(img21.src, img21_src_value = "img/cat-11.webp")) attr_dev(img21, "src", img21_src_value);
     			attr_dev(img21, "alt", "");
     			set_style(img21, "height", "70px");
-    			add_location(img21, file$1, 441, 48, 28260);
+    			add_location(img21, file$1, 442, 48, 28291);
     			attr_dev(div99, "class", "overflow-hidden");
     			set_style(div99, "width", "100px");
     			set_style(div99, "height", "70px");
-    			add_location(div99, file$1, 440, 44, 28145);
-    			add_location(h616, file$1, 444, 48, 28510);
+    			add_location(div99, file$1, 441, 44, 28176);
+    			add_location(h616, file$1, 445, 48, 28541);
     			attr_dev(small30, "class", "text-body");
-    			add_location(small30, file$1, 445, 48, 28579);
-    			attr_dev(small31, "class", "text-price svelte-ov6l8o");
-    			add_location(small31, file$1, 446, 48, 28674);
+    			add_location(small30, file$1, 446, 48, 28610);
+    			attr_dev(small31, "class", "text-price svelte-d9yz2r");
+    			add_location(small31, file$1, 447, 48, 28705);
     			attr_dev(div100, "class", "flex-fill pl-3");
-    			add_location(div100, file$1, 443, 44, 28432);
+    			add_location(div100, file$1, 444, 44, 28463);
     			attr_dev(div101, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div101, file$1, 439, 40, 28037);
+    			add_location(div101, file$1, 440, 40, 28068);
     			attr_dev(a34, "class", "text-decoration-none");
-    			add_location(a34, file$1, 438, 36, 27963);
-    			attr_dev(div102, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div102, file$1, 436, 32, 27757);
+    			add_location(a34, file$1, 439, 36, 27994);
+    			attr_dev(div102, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div102, file$1, 437, 32, 27788);
     			attr_dev(div103, "class", "row px-xl-5 pb-3");
     			set_style(div103, "overflow", "auto");
     			set_style(div103, "height", "250px");
-    			add_location(div103, file$1, 373, 28, 22729);
-    			add_location(form1, file$1, 372, 24, 22693);
+    			add_location(div103, file$1, 374, 28, 22760);
+    			add_location(form1, file$1, 373, 24, 22724);
     			attr_dev(div104, "class", "modal-body");
-    			add_location(div104, file$1, 371, 20, 22643);
-    			add_location(strong0, file$1, 458, 95, 29302);
-    			attr_dev(span12, "class", "span-secundary svelte-ov6l8o");
+    			add_location(div104, file$1, 372, 20, 22674);
+    			add_location(strong0, file$1, 459, 95, 29333);
+    			attr_dev(span12, "class", "span-secundary svelte-d9yz2r");
     			set_style(span12, "padding", "0");
     			set_style(span12, "margin", "0");
-    			add_location(span12, file$1, 458, 36, 29243);
-    			add_location(td0, file$1, 457, 32, 29201);
-    			attr_dev(span13, "class", "span-secundary svelte-ov6l8o");
+    			add_location(span12, file$1, 459, 36, 29274);
+    			add_location(td0, file$1, 458, 32, 29232);
+    			attr_dev(span13, "class", "span-secundary svelte-d9yz2r");
     			set_style(span13, "padding", "0");
     			set_style(span13, "margin", "0");
-    			add_location(span13, file$1, 461, 36, 29451);
-    			add_location(td1, file$1, 460, 32, 29409);
+    			add_location(span13, file$1, 462, 36, 29482);
+    			add_location(td1, file$1, 461, 32, 29440);
     			set_style(tr0, "padding", "0");
     			set_style(tr0, "margin", "0");
-    			add_location(tr0, file$1, 456, 28, 29133);
-    			add_location(strong1, file$1, 467, 66, 29772);
-    			attr_dev(span14, "class", "span-secundary svelte-ov6l8o");
-    			add_location(span14, file$1, 467, 36, 29742);
-    			add_location(td2, file$1, 466, 32, 29700);
-    			attr_dev(span15, "class", "span-secundary svelte-ov6l8o");
-    			add_location(span15, file$1, 470, 36, 29920);
-    			add_location(td3, file$1, 469, 32, 29878);
-    			add_location(tr1, file$1, 465, 28, 29662);
-    			add_location(strong2, file$1, 475, 63, 30181);
-    			attr_dev(span16, "class", "span-primary svelte-ov6l8o");
-    			add_location(span16, file$1, 475, 36, 30154);
-    			add_location(td4, file$1, 474, 32, 30112);
-    			add_location(strong3, file$1, 478, 63, 30353);
-    			attr_dev(span17, "class", "span-primary svelte-ov6l8o");
-    			add_location(span17, file$1, 478, 36, 30326);
-    			add_location(td5, file$1, 477, 32, 30284);
-    			add_location(tr2, file$1, 473, 28, 30074);
+    			add_location(tr0, file$1, 457, 28, 29164);
+    			add_location(strong1, file$1, 468, 66, 29803);
+    			attr_dev(span14, "class", "span-secundary svelte-d9yz2r");
+    			add_location(span14, file$1, 468, 36, 29773);
+    			add_location(td2, file$1, 467, 32, 29731);
+    			attr_dev(span15, "class", "span-secundary svelte-d9yz2r");
+    			add_location(span15, file$1, 471, 36, 29951);
+    			add_location(td3, file$1, 470, 32, 29909);
+    			add_location(tr1, file$1, 466, 28, 29693);
+    			add_location(strong2, file$1, 476, 63, 30212);
+    			attr_dev(span16, "class", "span-primary svelte-d9yz2r");
+    			add_location(span16, file$1, 476, 36, 30185);
+    			add_location(td4, file$1, 475, 32, 30143);
+    			add_location(strong3, file$1, 479, 63, 30384);
+    			attr_dev(span17, "class", "span-primary svelte-d9yz2r");
+    			add_location(span17, file$1, 479, 36, 30357);
+    			add_location(td5, file$1, 478, 32, 30315);
+    			add_location(tr2, file$1, 474, 28, 30105);
     			set_style(tbody0, "line-height", "normal");
-    			add_location(tbody0, file$1, 455, 24, 29069);
+    			add_location(tbody0, file$1, 456, 24, 29100);
     			attr_dev(button2, "type", "button");
-    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-ov6l8o");
-    			add_location(button2, file$1, 482, 24, 30562);
+    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-d9yz2r");
+    			add_location(button2, file$1, 483, 24, 30593);
     			attr_dev(div105, "class", "modal-footer");
-    			add_location(div105, file$1, 454, 20, 29017);
+    			add_location(div105, file$1, 455, 20, 29048);
     			attr_dev(div106, "class", "modal-content");
-    			add_location(div106, file$1, 364, 16, 22181);
+    			add_location(div106, file$1, 365, 16, 22212);
     			attr_dev(div107, "class", "modal-dialog modal-xl");
-    			add_location(div107, file$1, 363, 12, 22128);
+    			add_location(div107, file$1, 364, 12, 22159);
     			attr_dev(div108, "class", "modal fade bd-example-modal-sm");
     			attr_dev(div108, "tabindex", "-1");
     			attr_dev(div108, "role", "dialog");
     			attr_dev(div108, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div108, "aria-hidden", "true");
-    			add_location(div108, file$1, 362, 8, 21987);
+    			add_location(div108, file$1, 363, 8, 22018);
     			attr_dev(h52, "class", "modal-title");
     			attr_dev(h52, "id", "exampleModalLabel");
-    			add_location(h52, file$1, 492, 24, 31022);
+    			add_location(h52, file$1, 492, 24, 31051);
     			attr_dev(span18, "aria-hidden", "true");
-    			add_location(span18, file$1, 494, 24, 31219);
+    			add_location(span18, file$1, 494, 24, 31248);
     			attr_dev(button3, "type", "button");
     			attr_dev(button3, "class", "close");
     			attr_dev(button3, "data-dismiss", "modal");
     			attr_dev(button3, "aria-label", "Close");
-    			add_location(button3, file$1, 493, 24, 31117);
+    			add_location(button3, file$1, 493, 24, 31146);
     			attr_dev(div109, "class", "modal-header");
-    			add_location(div109, file$1, 491, 20, 30970);
+    			add_location(div109, file$1, 491, 20, 30999);
     			attr_dev(img22, "class", "img-fluid");
     			if (!src_url_equal(img22.src, img22_src_value = "img/cat-3.jpg")) attr_dev(img22, "src", img22_src_value);
     			attr_dev(img22, "alt", "");
     			set_style(img22, "height", "70px");
     			set_style(img22, "width", "100%");
-    			add_location(img22, file$1, 505, 48, 32043);
+    			add_location(img22, file$1, 505, 48, 32072);
     			attr_dev(div110, "class", "overflow-hidden");
     			set_style(div110, "width", "100px");
     			set_style(div110, "height", "70px");
-    			add_location(div110, file$1, 504, 44, 31928);
-    			add_location(h617, file$1, 508, 48, 32304);
+    			add_location(div110, file$1, 504, 44, 31957);
+    			add_location(h617, file$1, 508, 48, 32333);
     			attr_dev(small32, "class", "text-body");
-    			add_location(small32, file$1, 509, 48, 32385);
-    			attr_dev(small33, "class", "text-price svelte-ov6l8o");
-    			add_location(small33, file$1, 510, 48, 32479);
+    			add_location(small32, file$1, 509, 48, 32414);
+    			attr_dev(small33, "class", "text-price svelte-d9yz2r");
+    			add_location(small33, file$1, 510, 48, 32508);
     			attr_dev(div111, "class", "flex-fill pl-3");
-    			add_location(div111, file$1, 507, 44, 32226);
+    			add_location(div111, file$1, 507, 44, 32255);
     			attr_dev(div112, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div112, file$1, 503, 40, 31829);
+    			add_location(div112, file$1, 503, 40, 31858);
     			attr_dev(a35, "href", "#");
     			attr_dev(a35, "class", "text-decoration-none");
-    			add_location(a35, file$1, 502, 36, 31745);
-    			attr_dev(div113, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div113, file$1, 501, 32, 31622);
+    			add_location(a35, file$1, 502, 36, 31774);
+    			attr_dev(div113, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div113, file$1, 501, 32, 31651);
     			attr_dev(img23, "class", "img-fluid");
     			if (!src_url_equal(img23.src, img23_src_value = "img/cat-1.jpg")) attr_dev(img23, "src", img23_src_value);
     			attr_dev(img23, "alt", "");
     			set_style(img23, "height", "70px");
-    			add_location(img23, file$1, 520, 48, 33260);
+    			add_location(img23, file$1, 520, 48, 33289);
     			attr_dev(div114, "class", "overflow-hidden");
     			set_style(div114, "width", "100px");
     			set_style(div114, "height", "70px");
-    			add_location(div114, file$1, 519, 44, 33145);
-    			add_location(h618, file$1, 523, 48, 33508);
+    			add_location(div114, file$1, 519, 44, 33174);
+    			add_location(h618, file$1, 523, 48, 33537);
     			attr_dev(small34, "class", "text-body");
-    			add_location(small34, file$1, 524, 48, 33587);
-    			attr_dev(small35, "class", "text-price svelte-ov6l8o");
-    			add_location(small35, file$1, 525, 48, 33682);
+    			add_location(small34, file$1, 524, 48, 33616);
+    			attr_dev(small35, "class", "text-price svelte-d9yz2r");
+    			add_location(small35, file$1, 525, 48, 33711);
     			attr_dev(div115, "class", "flex-fill pl-3");
-    			add_location(div115, file$1, 522, 44, 33430);
+    			add_location(div115, file$1, 522, 44, 33459);
     			attr_dev(div116, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div116, file$1, 518, 40, 33037);
+    			add_location(div116, file$1, 518, 40, 33066);
     			attr_dev(a36, "href", "#");
     			attr_dev(a36, "class", "text-decoration-none");
-    			add_location(a36, file$1, 517, 36, 32953);
-    			attr_dev(div117, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div117, file$1, 516, 32, 32830);
+    			add_location(a36, file$1, 517, 36, 32982);
+    			attr_dev(div117, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div117, file$1, 516, 32, 32859);
     			attr_dev(img24, "class", "img-fluid");
     			if (!src_url_equal(img24.src, img24_src_value = "img/cat-4.jpg")) attr_dev(img24, "src", img24_src_value);
     			attr_dev(img24, "alt", "");
     			set_style(img24, "height", "70px");
-    			add_location(img24, file$1, 535, 48, 34463);
+    			add_location(img24, file$1, 535, 48, 34492);
     			attr_dev(div118, "class", "overflow-hidden");
     			set_style(div118, "width", "100px");
     			set_style(div118, "height", "70px");
-    			add_location(div118, file$1, 534, 44, 34348);
-    			add_location(h619, file$1, 538, 48, 34711);
+    			add_location(div118, file$1, 534, 44, 34377);
+    			add_location(h619, file$1, 538, 48, 34740);
     			attr_dev(small36, "class", "text-body");
-    			add_location(small36, file$1, 539, 48, 34784);
-    			attr_dev(small37, "class", "text-price svelte-ov6l8o");
-    			add_location(small37, file$1, 540, 48, 34879);
+    			add_location(small36, file$1, 539, 48, 34813);
+    			attr_dev(small37, "class", "text-price svelte-d9yz2r");
+    			add_location(small37, file$1, 540, 48, 34908);
     			attr_dev(div119, "class", "flex-fill pl-3");
-    			add_location(div119, file$1, 537, 44, 34633);
+    			add_location(div119, file$1, 537, 44, 34662);
     			attr_dev(div120, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div120, file$1, 533, 40, 34240);
+    			add_location(div120, file$1, 533, 40, 34269);
     			attr_dev(a37, "href", "#");
     			attr_dev(a37, "class", "text-decoration-none");
-    			add_location(a37, file$1, 532, 36, 34156);
-    			attr_dev(div121, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-ov6l8o");
-    			add_location(div121, file$1, 531, 32, 34033);
+    			add_location(a37, file$1, 532, 36, 34185);
+    			attr_dev(div121, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div121, file$1, 531, 32, 34062);
     			attr_dev(div122, "class", "row px-xl-5 pb-3");
     			set_style(div122, "overflow", "auto");
     			set_style(div122, "height", "250px");
-    			add_location(div122, file$1, 499, 28, 31429);
-    			add_location(form2, file$1, 498, 24, 31393);
+    			add_location(div122, file$1, 499, 28, 31458);
+    			add_location(form2, file$1, 498, 24, 31422);
     			attr_dev(div123, "class", "modal-body");
-    			add_location(div123, file$1, 497, 20, 31343);
-    			add_location(strong4, file$1, 555, 93, 35634);
-    			attr_dev(span19, "class", "span-primary svelte-ov6l8o");
+    			add_location(div123, file$1, 497, 20, 31372);
+    			add_location(strong4, file$1, 555, 93, 35663);
+    			attr_dev(span19, "class", "span-primary svelte-d9yz2r");
     			set_style(span19, "padding", "0");
     			set_style(span19, "margin", "0");
-    			add_location(span19, file$1, 555, 36, 35577);
-    			add_location(td6, file$1, 554, 32, 35535);
-    			attr_dev(span20, "class", "span-primary svelte-ov6l8o");
+    			add_location(span19, file$1, 555, 36, 35606);
+    			add_location(td6, file$1, 554, 32, 35564);
+    			attr_dev(span20, "class", "span-primary svelte-d9yz2r");
     			set_style(span20, "padding", "0");
     			set_style(span20, "margin", "0");
-    			add_location(span20, file$1, 558, 36, 35778);
-    			add_location(td7, file$1, 557, 32, 35736);
+    			add_location(span20, file$1, 558, 36, 35807);
+    			add_location(td7, file$1, 557, 32, 35765);
     			set_style(tr3, "padding", "0");
     			set_style(tr3, "margin", "0");
-    			add_location(tr3, file$1, 553, 28, 35467);
-    			add_location(strong5, file$1, 565, 63, 36102);
-    			attr_dev(span21, "class", "span-primary svelte-ov6l8o");
-    			add_location(span21, file$1, 565, 36, 36075);
-    			add_location(td8, file$1, 564, 32, 36033);
-    			add_location(strong6, file$1, 568, 63, 36274);
-    			attr_dev(span22, "class", "span-primary svelte-ov6l8o");
-    			add_location(span22, file$1, 568, 36, 36247);
-    			add_location(td9, file$1, 567, 32, 36205);
-    			add_location(tr4, file$1, 563, 28, 35995);
+    			add_location(tr3, file$1, 553, 28, 35496);
+    			add_location(strong5, file$1, 565, 63, 36131);
+    			attr_dev(span21, "class", "span-primary svelte-d9yz2r");
+    			add_location(span21, file$1, 565, 36, 36104);
+    			add_location(td8, file$1, 564, 32, 36062);
+    			add_location(strong6, file$1, 568, 63, 36303);
+    			attr_dev(span22, "class", "span-primary svelte-d9yz2r");
+    			add_location(span22, file$1, 568, 36, 36276);
+    			add_location(td9, file$1, 567, 32, 36234);
+    			add_location(tr4, file$1, 563, 28, 36024);
     			set_style(tbody1, "line-height", "normal");
-    			add_location(tbody1, file$1, 552, 24, 35403);
+    			add_location(tbody1, file$1, 552, 24, 35432);
     			attr_dev(button4, "type", "button");
-    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-ov6l8o");
-    			add_location(button4, file$1, 572, 24, 36483);
+    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-d9yz2r");
+    			add_location(button4, file$1, 572, 24, 36512);
     			attr_dev(div124, "class", "modal-footer");
-    			add_location(div124, file$1, 551, 20, 35351);
+    			add_location(div124, file$1, 551, 20, 35380);
     			attr_dev(div125, "class", "modal-content");
-    			add_location(div125, file$1, 490, 16, 30921);
+    			add_location(div125, file$1, 490, 16, 30950);
     			attr_dev(div126, "class", "modal-dialog modal-xl");
-    			add_location(div126, file$1, 489, 12, 30868);
+    			add_location(div126, file$1, 489, 12, 30897);
     			attr_dev(div127, "class", "modal fade bd-model");
     			attr_dev(div127, "tabindex", "-1");
     			attr_dev(div127, "role", "dialog");
     			attr_dev(div127, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div127, "aria-hidden", "true");
-    			add_location(div127, file$1, 488, 8, 30738);
-    			attr_dev(body, "class", "svelte-ov6l8o");
-    			add_location(body, file$1, 44, 4, 1116);
-    			add_location(main, file$1, 42, 0, 1102);
+    			add_location(div127, file$1, 488, 8, 30767);
+    			attr_dev(body, "class", "svelte-d9yz2r");
+    			add_location(body, file$1, 45, 4, 1147);
+    			add_location(main, file$1, 43, 0, 1133);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -2931,44 +3057,46 @@ var app = (function () {
     			if (if_block0) if_block0.m(body, null);
     			append_dev(body, t239);
     			if (if_block1) if_block1.m(body, null);
+    			append_dev(body, t240);
+    			if (if_block2) if_block2.m(body, null);
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(div35, "click", /*click_handler*/ ctx[3], false, false, false, false),
-    					listen_dev(div39, "click", /*click_handler_1*/ ctx[4], false, false, false, false),
-    					listen_dev(div43, "click", /*click_handler_2*/ ctx[5], false, false, false, false),
-    					listen_dev(div47, "click", /*click_handler_3*/ ctx[6], false, false, false, false),
-    					listen_dev(div51, "click", /*click_handler_4*/ ctx[7], false, false, false, false),
-    					listen_dev(div55, "click", /*click_handler_5*/ ctx[8], false, false, false, false),
-    					listen_dev(div59, "click", /*click_handler_6*/ ctx[9], false, false, false, false),
-    					listen_dev(div63, "click", /*click_handler_7*/ ctx[10], false, false, false, false),
-    					listen_dev(div69, "click", /*click_handler_8*/ ctx[11], false, false, false, false),
-    					listen_dev(div73, "click", /*click_handler_9*/ ctx[12], false, false, false, false),
-    					listen_dev(div77, "click", /*click_handler_10*/ ctx[13], false, false, false, false),
-    					listen_dev(a29, "click", /*scannerActive*/ ctx[2], false, false, false, false),
-    					listen_dev(div86, "click", /*click_handler_11*/ ctx[14], false, false, false, false),
-    					listen_dev(div90, "click", /*click_handler_12*/ ctx[15], false, false, false, false),
-    					listen_dev(div94, "click", /*click_handler_13*/ ctx[16], false, false, false, false),
-    					listen_dev(div98, "click", /*click_handler_14*/ ctx[17], false, false, false, false),
-    					listen_dev(div102, "click", /*click_handler_15*/ ctx[18], false, false, false, false),
-    					listen_dev(div113, "click", /*click_handler_16*/ ctx[19], false, false, false, false),
-    					listen_dev(div117, "click", /*click_handler_17*/ ctx[20], false, false, false, false),
-    					listen_dev(div121, "click", /*click_handler_18*/ ctx[21], false, false, false, false),
-    					listen_dev(button4, "click", /*click_handler_19*/ ctx[22], false, false, false, false)
+    					listen_dev(div35, "click", /*click_handler*/ ctx[4], false, false, false, false),
+    					listen_dev(div39, "click", /*click_handler_1*/ ctx[5], false, false, false, false),
+    					listen_dev(div43, "click", /*click_handler_2*/ ctx[6], false, false, false, false),
+    					listen_dev(div47, "click", /*click_handler_3*/ ctx[7], false, false, false, false),
+    					listen_dev(div51, "click", /*click_handler_4*/ ctx[8], false, false, false, false),
+    					listen_dev(div55, "click", /*click_handler_5*/ ctx[9], false, false, false, false),
+    					listen_dev(div59, "click", /*click_handler_6*/ ctx[10], false, false, false, false),
+    					listen_dev(div63, "click", /*click_handler_7*/ ctx[11], false, false, false, false),
+    					listen_dev(div69, "click", /*click_handler_8*/ ctx[12], false, false, false, false),
+    					listen_dev(div73, "click", /*click_handler_9*/ ctx[13], false, false, false, false),
+    					listen_dev(div77, "click", /*click_handler_10*/ ctx[14], false, false, false, false),
+    					listen_dev(a29, "click", /*scannerActive*/ ctx[3], false, false, false, false),
+    					listen_dev(div86, "click", /*click_handler_11*/ ctx[15], false, false, false, false),
+    					listen_dev(div90, "click", /*click_handler_12*/ ctx[16], false, false, false, false),
+    					listen_dev(div94, "click", /*click_handler_13*/ ctx[17], false, false, false, false),
+    					listen_dev(div98, "click", /*click_handler_14*/ ctx[18], false, false, false, false),
+    					listen_dev(div102, "click", /*click_handler_15*/ ctx[19], false, false, false, false),
+    					listen_dev(div113, "click", /*click_handler_16*/ ctx[20], false, false, false, false),
+    					listen_dev(div117, "click", /*click_handler_17*/ ctx[21], false, false, false, false),
+    					listen_dev(div121, "click", /*click_handler_18*/ ctx[22], false, false, false, false),
+    					listen_dev(button4, "click", /*click_handler_19*/ ctx[23], false, false, false, false)
     				];
 
     				mounted = true;
     			}
     		},
-    		p: function update(ctx, [dirty]) {
-    			if (dirty & /*car*/ 2) set_data_dev(t47, /*car*/ ctx[1]);
-    			if (dirty & /*car*/ 2) set_data_dev(t148, /*car*/ ctx[1]);
+    		p: function update(ctx, dirty) {
+    			if (dirty[0] & /*car*/ 2) set_data_dev(t47, /*car*/ ctx[1]);
+    			if (dirty[0] & /*car*/ 2) set_data_dev(t148, /*car*/ ctx[1]);
 
     			if (/*car*/ ctx[1] > 0) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_1(ctx);
+    					if_block0 = create_if_block_2(ctx);
     					if_block0.c();
     					if_block0.m(body, t239);
     				}
@@ -2981,13 +3109,26 @@ var app = (function () {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
-    					if_block1 = create_if_block(ctx);
+    					if_block1 = create_if_block_1(ctx);
     					if_block1.c();
-    					if_block1.m(body, null);
+    					if_block1.m(body, t240);
     				}
     			} else if (if_block1) {
     				if_block1.d(1);
     				if_block1 = null;
+    			}
+
+    			if (/*gameOpencasine*/ ctx[2] == true) {
+    				if (if_block2) {
+    					if_block2.p(ctx, dirty);
+    				} else {
+    					if_block2 = create_if_block(ctx);
+    					if_block2.c();
+    					if_block2.m(body, null);
+    				}
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
     			}
     		},
     		i: noop,
@@ -2996,6 +3137,7 @@ var app = (function () {
     			if (detaching) detach_dev(main);
     			if (if_block0) if_block0.d();
     			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -3018,6 +3160,7 @@ var app = (function () {
     	let gameOpen = false;
     	let car = 0;
     	let gamescanner = false;
+    	let gameOpencasine = false;
 
     	//Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     	let scanner = null;
@@ -3146,13 +3289,22 @@ var app = (function () {
     	};
 
     	const click_handler_21 = () => {
+    		$$invalidate(2, gameOpencasine = true);
+    	};
+
+    	const click_handler_22 = () => {
     		$$invalidate(0, gameOpen = false);
+    	};
+
+    	const click_handler_23 = () => {
+    		$$invalidate(2, gameOpencasine = false);
     	};
 
     	$$self.$capture_state = () => ({
     		gameOpen,
     		car,
     		gamescanner,
+    		gameOpencasine,
     		scanner,
     		scannerActive,
     		initBarcodeScanner,
@@ -3163,6 +3315,7 @@ var app = (function () {
     		if ('gameOpen' in $$props) $$invalidate(0, gameOpen = $$props.gameOpen);
     		if ('car' in $$props) $$invalidate(1, car = $$props.car);
     		if ('gamescanner' in $$props) gamescanner = $$props.gamescanner;
+    		if ('gameOpencasine' in $$props) $$invalidate(2, gameOpencasine = $$props.gameOpencasine);
     		if ('scanner' in $$props) scanner = $$props.scanner;
     	};
 
@@ -3173,6 +3326,7 @@ var app = (function () {
     	return [
     		gameOpen,
     		car,
+    		gameOpencasine,
     		scannerActive,
     		click_handler,
     		click_handler_1,
@@ -3195,14 +3349,16 @@ var app = (function () {
     		click_handler_18,
     		click_handler_19,
     		click_handler_20,
-    		click_handler_21
+    		click_handler_21,
+    		click_handler_22,
+    		click_handler_23
     	];
     }
 
     class Home extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {}, null, [-1, -1]);
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
