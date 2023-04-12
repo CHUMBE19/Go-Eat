@@ -362,7 +362,7 @@
                     </div>
                     <div class="modal-body">
               
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product?'height: 250px;':''}">
                                 {#each  product as value , key}
                                     <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product">
                                         <a  href="#"class="text-decoration-none">
