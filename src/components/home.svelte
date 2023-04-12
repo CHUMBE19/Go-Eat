@@ -102,7 +102,7 @@
 
         toast("GAME: Para ganar premios y ofertas. compite y acomula puntos jugando con nosotros", {
             icon: '👏',
-            style: ' background: #333; color: #fff;background-image: url("img/anuncio.avif");width:100%;height:100px; background-repeat: no-repeat, repeat; background-position: center;'
+            style: ' background: #333; color: #fff;background-image: url("img/anuncio.avif");width:100%;height:70px; background-repeat: no-repeat, repeat; background-position: center;'
         });
 
         gameActive=true;

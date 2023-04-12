@@ -17,7 +17,7 @@ const Configuration = ( ()=>{
 
     const getEnv= ()=>{
         const host = window.location.toString();
-        const env = /simba/.test(host)?"dev" : /localhost:8080/.test(host)?"local": "prod"
+        const env = /simba/.test(host)?"dev" : /localhost:8080/.test(host)?"local": "local"
         return env;
     }
     const getConfiguration = ()=>{
