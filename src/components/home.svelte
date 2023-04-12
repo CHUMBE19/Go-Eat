@@ -36,21 +36,20 @@
         scanner.onFrameRead = results => {
         console.log(results);
         for (let result of results) {
-
-            resultscanner(result);
-           
+            resultscanner(result);   
         }
     };
         scanner.onUnduplicatedRead = (txt, result) => {};
         await scanner.show();
     }
-
     const resultscanner=(result)=>{
-        console.log("result",result);
+        console.log("result",result.barcodeText);
+        let params=result.barcodeText;
+        console.log(params);
+        var data= await server.getproductos(products.filters);
         gamescanner=true;
         window.$(".bd-model").modal("show");
     };
-    
 
     function showQRCode() {
         let qrCodeElement = document.getElementById('qrcode');
