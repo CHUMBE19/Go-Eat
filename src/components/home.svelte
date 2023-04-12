@@ -8,7 +8,39 @@
     let car=0;
     let gameActive=false;
     let gameOpencasine=false;
-    let products={list:[],pages:[],filters:{}};
+    let products={list:[{
+        id:12,
+        code:"00012",
+        barcode:"CO-0001",
+        description:1,
+        photo:"img/cat-5.jpg",
+        nameconcat:"Comida",
+        amount:25,
+        name:"arroz con chancho con juane",
+        totalmoney:52,
+        create:"2023-04-07T19:40:54.738+00:00",
+        update:null
+    },
+    {
+        id:11,
+        code:"00011",
+        barcode:"CO-0001",
+        description:1,
+        photo:"img/cat-9.webp",
+        nameconcat:"Comida",
+        amount:25,
+        name:"Arroz Chaufa",
+        totalmoney:22,
+        create:"2023-04-07T19:40:54.738+00:00",
+        update:null
+    }
+    ],pages:[],filters:{}};
+
+
+    let productScanner={list:[],pages:[],filters:{}};
+
+
+
     let totalMoney=0;
     
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
@@ -45,8 +77,14 @@
     const resultscanner=async (result)=>{
         console.log("result",result.barcodeText);
         let params=result.barcodeText;
-        console.log(params);
+        let vulea='{"organization":"Sazon del Pato","tables":1,"code":"CO-0001"}';
+        let parsedBody = JSON.parse(vulea);
+        products.filters={...parsedBody};
         var data= await server.getproductos(products.filters);
+        productScanner.xpagina=data.xpagina;
+        productScanner.pagina=data.pagina;
+        productScanner.total=data.total;
+        productScanner.list=data.list;
         gamescanner=true;
         window.$(".bd-model").modal("show");
     };
@@ -411,53 +449,22 @@
               
                             <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
                                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid"  src="img/cat-3.jpg" alt="" style="height: 70px;width: 100%;">
+                                 {#each  productScanner.list as value , key}
+                                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
+                                        <a  href="#"class="text-decoration-none">
+                                            <div class="cat-item d-flex align-items-center mb-4">
+                                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
+                                                    <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
+                                                </div>
+                                                <div class="flex-fill pl-3">
+                                                    <h6>{value.name}</h6>
+                                                    <small class="text-body">100 Products</small>
+                                                    <small class="text-price">S/. {value.totalmoney}.00</small>
+                                                </div>
                                             </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Arroz Chaufa Amazonico</h6>
-                                                <small class="text-body">50 Unidades</small>
-                                                <small class="text-price">S/. 10.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Fideos a la Italiana</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 13.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-4.jpg" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Arroz con pato</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 15.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-
-                                
+                                        </a>
+                                    </div>
+                                {/each}
                             </div>
               
                     </div>
