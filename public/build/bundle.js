@@ -2022,7 +2022,7 @@ var app = (function () {
     			attr_dev(div39, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div39, file$1, 201, 20, 11734);
     			attr_dev(img6, "class", "img-fluid");
-    			if (!src_url_equal(img6.src, img6_src_value = "img/cat-3.jpg")) attr_dev(img6, "src", img6_src_value);
+    			if (!src_url_equal(img6.src, img6_src_value = "img/cat-1.jpg")) attr_dev(img6, "src", img6_src_value);
     			attr_dev(img6, "alt", "");
     			set_style(img6, "height", "119px");
     			set_style(img6, "width", "120px");

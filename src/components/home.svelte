@@ -217,7 +217,7 @@
                         <a class="text-decoration-none">
                             <div class="cat-item img-zoom d-flex align-items-center mb-4">
                                 <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-3.jpg" alt="" style="height: 119px;width: 120px">
+                                    <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 119px;width: 120px">
                                 </div>
                                 <div class="flex-fill pl-3">
                                     <h6>Arroz Chaufa Amazonico</h6>
