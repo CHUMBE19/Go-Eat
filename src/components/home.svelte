@@ -3,6 +3,7 @@
     let gameOpen=false;
     let car=0;
     let gamescanner=false;
+    let gameOpencasine=false;
 
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
@@ -577,7 +578,16 @@
         </div>
 
         {#if car>0}
-            <img class="btn btn-game back-to-game" on:click={()=>{gameOpen=true;}} src="img/game.png" alt="" width="80" height="70">
+            <div class="container">
+                <input type="checkbox" id="btn-mas">
+                <div class="redes">
+                    <a href="#">  <img class="img-game" on:click={()=>{gameOpen=true;}} src="img/casino.jpg" width="45px" height="45px" alt=""></a>
+                    <a href="#">  <img class="img-game" on:click={()=>{gameOpencasine=true;}} src="img/ruleta.jpg" width="45px" height="45px" alt=""></a>
+                </div>
+                <div class="btn-mas">
+                    <label for="btn-mas" class="fa fa-plus"></label>
+                </div>
+            </div>
         {/if}
         
 
@@ -586,9 +596,65 @@
             <iframe  class="back-to-iframe" width="100%" height="100%" src="https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default" frameborder="0"></iframe>
         {/if}
 
+        {#if gameOpencasine==true}
+            <i class="fa fa-times back-to-times" on:click={()=>{gameOpencasine=false;}} style="color:yellow;float: right; margin: 15px;margin-right: 18px;cursor: pointer;"></i>
+            <iframe  class="back-to-iframe" width="100%" height="100%" src="https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6" frameborder="0"></iframe>
+        {/if}
+
 </main>
 
 <style>
+
+    .img-game{
+        border-radius: 50%;
+    }
+    #btn-mas{
+        display: none;
+    }
+    .container{
+        position: fixed;
+        display: block;
+        bottom: 10px;
+        z-index: 11;
+        animation: action 1s infinite alternate;
+    }
+    .redes a, .btn-mas label{
+        display: block;
+        text-decoration: none;
+        background: #cc2b2b;
+        color: #fff;
+        width: 45px;
+        height: 45px;
+        line-height: 45px;
+        text-align: center;
+        border-radius: 50%;
+        box-shadow: 0px 1px 10px rgba(0,0,0,0.4);
+        transition: all 500ms ease;
+    }
+    .redes a:hover{
+        background: #fff;
+        color: #cc2b2b;
+    }
+    .redes a{
+        margin-bottom: -15px;
+        opacity: 0;
+        visibility: hidden;
+    }
+    #btn-mas:checked~ .redes a{
+        margin-bottom: 10px;
+        opacity: 1;
+        visibility: visible;
+    }
+    .btn-mas label{
+        cursor: pointer;
+        background: #f44141;
+        font-size: 23px;
+    }
+    #btn-mas:checked ~ .btn-mas label{
+        transform: rotate(135deg);
+        font-size: 25px;
+    }
+
        #videoview {
         position: relative;
         width: 100%;
