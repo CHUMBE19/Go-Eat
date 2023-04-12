@@ -23,6 +23,7 @@
   "dependencies": {
     "instascan": "^1.0.0",
     "jsqr": "^1.4.0",
+    "qrcode-generator": "^1.4.4",
     "qrcode-reader": "^1.0.4",
     "sirv-cli": "^2.0.0",
     "svelte-carousel": "^1.0.25",

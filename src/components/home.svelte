@@ -1,5 +1,6 @@
-
 <script>
+    import { onMount } from 'svelte';
+    import QRCode from 'qrcode-generator';
     let gameOpen=false;
     let car=0;
     let gamescanner=false;
@@ -7,6 +8,11 @@
 
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
+
+    let inforQR={organization:"Sazon del Pato",tables:1,code:"CO-0001"};
+    let qr = QRCode(0, 'L');
+    qr.addData(JSON.stringify(inforQR));
+    qr.make();
 
     const scannerActive=async()=>{
         try {
@@ -38,6 +44,12 @@
         window.$(".bd-model").modal("show");
     };
     
+
+    function showQRCode() {
+        let qrCodeElement = document.getElementById('qrcode');
+        qrCodeElement.innerHTML = qr.createImgTag(4);
+        }
+
         
 </script>
 
@@ -45,6 +57,7 @@
 <main>
 
     <body>
+        <div id="qrcode"></div>
         <!-- Topbar Start -->
         <div class="container-fluid">
             <div class="row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex">
