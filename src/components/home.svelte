@@ -486,7 +486,6 @@
                 </div>
             </div>
         </div>
-
         <div class="modal fade bd-model" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -583,6 +582,7 @@
                 <div class="redes">
                     <a href="#">  <img class="img-game" on:click={()=>{gameOpen=true;}} src="img/casino.jpg" width="45px" height="45px" alt=""></a>
                     <a href="#">  <img class="img-game" on:click={()=>{gameOpencasine=true;}} src="img/ruleta.jpg" width="45px" height="45px" alt=""></a>
+                    <a href="#">  <img class="img-game" on:click={()=>{gameOpencasine=true;}} src="img/ruleta.jpg" width="45px" height="45px" alt=""></a>
                 </div>
                 <div class="btn-mas">
                     <label for="btn-mas" class="fa fa-plus"></label>
@@ -611,13 +611,7 @@
     #btn-mas{
         display: none;
     }
-    .container{
-        position: fixed;
-        display: block;
-        bottom: 10px;
-        z-index: 11;
-        animation: action 1s infinite alternate;
-    }
+    
     .redes a, .btn-mas label{
         display: block;
         text-decoration: none;
@@ -630,6 +624,14 @@
         border-radius: 50%;
         box-shadow: 0px 1px 10px rgba(0,0,0,0.4);
         transition: all 500ms ease;
+    }
+
+    .container{
+        position: fixed;
+        display: block;
+        bottom: 10px;
+        z-index: 11;
+        animation: action 1s infinite alternate;
     }
     .redes a:hover{
         background: #fff;

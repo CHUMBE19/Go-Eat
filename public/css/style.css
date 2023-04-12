@@ -9693,15 +9693,6 @@ a.text-dark:hover, a.text-dark:focus {
   list-style-type: none;
 }
 
-.back-to-game {
-  position: fixed;
-  display: block;
-  right: 3px;
-  bottom: 10px;
-  z-index: 11;
-  animation: action 1s infinite alternate;
-}
-
 
 .back-to-iframe {
   position: fixed;

@@ -437,7 +437,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\home.svelte";
 
-    // (580:8) {#if car>0}
+    // (579:8) {#if car>0}
     function create_if_block_2(ctx) {
     	let div2;
     	let input;
@@ -451,6 +451,10 @@ var app = (function () {
     	let img1;
     	let img1_src_value;
     	let t2;
+    	let a2;
+    	let img2;
+    	let img2_src_value;
+    	let t3;
     	let div1;
     	let label;
     	let mounted;
@@ -468,39 +472,51 @@ var app = (function () {
     			a1 = element("a");
     			img1 = element("img");
     			t2 = space();
+    			a2 = element("a");
+    			img2 = element("img");
+    			t3 = space();
     			div1 = element("div");
     			label = element("label");
     			attr_dev(input, "type", "checkbox");
     			attr_dev(input, "id", "btn-mas");
-    			attr_dev(input, "class", "svelte-18mnml1");
-    			add_location(input, file$1, 581, 16, 36794);
-    			attr_dev(img0, "class", "img-game svelte-18mnml1");
+    			attr_dev(input, "class", "svelte-d9yz2r");
+    			add_location(input, file$1, 580, 16, 36792);
+    			attr_dev(img0, "class", "img-game svelte-d9yz2r");
     			if (!src_url_equal(img0.src, img0_src_value = "img/casino.jpg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "45px");
     			attr_dev(img0, "height", "45px");
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$1, 583, 34, 36903);
+    			add_location(img0, file$1, 582, 34, 36901);
     			attr_dev(a0, "href", "#");
-    			attr_dev(a0, "class", "svelte-18mnml1");
-    			add_location(a0, file$1, 583, 20, 36889);
-    			attr_dev(img1, "class", "img-game svelte-18mnml1");
+    			attr_dev(a0, "class", "svelte-d9yz2r");
+    			add_location(a0, file$1, 582, 20, 36887);
+    			attr_dev(img1, "class", "img-game svelte-d9yz2r");
     			if (!src_url_equal(img1.src, img1_src_value = "img/ruleta.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "width", "45px");
     			attr_dev(img1, "height", "45px");
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$1, 584, 34, 37052);
+    			add_location(img1, file$1, 583, 34, 37050);
     			attr_dev(a1, "href", "#");
-    			attr_dev(a1, "class", "svelte-18mnml1");
-    			add_location(a1, file$1, 584, 20, 37038);
-    			attr_dev(div0, "class", "redes svelte-18mnml1");
-    			add_location(div0, file$1, 582, 16, 36848);
+    			attr_dev(a1, "class", "svelte-d9yz2r");
+    			add_location(a1, file$1, 583, 20, 37036);
+    			attr_dev(img2, "class", "img-game svelte-d9yz2r");
+    			if (!src_url_equal(img2.src, img2_src_value = "img/ruleta.jpg")) attr_dev(img2, "src", img2_src_value);
+    			attr_dev(img2, "width", "45px");
+    			attr_dev(img2, "height", "45px");
+    			attr_dev(img2, "alt", "");
+    			add_location(img2, file$1, 584, 34, 37205);
+    			attr_dev(a2, "href", "#");
+    			attr_dev(a2, "class", "svelte-d9yz2r");
+    			add_location(a2, file$1, 584, 20, 37191);
+    			attr_dev(div0, "class", "redes svelte-d9yz2r");
+    			add_location(div0, file$1, 581, 16, 36846);
     			attr_dev(label, "for", "btn-mas");
-    			attr_dev(label, "class", "fa fa-plus svelte-18mnml1");
-    			add_location(label, file$1, 587, 20, 37256);
-    			attr_dev(div1, "class", "btn-mas svelte-18mnml1");
-    			add_location(div1, file$1, 586, 16, 37213);
-    			attr_dev(div2, "class", "container svelte-18mnml1");
-    			add_location(div2, file$1, 580, 12, 36753);
+    			attr_dev(label, "class", "fa fa-plus svelte-d9yz2r");
+    			add_location(label, file$1, 587, 20, 37409);
+    			attr_dev(div1, "class", "btn-mas svelte-d9yz2r");
+    			add_location(div1, file$1, 586, 16, 37366);
+    			attr_dev(div2, "class", "container svelte-d9yz2r");
+    			add_location(div2, file$1, 579, 12, 36751);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -512,14 +528,18 @@ var app = (function () {
     			append_dev(div0, t1);
     			append_dev(div0, a1);
     			append_dev(a1, img1);
-    			append_dev(div2, t2);
+    			append_dev(div0, t2);
+    			append_dev(div0, a2);
+    			append_dev(a2, img2);
+    			append_dev(div2, t3);
     			append_dev(div2, div1);
     			append_dev(div1, label);
 
     			if (!mounted) {
     				dispose = [
     					listen_dev(img0, "click", /*click_handler_20*/ ctx[24], false, false, false, false),
-    					listen_dev(img1, "click", /*click_handler_21*/ ctx[25], false, false, false, false)
+    					listen_dev(img1, "click", /*click_handler_21*/ ctx[25], false, false, false, false),
+    					listen_dev(img2, "click", /*click_handler_22*/ ctx[26], false, false, false, false)
     				];
 
     				mounted = true;
@@ -537,7 +557,7 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(580:8) {#if car>0}",
+    		source: "(579:8) {#if car>0}",
     		ctx
     	});
 
@@ -564,13 +584,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 594, 12, 37419);
+    			add_location(i, file$1, 594, 12, 37572);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 595, 12, 37591);
+    			add_location(iframe, file$1, 595, 12, 37744);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -578,7 +598,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_22*/ ctx[26], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_23*/ ctx[27], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -623,13 +643,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 599, 12, 38219);
+    			add_location(i, file$1, 599, 12, 38372);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 600, 12, 38397);
+    			add_location(iframe, file$1, 600, 12, 38550);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -637,7 +657,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_23*/ ctx[27], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_24*/ ctx[28], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -1987,7 +2007,7 @@ var app = (function () {
     			add_location(h61, file$1, 193, 36, 11346);
     			attr_dev(small0, "class", "text-body");
     			add_location(small0, file$1, 194, 36, 11413);
-    			attr_dev(small1, "class", "text-price svelte-18mnml1");
+    			attr_dev(small1, "class", "text-price svelte-d9yz2r");
     			add_location(small1, file$1, 195, 36, 11496);
     			attr_dev(div33, "class", "flex-fill pl-3");
     			add_location(div33, file$1, 192, 32, 11280);
@@ -1996,7 +2016,7 @@ var app = (function () {
     			attr_dev(a17, "href", "#");
     			attr_dev(a17, "class", "text-decoration-none");
     			add_location(a17, file$1, 187, 24, 10871);
-    			attr_dev(div35, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div35, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div35, file$1, 186, 20, 10761);
     			attr_dev(img5, "class", "img-fluid");
     			if (!src_url_equal(img5.src, img5_src_value = "img/cat-2.avif")) attr_dev(img5, "src", img5_src_value);
@@ -2010,7 +2030,7 @@ var app = (function () {
     			add_location(h62, file$1, 207, 36, 12292);
     			attr_dev(small2, "class", "text-body");
     			add_location(small2, file$1, 208, 36, 12347);
-    			attr_dev(small3, "class", "text-price svelte-18mnml1");
+    			attr_dev(small3, "class", "text-price svelte-d9yz2r");
     			add_location(small3, file$1, 209, 36, 12430);
     			attr_dev(div37, "class", "flex-fill pl-3");
     			add_location(div37, file$1, 206, 32, 12226);
@@ -2019,7 +2039,7 @@ var app = (function () {
     			attr_dev(a18, "href", "#");
     			attr_dev(a18, "class", "text-decoration-none");
     			add_location(a18, file$1, 201, 24, 11806);
-    			attr_dev(div39, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div39, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div39, file$1, 200, 20, 11695);
     			attr_dev(img6, "class", "img-fluid");
     			if (!src_url_equal(img6.src, img6_src_value = "img/cat-3.jpg")) attr_dev(img6, "src", img6_src_value);
@@ -2034,7 +2054,7 @@ var app = (function () {
     			add_location(h63, file$1, 221, 36, 13227);
     			attr_dev(small4, "class", "text-body");
     			add_location(small4, file$1, 222, 36, 13296);
-    			attr_dev(small5, "class", "text-price svelte-18mnml1");
+    			attr_dev(small5, "class", "text-price svelte-d9yz2r");
     			add_location(small5, file$1, 223, 36, 13379);
     			attr_dev(div41, "class", "flex-fill pl-3");
     			add_location(div41, file$1, 220, 32, 13161);
@@ -2042,7 +2062,7 @@ var app = (function () {
     			add_location(div42, file$1, 216, 28, 12802);
     			attr_dev(a19, "class", "text-decoration-none");
     			add_location(a19, file$1, 215, 24, 12740);
-    			attr_dev(div43, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div43, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div43, file$1, 214, 20, 12629);
     			attr_dev(img7, "class", "img-fluid");
     			if (!src_url_equal(img7.src, img7_src_value = "img/cat-4.jpg")) attr_dev(img7, "src", img7_src_value);
@@ -2056,7 +2076,7 @@ var app = (function () {
     			add_location(h64, file$1, 236, 36, 14242);
     			attr_dev(small6, "class", "text-body");
     			add_location(small6, file$1, 237, 36, 14303);
-    			attr_dev(small7, "class", "text-price svelte-18mnml1");
+    			attr_dev(small7, "class", "text-price svelte-d9yz2r");
     			add_location(small7, file$1, 238, 36, 14386);
     			attr_dev(div45, "class", "flex-fill pl-3");
     			add_location(div45, file$1, 235, 32, 14176);
@@ -2064,7 +2084,7 @@ var app = (function () {
     			add_location(div46, file$1, 231, 28, 13829);
     			attr_dev(a20, "class", "text-decoration-none");
     			add_location(a20, file$1, 230, 24, 13767);
-    			attr_dev(div47, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div47, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div47, file$1, 229, 20, 13656);
     			attr_dev(img8, "class", "img-fluid");
     			if (!src_url_equal(img8.src, img8_src_value = "img/cat-5.jpg")) attr_dev(img8, "src", img8_src_value);
@@ -2078,7 +2098,7 @@ var app = (function () {
     			add_location(h65, file$1, 250, 36, 15170);
     			attr_dev(small8, "class", "text-body");
     			add_location(small8, file$1, 251, 36, 15237);
-    			attr_dev(small9, "class", "text-price svelte-18mnml1");
+    			attr_dev(small9, "class", "text-price svelte-d9yz2r");
     			add_location(small9, file$1, 252, 36, 15320);
     			attr_dev(div49, "class", "flex-fill pl-3");
     			add_location(div49, file$1, 249, 32, 15104);
@@ -2086,7 +2106,7 @@ var app = (function () {
     			add_location(div50, file$1, 245, 28, 14757);
     			attr_dev(a21, "class", "text-decoration-none");
     			add_location(a21, file$1, 244, 24, 14695);
-    			attr_dev(div51, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div51, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div51, file$1, 243, 20, 14584);
     			attr_dev(img9, "class", "img-fluid");
     			if (!src_url_equal(img9.src, img9_src_value = "img/cat-6.jpg")) attr_dev(img9, "src", img9_src_value);
@@ -2100,7 +2120,7 @@ var app = (function () {
     			add_location(h66, file$1, 264, 36, 16106);
     			attr_dev(small10, "class", "text-body");
     			add_location(small10, file$1, 265, 36, 16167);
-    			attr_dev(small11, "class", "text-price svelte-18mnml1");
+    			attr_dev(small11, "class", "text-price svelte-d9yz2r");
     			add_location(small11, file$1, 266, 36, 16250);
     			attr_dev(div53, "class", "flex-fill pl-3");
     			add_location(div53, file$1, 263, 32, 16040);
@@ -2108,7 +2128,7 @@ var app = (function () {
     			add_location(div54, file$1, 259, 28, 15693);
     			attr_dev(a22, "class", "text-decoration-none");
     			add_location(a22, file$1, 258, 24, 15630);
-    			attr_dev(div55, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div55, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div55, file$1, 257, 20, 15519);
     			attr_dev(img10, "class", "img-fluid");
     			if (!src_url_equal(img10.src, img10_src_value = "img/cat-7.avif")) attr_dev(img10, "src", img10_src_value);
@@ -2122,7 +2142,7 @@ var app = (function () {
     			add_location(h67, file$1, 278, 36, 17036);
     			attr_dev(small12, "class", "text-body");
     			add_location(small12, file$1, 279, 36, 17099);
-    			attr_dev(small13, "class", "text-price svelte-18mnml1");
+    			attr_dev(small13, "class", "text-price svelte-d9yz2r");
     			add_location(small13, file$1, 280, 36, 17182);
     			attr_dev(div57, "class", "flex-fill pl-3");
     			add_location(div57, file$1, 277, 32, 16970);
@@ -2130,7 +2150,7 @@ var app = (function () {
     			add_location(div58, file$1, 273, 28, 16622);
     			attr_dev(a23, "class", "text-decoration-none");
     			add_location(a23, file$1, 272, 24, 16560);
-    			attr_dev(div59, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div59, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div59, file$1, 271, 20, 16449);
     			attr_dev(img11, "class", "img-fluid");
     			if (!src_url_equal(img11.src, img11_src_value = "img/cat-8.jpg")) attr_dev(img11, "src", img11_src_value);
@@ -2144,7 +2164,7 @@ var app = (function () {
     			add_location(h68, file$1, 292, 36, 17967);
     			attr_dev(small14, "class", "text-body");
     			add_location(small14, file$1, 293, 36, 18036);
-    			attr_dev(small15, "class", "text-price svelte-18mnml1");
+    			attr_dev(small15, "class", "text-price svelte-d9yz2r");
     			add_location(small15, file$1, 294, 36, 18119);
     			attr_dev(div61, "class", "flex-fill pl-3");
     			add_location(div61, file$1, 291, 32, 17901);
@@ -2152,7 +2172,7 @@ var app = (function () {
     			add_location(div62, file$1, 287, 28, 17554);
     			attr_dev(a24, "class", "text-decoration-none");
     			add_location(a24, file$1, 286, 24, 17492);
-    			attr_dev(div63, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div63, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div63, file$1, 285, 20, 17381);
     			attr_dev(div64, "class", "row px-xl-5 pb-3");
     			add_location(div64, file$1, 185, 16, 10709);
@@ -2174,7 +2194,7 @@ var app = (function () {
     			add_location(h69, file$1, 312, 36, 19191);
     			attr_dev(small16, "class", "text-body");
     			add_location(small16, file$1, 313, 36, 19247);
-    			attr_dev(small17, "class", "text-price svelte-18mnml1");
+    			attr_dev(small17, "class", "text-price svelte-d9yz2r");
     			add_location(small17, file$1, 314, 36, 19329);
     			attr_dev(div67, "class", "flex-fill pl-3");
     			add_location(div67, file$1, 311, 32, 19125);
@@ -2182,7 +2202,7 @@ var app = (function () {
     			add_location(div68, file$1, 307, 28, 18786);
     			attr_dev(a25, "class", "text-decoration-none");
     			add_location(a25, file$1, 306, 24, 18724);
-    			attr_dev(div69, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div69, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div69, file$1, 305, 20, 18613);
     			attr_dev(img13, "class", "img-fluid");
     			if (!src_url_equal(img13.src, img13_src_value = "img/cat-10.png")) attr_dev(img13, "src", img13_src_value);
@@ -2196,7 +2216,7 @@ var app = (function () {
     			add_location(h610, file$1, 326, 36, 20114);
     			attr_dev(small18, "class", "text-body");
     			add_location(small18, file$1, 327, 36, 20170);
-    			attr_dev(small19, "class", "text-price svelte-18mnml1");
+    			attr_dev(small19, "class", "text-price svelte-d9yz2r");
     			add_location(small19, file$1, 328, 36, 20253);
     			attr_dev(div71, "class", "flex-fill pl-3");
     			add_location(div71, file$1, 325, 32, 20048);
@@ -2204,7 +2224,7 @@ var app = (function () {
     			add_location(div72, file$1, 321, 28, 19700);
     			attr_dev(a26, "class", "text-decoration-none");
     			add_location(a26, file$1, 320, 24, 19638);
-    			attr_dev(div73, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div73, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div73, file$1, 319, 20, 19527);
     			attr_dev(img14, "class", "img-fluid");
     			if (!src_url_equal(img14.src, img14_src_value = "img/cat-11.webp")) attr_dev(img14, "src", img14_src_value);
@@ -2219,7 +2239,7 @@ var app = (function () {
     			add_location(h611, file$1, 340, 36, 21051);
     			attr_dev(small20, "class", "text-body");
     			add_location(small20, file$1, 341, 36, 21108);
-    			attr_dev(small21, "class", "text-price svelte-18mnml1");
+    			attr_dev(small21, "class", "text-price svelte-d9yz2r");
     			add_location(small21, file$1, 342, 36, 21191);
     			attr_dev(div75, "class", "flex-fill pl-3");
     			add_location(div75, file$1, 339, 32, 20985);
@@ -2227,13 +2247,13 @@ var app = (function () {
     			add_location(div76, file$1, 335, 28, 20624);
     			attr_dev(a27, "class", "text-decoration-none");
     			add_location(a27, file$1, 334, 24, 20562);
-    			attr_dev(div77, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div77, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div77, file$1, 333, 20, 20451);
     			attr_dev(div78, "class", "row px-xl-5 pb-3");
     			add_location(div78, file$1, 304, 16, 18561);
     			attr_dev(div79, "class", "container-fluid pt-5");
     			add_location(div79, file$1, 302, 12, 18368);
-    			attr_dev(div80, "class", "content-page svelte-18mnml1");
+    			attr_dev(div80, "class", "content-page svelte-d9yz2r");
     			add_location(div80, file$1, 136, 8, 6888);
     			attr_dev(i6, "class", "fas fa-shopping-cart");
     			set_style(i6, "color", "red");
@@ -2258,7 +2278,7 @@ var app = (function () {
     			attr_dev(a29, "class", "btn px-0 ");
     			set_style(a29, "margin-left", "3px");
     			add_location(a29, file$1, 357, 12, 21811);
-    			attr_dev(div81, "class", "card back-to-card bg-dark svelte-18mnml1");
+    			attr_dev(div81, "class", "card back-to-card bg-dark svelte-d9yz2r");
     			add_location(div81, file$1, 353, 8, 21448);
     			if (!src_url_equal(img16.src, img16_src_value = "img/goeat.png")) attr_dev(img16, "src", img16_src_value);
     			attr_dev(img16, "width", "40");
@@ -2288,7 +2308,7 @@ var app = (function () {
     			add_location(h612, file$1, 383, 48, 23623);
     			attr_dev(small22, "class", "text-body");
     			add_location(small22, file$1, 384, 48, 23691);
-    			attr_dev(small23, "class", "text-price svelte-18mnml1");
+    			attr_dev(small23, "class", "text-price svelte-d9yz2r");
     			add_location(small23, file$1, 385, 48, 23785);
     			attr_dev(div84, "class", "flex-fill pl-3");
     			add_location(div84, file$1, 382, 44, 23545);
@@ -2297,7 +2317,7 @@ var app = (function () {
     			attr_dev(a30, "href", "#");
     			attr_dev(a30, "class", "text-decoration-none");
     			add_location(a30, file$1, 377, 36, 23076);
-    			attr_dev(div86, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div86, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div86, file$1, 376, 32, 22953);
     			attr_dev(img18, "class", "img-fluid");
     			if (!src_url_equal(img18.src, img18_src_value = "img/cat-10.png")) attr_dev(img18, "src", img18_src_value);
@@ -2311,7 +2331,7 @@ var app = (function () {
     			add_location(h613, file$1, 398, 48, 24814);
     			attr_dev(small24, "class", "text-body");
     			add_location(small24, file$1, 399, 48, 24882);
-    			attr_dev(small25, "class", "text-price svelte-18mnml1");
+    			attr_dev(small25, "class", "text-price svelte-d9yz2r");
     			add_location(small25, file$1, 400, 48, 24977);
     			attr_dev(div88, "class", "flex-fill pl-3");
     			add_location(div88, file$1, 397, 44, 24736);
@@ -2320,7 +2340,7 @@ var app = (function () {
     			attr_dev(a31, "href", "#");
     			attr_dev(a31, "class", "text-decoration-none");
     			add_location(a31, file$1, 392, 36, 24258);
-    			attr_dev(div90, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div90, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div90, file$1, 391, 32, 24135);
     			attr_dev(img19, "class", "img-fluid");
     			if (!src_url_equal(img19.src, img19_src_value = "img/cat-11.webp")) attr_dev(img19, "src", img19_src_value);
@@ -2334,7 +2354,7 @@ var app = (function () {
     			add_location(h614, file$1, 413, 48, 26007);
     			attr_dev(small26, "class", "text-body");
     			add_location(small26, file$1, 414, 48, 26076);
-    			attr_dev(small27, "class", "text-price svelte-18mnml1");
+    			attr_dev(small27, "class", "text-price svelte-d9yz2r");
     			add_location(small27, file$1, 415, 48, 26171);
     			attr_dev(div92, "class", "flex-fill pl-3");
     			add_location(div92, file$1, 412, 44, 25929);
@@ -2343,7 +2363,7 @@ var app = (function () {
     			attr_dev(a32, "href", "#");
     			attr_dev(a32, "class", "text-decoration-none");
     			add_location(a32, file$1, 407, 36, 25450);
-    			attr_dev(div94, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div94, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div94, file$1, 406, 32, 25327);
     			attr_dev(img20, "class", "img-fluid");
     			if (!src_url_equal(img20.src, img20_src_value = "img/cat-11.webp")) attr_dev(img20, "src", img20_src_value);
@@ -2357,7 +2377,7 @@ var app = (function () {
     			add_location(h615, file$1, 429, 48, 27274);
     			attr_dev(small28, "class", "text-body");
     			add_location(small28, file$1, 430, 48, 27343);
-    			attr_dev(small29, "class", "text-price svelte-18mnml1");
+    			attr_dev(small29, "class", "text-price svelte-d9yz2r");
     			add_location(small29, file$1, 431, 48, 27438);
     			attr_dev(div96, "class", "flex-fill pl-3");
     			add_location(div96, file$1, 428, 44, 27196);
@@ -2365,7 +2385,7 @@ var app = (function () {
     			add_location(div97, file$1, 424, 40, 26801);
     			attr_dev(a33, "class", "text-decoration-none");
     			add_location(a33, file$1, 423, 36, 26727);
-    			attr_dev(div98, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div98, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div98, file$1, 421, 32, 26521);
     			attr_dev(img21, "class", "img-fluid");
     			if (!src_url_equal(img21.src, img21_src_value = "img/cat-11.webp")) attr_dev(img21, "src", img21_src_value);
@@ -2379,7 +2399,7 @@ var app = (function () {
     			add_location(h616, file$1, 445, 48, 28541);
     			attr_dev(small30, "class", "text-body");
     			add_location(small30, file$1, 446, 48, 28610);
-    			attr_dev(small31, "class", "text-price svelte-18mnml1");
+    			attr_dev(small31, "class", "text-price svelte-d9yz2r");
     			add_location(small31, file$1, 447, 48, 28705);
     			attr_dev(div100, "class", "flex-fill pl-3");
     			add_location(div100, file$1, 444, 44, 28463);
@@ -2387,7 +2407,7 @@ var app = (function () {
     			add_location(div101, file$1, 440, 40, 28068);
     			attr_dev(a34, "class", "text-decoration-none");
     			add_location(a34, file$1, 439, 36, 27994);
-    			attr_dev(div102, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
+    			attr_dev(div102, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
     			add_location(div102, file$1, 437, 32, 27788);
     			attr_dev(div103, "class", "row px-xl-5 pb-3");
     			set_style(div103, "overflow", "auto");
@@ -2397,12 +2417,12 @@ var app = (function () {
     			attr_dev(div104, "class", "modal-body");
     			add_location(div104, file$1, 372, 20, 22674);
     			add_location(strong0, file$1, 459, 95, 29333);
-    			attr_dev(span12, "class", "span-secundary svelte-18mnml1");
+    			attr_dev(span12, "class", "span-secundary svelte-d9yz2r");
     			set_style(span12, "padding", "0");
     			set_style(span12, "margin", "0");
     			add_location(span12, file$1, 459, 36, 29274);
     			add_location(td0, file$1, 458, 32, 29232);
-    			attr_dev(span13, "class", "span-secundary svelte-18mnml1");
+    			attr_dev(span13, "class", "span-secundary svelte-d9yz2r");
     			set_style(span13, "padding", "0");
     			set_style(span13, "margin", "0");
     			add_location(span13, file$1, 462, 36, 29482);
@@ -2411,26 +2431,26 @@ var app = (function () {
     			set_style(tr0, "margin", "0");
     			add_location(tr0, file$1, 457, 28, 29164);
     			add_location(strong1, file$1, 468, 66, 29803);
-    			attr_dev(span14, "class", "span-secundary svelte-18mnml1");
+    			attr_dev(span14, "class", "span-secundary svelte-d9yz2r");
     			add_location(span14, file$1, 468, 36, 29773);
     			add_location(td2, file$1, 467, 32, 29731);
-    			attr_dev(span15, "class", "span-secundary svelte-18mnml1");
+    			attr_dev(span15, "class", "span-secundary svelte-d9yz2r");
     			add_location(span15, file$1, 471, 36, 29951);
     			add_location(td3, file$1, 470, 32, 29909);
     			add_location(tr1, file$1, 466, 28, 29693);
     			add_location(strong2, file$1, 476, 63, 30212);
-    			attr_dev(span16, "class", "span-primary svelte-18mnml1");
+    			attr_dev(span16, "class", "span-primary svelte-d9yz2r");
     			add_location(span16, file$1, 476, 36, 30185);
     			add_location(td4, file$1, 475, 32, 30143);
     			add_location(strong3, file$1, 479, 63, 30384);
-    			attr_dev(span17, "class", "span-primary svelte-18mnml1");
+    			attr_dev(span17, "class", "span-primary svelte-d9yz2r");
     			add_location(span17, file$1, 479, 36, 30357);
     			add_location(td5, file$1, 478, 32, 30315);
     			add_location(tr2, file$1, 474, 28, 30105);
     			set_style(tbody0, "line-height", "normal");
     			add_location(tbody0, file$1, 456, 24, 29100);
     			attr_dev(button2, "type", "button");
-    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-18mnml1");
+    			attr_dev(button2, "class", "btn btn-primary btn-car svelte-d9yz2r");
     			add_location(button2, file$1, 483, 24, 30593);
     			attr_dev(div105, "class", "modal-footer");
     			add_location(div105, file$1, 455, 20, 29048);
@@ -2446,134 +2466,134 @@ var app = (function () {
     			add_location(div108, file$1, 363, 8, 22018);
     			attr_dev(h52, "class", "modal-title");
     			attr_dev(h52, "id", "exampleModalLabel");
-    			add_location(h52, file$1, 493, 24, 31053);
+    			add_location(h52, file$1, 492, 24, 31051);
     			attr_dev(span18, "aria-hidden", "true");
-    			add_location(span18, file$1, 495, 24, 31250);
+    			add_location(span18, file$1, 494, 24, 31248);
     			attr_dev(button3, "type", "button");
     			attr_dev(button3, "class", "close");
     			attr_dev(button3, "data-dismiss", "modal");
     			attr_dev(button3, "aria-label", "Close");
-    			add_location(button3, file$1, 494, 24, 31148);
+    			add_location(button3, file$1, 493, 24, 31146);
     			attr_dev(div109, "class", "modal-header");
-    			add_location(div109, file$1, 492, 20, 31001);
+    			add_location(div109, file$1, 491, 20, 30999);
     			attr_dev(img22, "class", "img-fluid");
     			if (!src_url_equal(img22.src, img22_src_value = "img/cat-3.jpg")) attr_dev(img22, "src", img22_src_value);
     			attr_dev(img22, "alt", "");
     			set_style(img22, "height", "70px");
     			set_style(img22, "width", "100%");
-    			add_location(img22, file$1, 506, 48, 32074);
+    			add_location(img22, file$1, 505, 48, 32072);
     			attr_dev(div110, "class", "overflow-hidden");
     			set_style(div110, "width", "100px");
     			set_style(div110, "height", "70px");
-    			add_location(div110, file$1, 505, 44, 31959);
-    			add_location(h617, file$1, 509, 48, 32335);
+    			add_location(div110, file$1, 504, 44, 31957);
+    			add_location(h617, file$1, 508, 48, 32333);
     			attr_dev(small32, "class", "text-body");
-    			add_location(small32, file$1, 510, 48, 32416);
-    			attr_dev(small33, "class", "text-price svelte-18mnml1");
-    			add_location(small33, file$1, 511, 48, 32510);
+    			add_location(small32, file$1, 509, 48, 32414);
+    			attr_dev(small33, "class", "text-price svelte-d9yz2r");
+    			add_location(small33, file$1, 510, 48, 32508);
     			attr_dev(div111, "class", "flex-fill pl-3");
-    			add_location(div111, file$1, 508, 44, 32257);
+    			add_location(div111, file$1, 507, 44, 32255);
     			attr_dev(div112, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div112, file$1, 504, 40, 31860);
+    			add_location(div112, file$1, 503, 40, 31858);
     			attr_dev(a35, "href", "#");
     			attr_dev(a35, "class", "text-decoration-none");
-    			add_location(a35, file$1, 503, 36, 31776);
-    			attr_dev(div113, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
-    			add_location(div113, file$1, 502, 32, 31653);
+    			add_location(a35, file$1, 502, 36, 31774);
+    			attr_dev(div113, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div113, file$1, 501, 32, 31651);
     			attr_dev(img23, "class", "img-fluid");
     			if (!src_url_equal(img23.src, img23_src_value = "img/cat-1.jpg")) attr_dev(img23, "src", img23_src_value);
     			attr_dev(img23, "alt", "");
     			set_style(img23, "height", "70px");
-    			add_location(img23, file$1, 521, 48, 33291);
+    			add_location(img23, file$1, 520, 48, 33289);
     			attr_dev(div114, "class", "overflow-hidden");
     			set_style(div114, "width", "100px");
     			set_style(div114, "height", "70px");
-    			add_location(div114, file$1, 520, 44, 33176);
-    			add_location(h618, file$1, 524, 48, 33539);
+    			add_location(div114, file$1, 519, 44, 33174);
+    			add_location(h618, file$1, 523, 48, 33537);
     			attr_dev(small34, "class", "text-body");
-    			add_location(small34, file$1, 525, 48, 33618);
-    			attr_dev(small35, "class", "text-price svelte-18mnml1");
-    			add_location(small35, file$1, 526, 48, 33713);
+    			add_location(small34, file$1, 524, 48, 33616);
+    			attr_dev(small35, "class", "text-price svelte-d9yz2r");
+    			add_location(small35, file$1, 525, 48, 33711);
     			attr_dev(div115, "class", "flex-fill pl-3");
-    			add_location(div115, file$1, 523, 44, 33461);
+    			add_location(div115, file$1, 522, 44, 33459);
     			attr_dev(div116, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div116, file$1, 519, 40, 33068);
+    			add_location(div116, file$1, 518, 40, 33066);
     			attr_dev(a36, "href", "#");
     			attr_dev(a36, "class", "text-decoration-none");
-    			add_location(a36, file$1, 518, 36, 32984);
-    			attr_dev(div117, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
-    			add_location(div117, file$1, 517, 32, 32861);
+    			add_location(a36, file$1, 517, 36, 32982);
+    			attr_dev(div117, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div117, file$1, 516, 32, 32859);
     			attr_dev(img24, "class", "img-fluid");
     			if (!src_url_equal(img24.src, img24_src_value = "img/cat-4.jpg")) attr_dev(img24, "src", img24_src_value);
     			attr_dev(img24, "alt", "");
     			set_style(img24, "height", "70px");
-    			add_location(img24, file$1, 536, 48, 34494);
+    			add_location(img24, file$1, 535, 48, 34492);
     			attr_dev(div118, "class", "overflow-hidden");
     			set_style(div118, "width", "100px");
     			set_style(div118, "height", "70px");
-    			add_location(div118, file$1, 535, 44, 34379);
-    			add_location(h619, file$1, 539, 48, 34742);
+    			add_location(div118, file$1, 534, 44, 34377);
+    			add_location(h619, file$1, 538, 48, 34740);
     			attr_dev(small36, "class", "text-body");
-    			add_location(small36, file$1, 540, 48, 34815);
-    			attr_dev(small37, "class", "text-price svelte-18mnml1");
-    			add_location(small37, file$1, 541, 48, 34910);
+    			add_location(small36, file$1, 539, 48, 34813);
+    			attr_dev(small37, "class", "text-price svelte-d9yz2r");
+    			add_location(small37, file$1, 540, 48, 34908);
     			attr_dev(div119, "class", "flex-fill pl-3");
-    			add_location(div119, file$1, 538, 44, 34664);
+    			add_location(div119, file$1, 537, 44, 34662);
     			attr_dev(div120, "class", "cat-item img-zoom d-flex align-items-center mb-4");
-    			add_location(div120, file$1, 534, 40, 34271);
+    			add_location(div120, file$1, 533, 40, 34269);
     			attr_dev(a37, "href", "#");
     			attr_dev(a37, "class", "text-decoration-none");
-    			add_location(a37, file$1, 533, 36, 34187);
-    			attr_dev(div121, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-18mnml1");
-    			add_location(div121, file$1, 532, 32, 34064);
+    			add_location(a37, file$1, 532, 36, 34185);
+    			attr_dev(div121, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-d9yz2r");
+    			add_location(div121, file$1, 531, 32, 34062);
     			attr_dev(div122, "class", "row px-xl-5 pb-3");
     			set_style(div122, "overflow", "auto");
     			set_style(div122, "height", "250px");
-    			add_location(div122, file$1, 500, 28, 31460);
-    			add_location(form2, file$1, 499, 24, 31424);
+    			add_location(div122, file$1, 499, 28, 31458);
+    			add_location(form2, file$1, 498, 24, 31422);
     			attr_dev(div123, "class", "modal-body");
-    			add_location(div123, file$1, 498, 20, 31374);
-    			add_location(strong4, file$1, 556, 93, 35665);
-    			attr_dev(span19, "class", "span-primary svelte-18mnml1");
+    			add_location(div123, file$1, 497, 20, 31372);
+    			add_location(strong4, file$1, 555, 93, 35663);
+    			attr_dev(span19, "class", "span-primary svelte-d9yz2r");
     			set_style(span19, "padding", "0");
     			set_style(span19, "margin", "0");
-    			add_location(span19, file$1, 556, 36, 35608);
-    			add_location(td6, file$1, 555, 32, 35566);
-    			attr_dev(span20, "class", "span-primary svelte-18mnml1");
+    			add_location(span19, file$1, 555, 36, 35606);
+    			add_location(td6, file$1, 554, 32, 35564);
+    			attr_dev(span20, "class", "span-primary svelte-d9yz2r");
     			set_style(span20, "padding", "0");
     			set_style(span20, "margin", "0");
-    			add_location(span20, file$1, 559, 36, 35809);
-    			add_location(td7, file$1, 558, 32, 35767);
+    			add_location(span20, file$1, 558, 36, 35807);
+    			add_location(td7, file$1, 557, 32, 35765);
     			set_style(tr3, "padding", "0");
     			set_style(tr3, "margin", "0");
-    			add_location(tr3, file$1, 554, 28, 35498);
-    			add_location(strong5, file$1, 566, 63, 36133);
-    			attr_dev(span21, "class", "span-primary svelte-18mnml1");
-    			add_location(span21, file$1, 566, 36, 36106);
-    			add_location(td8, file$1, 565, 32, 36064);
-    			add_location(strong6, file$1, 569, 63, 36305);
-    			attr_dev(span22, "class", "span-primary svelte-18mnml1");
-    			add_location(span22, file$1, 569, 36, 36278);
-    			add_location(td9, file$1, 568, 32, 36236);
-    			add_location(tr4, file$1, 564, 28, 36026);
+    			add_location(tr3, file$1, 553, 28, 35496);
+    			add_location(strong5, file$1, 565, 63, 36131);
+    			attr_dev(span21, "class", "span-primary svelte-d9yz2r");
+    			add_location(span21, file$1, 565, 36, 36104);
+    			add_location(td8, file$1, 564, 32, 36062);
+    			add_location(strong6, file$1, 568, 63, 36303);
+    			attr_dev(span22, "class", "span-primary svelte-d9yz2r");
+    			add_location(span22, file$1, 568, 36, 36276);
+    			add_location(td9, file$1, 567, 32, 36234);
+    			add_location(tr4, file$1, 563, 28, 36024);
     			set_style(tbody1, "line-height", "normal");
-    			add_location(tbody1, file$1, 553, 24, 35434);
+    			add_location(tbody1, file$1, 552, 24, 35432);
     			attr_dev(button4, "type", "button");
-    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-18mnml1");
-    			add_location(button4, file$1, 573, 24, 36514);
+    			attr_dev(button4, "class", "btn btn-primary btn-car svelte-d9yz2r");
+    			add_location(button4, file$1, 572, 24, 36512);
     			attr_dev(div124, "class", "modal-footer");
-    			add_location(div124, file$1, 552, 20, 35382);
+    			add_location(div124, file$1, 551, 20, 35380);
     			attr_dev(div125, "class", "modal-content");
-    			add_location(div125, file$1, 491, 16, 30952);
+    			add_location(div125, file$1, 490, 16, 30950);
     			attr_dev(div126, "class", "modal-dialog modal-xl");
-    			add_location(div126, file$1, 490, 12, 30899);
+    			add_location(div126, file$1, 489, 12, 30897);
     			attr_dev(div127, "class", "modal fade bd-model");
     			attr_dev(div127, "tabindex", "-1");
     			attr_dev(div127, "role", "dialog");
     			attr_dev(div127, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div127, "aria-hidden", "true");
-    			add_location(div127, file$1, 489, 8, 30769);
-    			attr_dev(body, "class", "svelte-18mnml1");
+    			add_location(div127, file$1, 488, 8, 30767);
+    			attr_dev(body, "class", "svelte-d9yz2r");
     			add_location(body, file$1, 45, 4, 1147);
     			add_location(main, file$1, 43, 0, 1133);
     		},
@@ -3293,10 +3313,14 @@ var app = (function () {
     	};
 
     	const click_handler_22 = () => {
-    		$$invalidate(0, gameOpen = false);
+    		$$invalidate(2, gameOpencasine = true);
     	};
 
     	const click_handler_23 = () => {
+    		$$invalidate(0, gameOpen = false);
+    	};
+
+    	const click_handler_24 = () => {
     		$$invalidate(2, gameOpencasine = false);
     	};
 
@@ -3351,7 +3375,8 @@ var app = (function () {
     		click_handler_20,
     		click_handler_21,
     		click_handler_22,
-    		click_handler_23
+    		click_handler_23,
+    		click_handler_24
     	];
     }
 
