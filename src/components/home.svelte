@@ -4,7 +4,7 @@
     let car=0;
     let gamescanner=false;
 
-    Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+    //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
 
    
@@ -34,7 +34,8 @@
     }
 
     const resultscanner=(result)=>{
-        location.reload();
+        gamescanner=true;
+        window.$(".bd-model").modal("show");
     };
     
         
@@ -482,6 +483,96 @@
                             </tr>
                         </tbody>                                            
                         <button type="button" class="btn btn-primary btn-car">Proceder pago</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade bd-model" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">El sazon del pato</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
+                                <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
+                                    <a  href="#" class="text-decoration-none">
+                                        <div class="cat-item d-flex align-items-center mb-4">
+                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
+                                                <img class="img-fluid"  src="img/cat-3.jpg" alt="" style="height: 70px;width: 100%;">
+                                            </div>
+                                            <div class="flex-fill pl-3">
+                                                <h6>Arroz Chaufa Amazonico</h6>
+                                                <small class="text-body">50 Unidades</small>
+                                                <small class="text-price">S/. 10.00</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
+                                    <a  href="#" class="text-decoration-none">
+                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
+                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
+                                                <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 70px;">
+                                            </div>
+                                            <div class="flex-fill pl-3">
+                                                <h6>Fideos a la Italiana</h6>
+                                                <small class="text-body">100 Products</small>
+                                                <small class="text-price">S/. 13.00</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
+                                    <a  href="#" class="text-decoration-none">
+                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
+                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
+                                                <img class="img-fluid" src="img/cat-4.jpg" alt="" style="height: 70px;">
+                                            </div>
+                                            <div class="flex-fill pl-3">
+                                                <h6>Arroz con pato</h6>
+                                                <small class="text-body">100 Products</small>
+                                                <small class="text-price">S/. 15.00</small>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
+
+                                
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <tbody style="line-height:normal">
+                            <tr style="padding: 0;margin: 0;">
+                                <td>
+                                    <span class="span-primary" style="padding: 0;margin: 0;"><strong>Mesa:</strong></span>
+                                </td>
+                                <td>
+                                    <span class="span-primary" style="padding: 0;margin: 0;"> 1</span>
+                                </td>
+                               
+                            </tr>
+            
+                            <tr>
+                                <td>
+                                    <span class="span-primary"><strong>TOTAL:</strong></span>
+                                </td>
+                                <td>
+                                    <span class="span-primary"><strong>S/ 0.00</strong></span>
+                                </td>
+                            </tr>
+                        </tbody>                                            
+                        <button type="button" class="btn btn-primary btn-car" on:click={()=>{location.reload();}}>Realizar pedido</button>
                     </div>
                 </div>
             </div>
