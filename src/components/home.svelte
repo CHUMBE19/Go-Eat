@@ -582,7 +582,6 @@
                 <div class="redes">
                     <a href="#">  <img class="img-game" on:click={()=>{gameOpen=true;}} src="img/casino.jpg" width="45px" height="45px" alt=""></a>
                     <a href="#">  <img class="img-game" on:click={()=>{gameOpencasine=true;}} src="img/ruleta.jpg" width="45px" height="45px" alt=""></a>
-                    <a href="#">  <img class="img-game" on:click={()=>{gameOpencasine=true;}} src="img/ruleta.jpg" width="45px" height="45px" alt=""></a>
                 </div>
                 <div class="btn-mas">
                     <label for="btn-mas" class="fa fa-plus"></label>
