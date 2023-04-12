@@ -1,13 +1,20 @@
 <script>
+      // @ts-nocheck
+    import toast, { Toaster } from 'svelte-french-toast';
     import { onMount } from 'svelte';
+    import server from '../server';
     import QRCode from 'qrcode-generator';
     let gameOpen=false;
     let car=0;
-    let gamescanner=false;
+    let gameActive=false;
     let gameOpencasine=false;
-
+    let products={list:[],pages:[],filters:{}};
+    let totalMoney=0;
+    
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
+
+    let product = [];
 
     let inforQR={organization:"Sazon del Pato",tables:1,code:"CO-0001"};
     let qr = QRCode(0, 'L');
@@ -29,34 +36,85 @@
         scanner.onFrameRead = results => {
         console.log(results);
         for (let result of results) {
-
-            resultscanner(result);
-           
+            resultscanner(result);   
         }
     };
         scanner.onUnduplicatedRead = (txt, result) => {};
         await scanner.show();
     }
-
     const resultscanner=(result)=>{
-        console.log("result",result);
+        console.log("result",result.barcodeText);
+        let params=result.barcodeText;
+        console.log(params);
+        var data= await server.getproductos(products.filters);
         gamescanner=true;
         window.$(".bd-model").modal("show");
     };
-    
 
     function showQRCode() {
         let qrCodeElement = document.getElementById('qrcode');
         qrCodeElement.innerHTML = qr.createImgTag(4);
-        }
+    }
+ 
+    onMount(async () => {
+      await getProducts();
+    });
 
+    const getProducts= async ()=>{
+      try {
+         var data= await server.getproductos(products.filters);
+         products.xpagina=data.xpagina;
+         products.pagina=data.pagina;
+         products.total=data.total;
+         products.list=data.list;
+      } catch (e) {
+        toast('Hello Darkness!', {
+            icon: '👏',
+            style: 'border-radius: 200px; background: #333; color: #fff;'
+        });
+      }     
+    };
+
+    function addProduct(value) {
+        product = [...product, value];
+        console.log(product);
+        calculatePrice(product);
+
+    }
+
+   function calculatePrice(product){
+        totalMoney=0;
+        product.forEach(element => {
+            totalMoney+= element.totalmoney;
+        });
+   }; 
         
+
+   const prepareSearch=(e)=>{
+      if(e.charCode===13){ 
+        getProducts();
+      }
+    };
+
+
+    const paymentProceed=()=>{
+
+        toast("GAME: Para ganar premios y ofertas. compite y acomula puntos jugando con nosotros", {
+            icon: '👏',
+            style: ' background: #333; color: #fff;background-image: url("img/anuncio.avif");width:100%;height:70px; background-repeat: no-repeat, repeat; background-position: center;'
+        });
+
+        gameActive=true;
+
+
+ };
+
+
 </script>
 
 
 <main>
-
-    <body>
+    <body><Toaster />
         <div id="qrcode"></div>
         <!-- Topbar Start -->
         <div class="container-fluid">
@@ -69,16 +127,15 @@
                     </a>
                 </div>
                 <div class="col-lg-4 col-6 text-left">
-                    <form action="">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search for products">
-                            <div class="input-group-append">
-                                <span class="input-group-text bg-transparent text-primary">
-                                    <i class="fa fa-search"></i>
-                                </span>
-                            </div>
+                    <div class="input-group">
+                        <input type="text" class="form-control" bind:value={products.filters.name} on:keypress={prepareSearch} placeholder="Search for products">
+                        <div class="input-group-append">
+                            <span class="input-group-text bg-transparent text-primary">
+                                <i class="fa fa-search"></i>
+                            </span>
                         </div>
-                    </form>
+                    </div>
+        
                 </div>
                 <div class="col-lg-4 col-6 text-right">
                     <p class="m-0">Servicio al Cliente</p>
@@ -138,7 +195,7 @@
                                 </a>
                                 <a href="#" class="btn px-0 ml-3" data-toggle="modal" data-target=".bd-example-modal-sm">
                                     <i class="fas fa-shopping-cart text-primary"></i>
-                                    <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">{car}</span>
+                                    <span class="badge text-secondary border border-secondary rounded-circle" style="padding-bottom: 2px;">{product.length}</span>
                                 </a>
                             </div>
                         </div>
@@ -194,123 +251,42 @@
                 </div>
             </div>
             <!-- Carousel End -->   
-    
+            
+            <div class="col-lg-4  text-left buscadorMovil">
+                <div class="input-group">
+                    <input type="text" class="form-control" bind:value={products.filters.name}  placeholder="Search for products">
+                    <div class="input-group-append" on:click={getProducts} style="cursor: pointer;">
+                        <span class="input-group-text bg-transparent text-primary">
+                            <i class="fa fa-search"></i>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
             <div class="container-fluid">
+                
                 <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">COMIDAS</span></h2>
                 <div class="row px-xl-5 pb-3">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{car++;}}>
-                        <a  href="#"class="text-decoration-none">
-                            <div class="cat-item d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 119px;">
+
+
+                    {#each  products.list as value , key}
+
+                        <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
+                            <a  href="#"class="text-decoration-none">
+                                <div class="cat-item d-flex align-items-center mb-4">
+                                    <div class="overflow-hidden" style="width: 120px; height: 120px;">
+                                        <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
+                                    </div>
+                                    <div class="flex-fill pl-3">
+                                        <h6>{value.name}</h6>
+                                        <small class="text-body">100 Products</small>
+                                        <small class="text-price">S/. {value.totalmoney}.00</small>
+                                    </div>
                                 </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Fideos a la Italiana</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 15.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a  href="#" class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-2.avif" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Sandwich</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 25.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 119px;width: 120px">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Arroz Chaufa Amazonico</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 10.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-4.jpg" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Arroz con pato</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 8.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-5.jpg" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Mondonguito Italiano</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 13.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none" >
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-6.jpg" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Saltado de Res</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 11.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-7.avif" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Pollo a la brasa</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 11.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-8.jpg" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Chancho ala Caja China</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 15.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                            </a>
+                        </div>
+                    {/each}
+
                 </div>
             </div>
             
@@ -367,7 +343,7 @@
 
         <div class="card back-to-card  bg-dark">
             <a  href="#" class="btn px-0 "  style="margin-left: 3px;" data-toggle="modal" data-target=".bd-example-modal-sm">
-                <span style="padding-bottom: 2px;color: red;font-size: 10px;"><i class="fas fa-shopping-cart" style="color: red;font-size: 15px;"></i>{car}</span>
+                <span style="padding-bottom: 2px;color: red;font-size: 10px;"><i class="fas fa-shopping-cart" style="color: red;font-size: 15px;"></i>{product.length}</span>
             </a>
             <a  href="#" class="btn px-0 "  style="margin-left: 3px;" on:click={scannerActive}>
                 <img  src="img/scanner.png" alt="" width="25" height="25">
@@ -385,117 +361,39 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form>
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
-                                <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-9.webp" alt="" style="height: 70px;">
+              
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product?'height: 250px;':''}">
+                                {#each  product as value , key}
+                                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product">
+                                        <a  href="#"class="text-decoration-none">
+                                            <div class="cat-item d-flex align-items-center mb-4">
+                                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
+                                                    <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
+                                                </div>
+                                                <div class="flex-fill pl-3">
+                                                    <h6>{value.name}</h6>
+                                                    <small class="text-body">100 Products</small>
+                                                    <small class="text-price">S/. {value.totalmoney}.00</small>
+                                                </div>
                                             </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Coca Cola</h6>
-                                                <small class="text-body">50 Unidades</small>
-                                                <small class="text-price">S/. 3.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-10.png" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Inka Cola</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 3.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-11.webp" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Pepsi Cola</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 2.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <!-- svelte-ignore a11y-missing-attribute -->
-                                    <a class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-11.webp" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Pepsi Cola</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 2.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <!-- svelte-ignore a11y-missing-attribute -->
-                                    <a class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-11.webp" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Pepsi Cola</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 2.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
+                                        </a>
+                                    </div>
+                                {/each}
+                       
                             </div>
-                        </form>
                     </div>
                     <div class="modal-footer">
                         <tbody style="line-height:normal">
-                            <tr style="padding: 0;margin: 0;">
-                                <td>
-                                    <span class="span-secundary" style="padding: 0;margin: 0;"><strong>Sub total:</strong></span>
-                                </td>
-                                <td>
-                                    <span class="span-secundary" style="padding: 0;margin: 0;"> S/ 8.00</span>
-                                </td>
-                               
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span class="span-secundary"> <strong>Entrega:</strong> </span>
-                                </td>
-                                <td>
-                                    <span class="span-secundary"> Por calcular:</span>
-                                </td>
-                            </tr>
                             <tr>
                                 <td>
                                     <span class="span-primary"><strong>TOTAL:</strong></span>
                                 </td>
                                 <td>
-                                    <span class="span-primary"><strong>S/ 8.00</strong></span>
+                                    <span class="span-primary"><strong>S/ {totalMoney}.00</strong></span>
                                 </td>
                             </tr>
                         </tbody>                                            
-                        <button type="button" class="btn btn-primary btn-car">Proceder pago</button>
+                        <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={paymentProceed}>Proceder pago</button>
                     </div>
                 </div>
             </div>
@@ -510,7 +408,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form>
+              
                             <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
                                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                                 <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
@@ -561,7 +459,7 @@
 
                                 
                             </div>
-                        </form>
+              
                     </div>
                     <div class="modal-footer">
                         <tbody style="line-height:normal">
@@ -589,7 +487,7 @@
                 </div>
             </div>
         </div>
-        {#if car>0}
+        {#if gameActive}
             <div class="container">
                 <input type="checkbox" id="btn-mas">
                 <div class="redes">
@@ -707,6 +605,9 @@
         .card {
            display: none;
         }
+        .buscadorMovil{
+            display: none;
+        }
     }
 
     @media (max-width: 992px) {
@@ -714,6 +615,7 @@
             overflow: auto; 
             height: 86vh;
         }
+       
     }
 
     .btn-car{
