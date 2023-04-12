@@ -33,6 +33,7 @@
     }
 
     const resultscanner=(result)=>{
+        console.log("result",result);
         gamescanner=true;
         window.$(".bd-model").modal("show");
     };
