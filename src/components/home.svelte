@@ -85,7 +85,6 @@
         productScanner.pagina=data.pagina;
         productScanner.total=data.total;
         productScanner.list=data.list;
-        gamescanner=true;
         window.$(".bd-model").modal("show");
     };
 
