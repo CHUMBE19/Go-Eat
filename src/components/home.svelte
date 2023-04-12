@@ -446,7 +446,7 @@
                     </div>
                     <div class="modal-body">
               
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 290px;">
                                 <!-- svelte-ignore a11y-click-events-have-key-events -->
                                  {#each  productScanner.list as value , key}
                                     <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
