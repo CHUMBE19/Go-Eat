@@ -8,33 +8,7 @@
     let car=0;
     let gameActive=false;
     let gameOpencasine=false;
-    let products={list:[{
-        id:12,
-        code:"00012",
-        barcode:"CO-0001",
-        description:1,
-        photo:"img/cat-5.jpg",
-        nameconcat:"Comida",
-        amount:25,
-        name:"arroz con chancho con juane",
-        totalmoney:52,
-        create:"2023-04-07T19:40:54.738+00:00",
-        update:null
-    },
-    {
-        id:11,
-        code:"00011",
-        barcode:"CO-0001",
-        description:1,
-        photo:"img/cat-9.webp",
-        nameconcat:"Comida",
-        amount:25,
-        name:"Arroz Chaufa",
-        totalmoney:22,
-        create:"2023-04-07T19:40:54.738+00:00",
-        update:null
-    }
-    ],pages:[],filters:{}};
+    let products={list:[],pages:[],filters:{}};
 
 
     let productScanner={list:[],pages:[],filters:{}};
@@ -304,8 +278,6 @@
                 
                 <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">COMIDAS</span></h2>
                 <div class="row px-xl-5 pb-3">
-
-
                     {#each  products.list as value , key}
 
                         <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
@@ -324,54 +296,6 @@
                         </div>
                     {/each}
 
-                </div>
-            </div>
-            
-            <div class="container-fluid pt-5">
-                <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">BEBIDAS</span></h2>
-                <div class="row px-xl-5 pb-3">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-9.webp" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Coca Cola</h6>
-                                    <small class="text-body">50 Unidades</small>
-                                    <small class="text-price">S/. 3.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-10.png" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Inka Cola</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 3.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-11.webp" alt="" style="height: 119px;width: 120px">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Pepsi Cola</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 2.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

@@ -1,13 +1,13 @@
 const Configuration = ( ()=>{
     const local = {
-        API:"http://localhost:8086/api",
+        API:"https://goeat.azurewebsites.net/api/",
     }
     const dev = {
         API:"http://localhost:8086/api",
     }
 
     const prod = {
-        API: "",
+        API: "https://goeat.azurewebsites.net/api/",
     }
 
     const configMap = new Map()
@@ -17,7 +17,7 @@ const Configuration = ( ()=>{
 
     const getEnv= ()=>{
         const host = window.location.toString();
-        const env = /simba/.test(host)?"dev" : /localhost:8080/.test(host)?"local": "local"
+        const env = /simba/.test(host)?"dev" : /localhost:8080/.test(host)?"local": "prod"
         return env;
     }
     const getConfiguration = ()=>{
