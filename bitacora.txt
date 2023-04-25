@@ -1,0 +1,2 @@
+CORRER EL BACKEND (JAVASPRINT)
+.\mvnw spring-boot:run

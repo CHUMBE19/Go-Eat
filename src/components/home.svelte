@@ -1,5 +1,5 @@
 <script>
-      // @ts-nocheck
+    // @ts-nocheck
     import toast, { Toaster } from 'svelte-french-toast';
     import { onMount } from 'svelte';
     import server from '../server';
@@ -38,11 +38,11 @@
         for (let result of results) {
             resultscanner(result);   
         }
-    };
+        };
         scanner.onUnduplicatedRead = (txt, result) => {};
         await scanner.show();
     }
-    const resultscanner=(result)=>{
+    const resultscanner= async (result)=>{
         console.log("result",result.barcodeText);
         let params=result.barcodeText;
         console.log(params);
