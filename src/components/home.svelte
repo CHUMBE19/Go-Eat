@@ -4,6 +4,7 @@
     import { onMount } from 'svelte';
     import server from '../server';
     import QRCode from 'qrcode-generator';
+    
     let gameOpen=false;
     let car=0;
     let gameActive=false;
@@ -13,6 +14,10 @@
 
     const onRegister = () => {
         showRegister = true;
+    }
+
+    const register = async () => {
+        alert("registro pendiente")
     }
 
     let productScanner={list:[],pages:[],filters:{}};
@@ -164,10 +169,32 @@
                 <div>
                     {#if showRegister}
 
-                        <p>Aqui irá el registro xd</p>
-                        <!--div class="container">
-                            <input type="email" placeholder="email">
-                            <input type="number" placeholder="phone">
+                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
+                        <p>Ingrese sus datos para acceder a más promociones y descuentos</p>
+                        <input type="email" placeholder="email">
+                        <input type="number" placeholder="phone">
+                        <button class="btn-register-confirm"  on:click={register}>Registrarme</button>
+                        
+
+                        <!--div class="modal fade bd-example-modal-sm"  tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel2" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <button type="button" class="close" on:click={() => (showRegister = false)}>
+                                        <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <input type="email" placeholder="email">
+                                        <input type="number" placeholder="phone">
+                                    </div>
+                                    <div class="modal-footer">                                     
+                                        <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={register}>Registrarme</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div-->
 
                     {/if}
@@ -298,6 +325,27 @@
                 </div>
             </div>
 
+            <!--div class="modal fade bd-example-modal-sm"  tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel2" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <button type="button" class="close" on:click={() => (showRegister = false)}>
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="email" placeholder="email">
+                            <input type="number" placeholder="phone">
+                        </div>
+                        <div class="modal-footer">                                     
+                            <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={register}>Registrarme</button>
+                        </div>
+                    </div>
+                </div>
+            </div-->
+
             <div class="container-fluid">
                 
                 <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">COMIDAS</span></h2>
@@ -335,52 +383,6 @@
             </a>
         </div>
 
-        <!--div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-xl">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product.length>0?'height: 250px;':''}">
-                                {#each  product as value , key}
-                                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product">
-                                        <a  href="#"class="text-decoration-none">
-                                            <div class="cat-item d-flex align-items-center mb-4">
-                                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                                    <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
-                                                </div>
-                                                <div class="flex-fill pl-3">
-                                                    <h6>{value.name}</h6>
-                                                    <small class="text-body">100 Products</small>
-                                                    <small class="text-price">S/. {value.totalmoney}.00</small>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                {/each}
-                       
-                            </div>
-                    </div>
-                    <div class="modal-footer">
-                        <tbody style="line-height:normal">
-                            <tr>
-                                <td>
-                                    <span class="span-primary"><strong>TOTAL:</strong></span>
-                                </td>
-                                <td>
-                                    <span class="span-primary"><strong>S/ {totalMoney}.00</strong></span>
-                                </td>
-                            </tr>
-                        </tbody>                                            
-                        <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={paymentProceed}>Proceder pago</button>
-                    </div>
-                </div>
-            </div>
-        </div-->
 
         <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -621,6 +623,11 @@
 
     .btn-register{
         background-color:whitesmoke;
+        border-radius: 10px;
+    }
+
+    .btn-register-confirm{
+        background-color:greenyellow;
         border-radius: 10px;
     }
 
