@@ -8302,12 +8302,6 @@ var app = (function () {
     const file = "src\\App.svelte";
 
     function create_fragment(ctx) {
-    	let head;
-    	let script0;
-    	let script0_src_value;
-    	let t0;
-    	let script1;
-    	let t2;
     	let main;
     	let home;
     	let current;
@@ -8315,31 +8309,15 @@ var app = (function () {
 
     	const block = {
     		c: function create() {
-    			head = element("head");
-    			script0 = element("script");
-    			t0 = space();
-    			script1 = element("script");
-    			script1.textContent = "window.dataLayer = window.dataLayer || [];\r\n\t\tfunction gtag(){dataLayer.push(arguments);}\r\n\t\tgtag('js', new Date());\r\n\r\n\t\tgtag('config', 'G-0E0RLQSF5R');";
-    			t2 = space();
     			main = element("main");
     			create_component(home.$$.fragment);
-    			script0.async = true;
-    			if (!src_url_equal(script0.src, script0_src_value = "https://www.googletagmanager.com/gtag/js?id=G-0E0RLQSF5R")) attr_dev(script0, "src", script0_src_value);
-    			add_location(script0, file, 3, 1, 43);
-    			add_location(script1, file, 4, 1, 132);
-    			add_location(head, file, 0, 0, 0);
     			attr_dev(main, "class", "svelte-1nd5vak");
-    			add_location(main, file, 21, 0, 431);
+    			add_location(main, file, 7, 0, 107);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
     		},
     		m: function mount(target, anchor) {
-    			insert_dev(target, head, anchor);
-    			append_dev(head, script0);
-    			append_dev(head, t0);
-    			append_dev(head, script1);
-    			insert_dev(target, t2, anchor);
     			insert_dev(target, main, anchor);
     			mount_component(home, main, null);
     			current = true;
@@ -8355,8 +8333,6 @@ var app = (function () {
     			current = false;
     		},
     		d: function destroy(detaching) {
-    			if (detaching) detach_dev(head);
-    			if (detaching) detach_dev(t2);
     			if (detaching) detach_dev(main);
     			destroy_component(home);
     		}
