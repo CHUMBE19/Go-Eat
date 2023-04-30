@@ -174,7 +174,7 @@
                 <div>
                     {#if showRegister}
 
-                        <p>Aqui irá el registro</p>
+                        <p>Aqui irá el registro xd</p>
                         <!--div class="container">
                             <input type="email" placeholder="email">
                             <input type="number" placeholder="phone">
