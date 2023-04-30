@@ -1,12 +1,3 @@
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NQ167ZS6B3"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-NQ167ZS6B3');
-</script>
-
 <script>
     // @ts-nocheck
     import toast, { Toaster } from 'svelte-french-toast';
