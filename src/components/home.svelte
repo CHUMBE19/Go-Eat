@@ -1,3 +1,13 @@
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NQ167ZS6B3"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-NQ167ZS6B3');
+</script>
+
 <script>
     // @ts-nocheck
     import toast, { Toaster } from 'svelte-french-toast';
@@ -9,6 +19,16 @@
     let gameActive=false;
     let gameOpencasine=false;
     let products={list:[],pages:[],filters:{}};
+    let showRegister = false;
+
+    const onRegister = () => {
+        showRegister = true;
+    }
+
+    let productScanner={list:[],pages:[],filters:{}};
+
+
+
     let totalMoney=0;
     
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
@@ -42,12 +62,17 @@
         scanner.onUnduplicatedRead = (txt, result) => {};
         await scanner.show();
     }
-    const resultscanner= async (result)=>{
+    const resultscanner=async (result)=>{
         console.log("result",result.barcodeText);
         let params=result.barcodeText;
-        console.log(params);
+        let vulea='{"organization":"Sazon del Pato","tables":1,"code":"CO-0001"}';
+        let parsedBody = JSON.parse(vulea);
+        products.filters={...parsedBody};
         var data= await server.getproductos(products.filters);
-        gamescanner=true;
+        productScanner.xpagina=data.xpagina;
+        productScanner.pagina=data.pagina;
+        productScanner.total=data.total;
+        productScanner.list=data.list;
         window.$(".bd-model").modal("show");
     };
 
@@ -109,11 +134,13 @@
 
  };
 
-
 </script>
+
+    
 
 
 <main>
+
     <body><Toaster />
         <div id="qrcode"></div>
         <!-- Topbar Start -->
@@ -137,10 +164,28 @@
                     </div>
         
                 </div>
+
                 <div class="col-lg-4 col-6 text-right">
-                    <p class="m-0">Servicio al Cliente</p>
-                    <h5 class="m-0">+ 951 970 113</h5>
+
+                    <button class="btn-register"  on:click={onRegister}>Registro</button>
                 </div>
+
+
+                <div>
+                    {#if showRegister}
+
+                        <p>Aqui irá el registro</p>
+                        <!--div class="container">
+                            <input type="email" placeholder="email">
+                            <input type="number" placeholder="phone">
+                        </div-->
+
+                    {/if}
+                </div>
+
+
+                
+
             </div>
         </div>
         <!-- Topbar End -->
@@ -267,8 +312,6 @@
                 
                 <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">COMIDAS</span></h2>
                 <div class="row px-xl-5 pb-3">
-
-
                     {#each  products.list as value , key}
 
                         <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
@@ -289,54 +332,6 @@
 
                 </div>
             </div>
-            
-            <div class="container-fluid pt-5">
-                <h2 class="section-title position-relative text-uppercase mx-xl-5 mb-4"><span class="bg-secondary pr-3">BEBIDAS</span></h2>
-                <div class="row px-xl-5 pb-3">
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-9.webp" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Coca Cola</h6>
-                                    <small class="text-body">50 Unidades</small>
-                                    <small class="text-price">S/. 3.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-10.png" alt="" style="height: 119px;">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Inka Cola</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 3.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                        <a class="text-decoration-none">
-                            <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
-                                    <img class="img-fluid" src="img/cat-11.webp" alt="" style="height: 119px;width: 120px">
-                                </div>
-                                <div class="flex-fill pl-3">
-                                    <h6>Pepsi Cola</h6>
-                                    <small class="text-body">100 Products</small>
-                                    <small class="text-price">S/. 2.00</small>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
      
 
@@ -350,6 +345,52 @@
             </a>
         </div>
 
+        <!--div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-xl">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product.length>0?'height: 250px;':''}">
+                                {#each  product as value , key}
+                                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product">
+                                        <a  href="#"class="text-decoration-none">
+                                            <div class="cat-item d-flex align-items-center mb-4">
+                                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
+                                                    <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
+                                                </div>
+                                                <div class="flex-fill pl-3">
+                                                    <h6>{value.name}</h6>
+                                                    <small class="text-body">100 Products</small>
+                                                    <small class="text-price">S/. {value.totalmoney}.00</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                {/each}
+                       
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <tbody style="line-height:normal">
+                            <tr>
+                                <td>
+                                    <span class="span-primary"><strong>TOTAL:</strong></span>
+                                </td>
+                                <td>
+                                    <span class="span-primary"><strong>S/ {totalMoney}.00</strong></span>
+                                </td>
+                            </tr>
+                        </tbody>                                            
+                        <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={paymentProceed}>Proceder pago</button>
+                    </div>
+                </div>
+            </div>
+        </div-->
 
         <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -362,7 +403,7 @@
                     </div>
                     <div class="modal-body">
               
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product?'height: 250px;':''}">
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; {product.length>0?'height: 250px;':''}">
                                 {#each  product as value , key}
                                     <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product">
                                         <a  href="#"class="text-decoration-none">
@@ -398,6 +439,7 @@
                 </div>
             </div>
         </div>
+
         <div class="modal fade bd-model" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
                 <div class="modal-content">
@@ -409,55 +451,24 @@
                     </div>
                     <div class="modal-body">
               
-                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 250px;">
+                            <div class="row px-xl-5 pb-3" style="overflow: auto; height: 290px;">
                                 <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid"  src="img/cat-3.jpg" alt="" style="height: 70px;width: 100%;">
+                                 {#each  productScanner.list as value , key}
+                                    <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product" on:click={()=>{addProduct(value)}}>
+                                        <a  href="#"class="text-decoration-none">
+                                            <div class="cat-item d-flex align-items-center mb-4">
+                                                <div class="overflow-hidden" style="width: 120px; height: 120px;">
+                                                    <img class="img-fluid" src="{value.photo}" alt="" style="height: 119px;">
+                                                </div>
+                                                <div class="flex-fill pl-3">
+                                                    <h6>{value.name}</h6>
+                                                    <small class="text-body">100 Products</small>
+                                                    <small class="text-price">S/. {value.totalmoney}.00</small>
+                                                </div>
                                             </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Arroz Chaufa Amazonico</h6>
-                                                <small class="text-body">50 Unidades</small>
-                                                <small class="text-price">S/. 10.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-1.jpg" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Fideos a la Italiana</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 13.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-                                <div class="col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product"  on:click={()=>{car++;}}>
-                                    <a  href="#" class="text-decoration-none">
-                                        <div class="cat-item img-zoom d-flex align-items-center mb-4">
-                                            <div class="overflow-hidden" style="width: 100px; height: 70px;">
-                                                <img class="img-fluid" src="img/cat-4.jpg" alt="" style="height: 70px;">
-                                            </div>
-                                            <div class="flex-fill pl-3">
-                                                <h6>Arroz con pato</h6>
-                                                <small class="text-body">100 Products</small>
-                                                <small class="text-price">S/. 15.00</small>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                  <!-- svelte-ignore a11y-click-events-have-key-events -->
-
-                                
+                                        </a>
+                                    </div>
+                                {/each}
                             </div>
               
                     </div>
@@ -616,6 +627,11 @@
             height: 86vh;
         }
        
+    }
+
+    .btn-register{
+        background-color:whitesmoke;
+        border-radius: 10px;
     }
 
     .btn-car{
