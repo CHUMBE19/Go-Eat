@@ -129,6 +129,7 @@
         else {
             alert("registro pendiente");
             onRegisterCancel();
+            location.reload();
         }
     }
 
@@ -181,9 +182,9 @@
                                 <input bind:value={email} type="email" placeholder="email">
                                 <input bind:value={phone} type="number" placeholder="phone">
                             </div>
-                            <div class="modal-footer">  
+                            <div class="modal-footer">
                                 <button class="btn-register-cancel" data-dismiss="modal" aria-label="Close" on:click={onRegisterCancel}>cancelar</button>
-                                <button class="btn-register-confirm"  on:click={register}>Registrarme</button>
+                                    <button class="btn-register-confirm" on:click={register}>Registrarme</button>
                             </div>
                         </div>
                     </div>
