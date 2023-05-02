@@ -11,27 +11,14 @@
     let gameOpencasine=false;
     let products={list:[],pages:[],filters:{}};
     let showRegister = false;
-
-    const onRegister = () => {
-        showRegister = true;
-    }
-
-    const register = async () => {
-        alert("registro pendiente")
-    }
-
-    let productScanner={list:[],pages:[],filters:{}};
-
-
-
-    let totalMoney=0;
-    
+    let phone;
+    let email;
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
-
     let product = [];
-
     let inforQR={organization:"Sazon del Pato",tables:1,code:"CO-0001"};
+    let productScanner={list:[],pages:[],filters:{}};
+    let totalMoney=0;
     let qr = QRCode(0, 'L');
     qr.addData(JSON.stringify(inforQR));
     qr.make();
@@ -49,10 +36,10 @@
     async function initBarcodeScanner() {
         scanner = await Dynamsoft.DBR.BarcodeScanner.createInstance();
         scanner.onFrameRead = results => {
-        console.log(results);
-        for (let result of results) {
-            resultscanner(result);   
-        }
+            console.log(results);
+            for (let result of results) {
+                resultscanner(result);   
+            }
         };
         scanner.onUnduplicatedRead = (txt, result) => {};
         await scanner.show();
@@ -102,12 +89,12 @@
 
     }
 
-   function calculatePrice(product){
+    function calculatePrice(product){
         totalMoney=0;
         product.forEach(element => {
             totalMoney+= element.totalmoney;
         });
-   }; 
+    }; 
         
 
    const prepareSearch=(e)=>{
@@ -116,18 +103,34 @@
       }
     };
 
-
     const paymentProceed=()=>{
-
         toast("GAME: Para ganar premios y ofertas. compite y acomula puntos jugando con nosotros", {
             icon: '👏',
             style: ' background: #333; color: #fff;background-image: url("img/anuncio.avif");width:100%;height:70px; background-repeat: no-repeat, repeat; background-position: center;'
         });
-
         gameActive=true;
+    };
 
+    const onRegister = () => {
+        showRegister = true;
+    }
 
- };
+    const register = async () => {
+        validateInputs();
+    }
+
+    const onRegisterCancel = () => {
+        showRegister = false;
+    }
+
+    const validateInputs = () =>{
+        if(!email) return alert("Ingrese un correo válido");
+        if(!phone) return alert("Ingrese teléfono válido");
+        else {
+            alert("registro pendiente");
+            onRegisterCancel();
+        }
+    }
 
 </script>
 
@@ -161,47 +164,32 @@
                 </div>
 
                 <div class="col-lg-4 col-6 text-right">
-
-                    <button class="btn-register"  on:click={onRegister}>Registro</button>
+                    <!--button class="btn-register" data-toggle="modal" data-target="modal-fade-register" on:click={onRegister}>Registro</button-->
+                    <a href="#" class="btn register ml-3" data-toggle="modal" data-target="modal-fade-register">
+                        <button class="btn-register" data-toggle="modal" data-target="#myModal" on:click={onRegister}>Registro</button>
+                    </a>
                 </div>
 
-
-                <div>
-                    {#if showRegister}
-
-                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
-                        <p>Ingrese sus datos para acceder a más promociones y descuentos</p>
-                        <input type="email" placeholder="email">
-                        <input type="number" placeholder="phone">
-                        <button class="btn-register-confirm"  on:click={register}>Registrarme</button>
-                        
-
-                        <!--div class="modal fade bd-example-modal-sm"  tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel2" aria-hidden="true">
-                            <div class="modal-dialog modal-xl">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <button type="button" class="close" on:click={() => (showRegister = false)}>
-                                        <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <input type="email" placeholder="email">
-                                        <input type="number" placeholder="phone">
-                                    </div>
-                                    <div class="modal-footer">                                     
-                                        <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={register}>Registrarme</button>
-                                    </div>
-                                </div>
+                {#if showRegister}
+                <div class="modal fade" id="myModal">
+                    <div class="modal-dialog modal-small">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" > Regístrese para más promociones</h5>
                             </div>
-                        </div-->
-
-                    {/if}
+                            <div class="modal-body">
+                                <input bind:value={email} type="email" placeholder="email">
+                                <input bind:value={phone} type="number" placeholder="phone">
+                            </div>
+                            <div class="modal-footer">  
+                                <button class="btn-register-cancel" data-dismiss="modal" aria-label="Close" on:click={onRegisterCancel}>cancelar</button>
+                                <button class="btn-register-confirm"  on:click={register}>Registrarme</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                {/if}
 
-
-                
 
             </div>
         </div>
@@ -324,27 +312,6 @@
                     </div>
                 </div>
             </div>
-
-            <!--div class="modal fade bd-example-modal-sm"  tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel2" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" >Registro</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <button type="button" class="close" on:click={() => (showRegister = false)}>
-                            <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <input type="email" placeholder="email">
-                            <input type="number" placeholder="phone">
-                        </div>
-                        <div class="modal-footer">                                     
-                            <button type="button" class="btn btn-primary btn-car" data-dismiss="modal"  on:click={register}>Registrarme</button>
-                        </div>
-                    </div>
-                </div>
-            </div-->
 
             <div class="container-fluid">
                 
@@ -627,9 +594,17 @@
     }
 
     .btn-register-confirm{
-        background-color:greenyellow;
+        background-color:whitesmoke;
         border-radius: 10px;
+        border: 1px solid greenyellow;
     }
+
+    .btn-register-cancel{
+        background-color:whitesmoke;
+        border-radius: 10px;
+        border: 1px solid red;
+    }
+    
 
     .btn-car{
         width: 100%;
