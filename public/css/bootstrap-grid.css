@@ -952,10 +952,6 @@ html {
   }
 }
 
-.d-none {
-  display: none !important;
-}
-
 .d-inline {
   display: inline !important;
 }

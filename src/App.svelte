@@ -1,5 +1,4 @@
 <script>
-	export let name;
 	// @ts-ignore
 	import Home from "./components/home.svelte";
 

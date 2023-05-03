@@ -23,8 +23,6 @@
     let scanner = null;
     let product = [];
     let inforQR={organization:"Sazon del Pato",tables:1,code:"CO-0001"};
-    let productScanner={list:[],pages:[],filters:{}};
-    let totalMoney=0;
     let qr = QRCode(0, 'L');
     qr.addData(JSON.stringify(inforQR));
     qr.make();
@@ -140,7 +138,7 @@
             onRegisterCancel();
             location.reload();
         }
-    }
+    };
 
 </script>
 
@@ -174,31 +172,8 @@
                 </div>
 
                 <div class="col-lg-4 col-6 text-right">
-                    <!--button class="btn-register" data-toggle="modal" data-target="modal-fade-register" on:click={onRegister}>Registro</button-->
-                    <a href="#" class="btn register ml-3" data-toggle="modal" data-target="modal-fade-register">
-                        <button class="btn-register" data-toggle="modal" data-target="#myModal" on:click={onRegister}>Registro</button>
-                    </a>
+                       <button class="btn btn-primary btn-register" data-toggle="modal" data-target=".bd-example-modal-sigIn">Registro</button>
                 </div>
-
-                {#if showRegister}
-                <div class="modal fade" id="myModal">
-                    <div class="modal-dialog modal-small">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel"> <img src="img/goeat.png" width="40" height="40" > Regístrese para más promociones</h5>
-                            </div>
-                            <div class="modal-body">
-                                <input bind:value={email} type="email" placeholder="email">
-                                <input bind:value={phone} type="number" placeholder="phone">
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn-register-cancel" data-dismiss="modal" aria-label="Close" on:click={onRegisterCancel}>cancelar</button>
-                                    <button class="btn-register-confirm" on:click={register}>Registrarme</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {/if}
 
 
             </div>
@@ -360,6 +335,33 @@
             </a>
         </div>
 
+        
+        <div class="modal fade bd-example-modal-sigIn" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" style="padding-top: 80px;">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content-singIn">
+                    <div class="modal-header-singIn">
+                        <img class="rounded-circle" src="img/goeat.png">
+                    </div>
+                      
+                    <div class="modal-body">
+                        <h5 class="mt-1 mb-2" style="text-align: center;">Goeat Play and Win</h5>
+                        <form>
+                            <div class="mb-3">
+                              <label for="recipient-name" class="col-form-label">Email:</label>
+                              <input bind:value={email} type="email" class="form-control" id="recipient-name">
+                            </div>
+                            <div class="mb-3">
+                              <label for="message-text" class="col-form-label">Phone:</label>
+                              <input bind:value={phone} type="number" class="form-control" id="recipient-name">
+                            </div>
+                          </form>
+                          <div class="text-center mt-4 mb-4">
+                            <button type="submit" class="btn btn-cyan mt-1">Registrar <i class="fas fa-sign-in ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-xl">
@@ -494,14 +496,75 @@
 </main>
 
 <style>
+    
+    .modal-dialog .modal-content-singIn {
+        border: 0;
+        border-radius: .125rem;
+        -webkit-box-shadow: 0 5px 11px 0 rgba(0,0,0,0.18),0 4px 15px 0 rgba(0,0,0,0.15);
+        box-shadow: 0 5px 11px 0 rgba(0,0,0,0.18),0 4px 15px 0 rgba(0,0,0,0.15);
+    }
 
+    .modal-dialog .modal-header-singIn {
+        padding: 1.5rem;
+        margin: -6rem 0 -1rem;
+        text-align: center;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .text-center {
+        text-align: center !important;
+    }
+    .btn-cyan {
+        color: #fff;
+        background-color: #00bcd4 !important;
+        font-family: arial,sans-serif;
+        border:none;
+        -webkit-box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+    }
+
+    .btn-cyan:active{
+        background-color: #20555b !important;
+        -webkit-box-shadow: 0 2px 5px 0 rgba(0,0,0,0.16),0 2px 10px 0 rgba(0,0,0,0.12);
+    }
+
+    h5 {
+    font-size: 26px;
+    font-weight: 700;
+    background: -webkit-linear-gradient(#f602a6, #3a1ed7);
+        background-clip: border-box;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    }
+    .modal-header-singIn img {
+    width: 130px;
+    margin-right: auto;
+    margin-left: auto;
+    -webkit-box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    box-shadow: 0 8px 17px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    }
+
+    .rounded-circle {
+     border-radius: 50% !important;
+    }
     .img-game{
         border-radius: 50%;
     }
     #btn-mas{
         display: none;
     }
-    
+    .modal-content-singIn {
+        display: flex;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        width: 100%;
+        pointer-events: auto;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid rgba(0,0,0,0.2);
+        border-radius: 5px !important;
+        outline: 0;
+    }
     .redes a, .btn-mas label{
         display: block;
         text-decoration: none;
@@ -649,7 +712,13 @@
         float: right;
         margin-right: 5px;
     }
-
+    .modal-header-singIn {
+        max-width: 100%;
+        height: auto;
+        margin: -6rem 0 -1rem;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+    }
     .panel-menu{
         margin: 1px;
     }
