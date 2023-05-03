@@ -217,7 +217,7 @@
                         </button>
                         <div class="text-decoration-none d-block d-lg-none">
                             <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
-                            <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Registrar</button>
+                            <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
                         </div> 
                         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                             <div class="navbar-nav mr-auto py-0">
