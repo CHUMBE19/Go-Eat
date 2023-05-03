@@ -6,18 +6,13 @@
     import QRCode from 'qrcode-generator';
     
     let gameOpen=false;
-    let car=0;
     let gameActive=false;
     let gameOpencasine=false;
     let products={list:[],pages:[],filters:{}};
     let productScanner={list:[],pages:[],filters:{}};
     let totalMoney=0;
-
     let categories=["ALITAS","SANDWICHES","POSTRES","LUNCH","BOCADILLOS","COMPLEMENTOS","BEBIDAS","HAMBURGUESA","GUARNICION"];
-    
-    let showRegister = false;
-    let phone;
-    let email;
+    let user={};
 
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
@@ -88,6 +83,21 @@
         });
       }     
     };
+
+
+    const save=async()=>{   
+        try {
+         var data= await server.saveUser(user);
+         console.log("user",data);
+         if(data.user_id){
+            toast.success("Registro Exitoso");
+         }
+        
+      } catch (e) {
+        toast.error("Error al registrar"+e);
+      }  
+    }
+
 
     function addProduct(value) {
         product = [...product, value];
@@ -168,11 +178,11 @@
                             </span>
                         </div>
                     </div>
-        
                 </div>
 
                 <div class="col-lg-4 col-6 text-right">
-                       <button class="btn btn-primary btn-register" data-toggle="modal" data-target=".bd-example-modal-sigIn">Registro</button>
+                       <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
+                       <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
                 </div>
 
 
@@ -205,10 +215,10 @@
                         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                             <span class="navbar-toggler-icon"></span>
                         </button>
-                        <a href="" class="text-decoration-none d-block d-lg-none">
-                            <span class="h1 text-uppercase text-dark bg-light px-2">GO</span>
-                            <span class="h1 text-uppercase text-light bg-primary px-2 ml-n1">Eat</span>
-                        </a>
+                        <div class="text-decoration-none d-block d-lg-none">
+                            <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
+                            <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Registrar</button>
+                        </div> 
                         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                             <div class="navbar-nav mr-auto py-0">
                                 <a href="index.html" class="nav-item nav-link active">Home</a>
@@ -335,7 +345,8 @@
             </a>
         </div>
 
-        
+
+         
         <div class="modal fade bd-example-modal-sigIn" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" style="padding-top: 80px;">
             <div class="modal-dialog modal-sm">
                 <div class="modal-content-singIn">
@@ -344,19 +355,49 @@
                     </div>
                       
                     <div class="modal-body">
-                        <h5 class="mt-1 mb-2" style="text-align: center;">Goeat Play and Win</h5>
+                        <h5 class="mt-1 mb-4" style="text-align: center;">Inisiar Sesion</h5>
                         <form>
-                            <div class="mb-3">
-                              <label for="recipient-name" class="col-form-label">Email:</label>
-                              <input bind:value={email} type="email" class="form-control" id="recipient-name">
+                            <div class="mb-4 mt-1">
+                                <input bind:value={user.username} type="text" class="form-control input-sign" id="recipient-name" placeholder="Usuario">
+                              </div><br>
+                            <div class="mb-4 mt-1">
+                              <input bind:value={user.password} type="password" class="form-control input-sign" id="recipient-name" placeholder="Contraseña">
                             </div>
-                            <div class="mb-3">
-                              <label for="message-text" class="col-form-label">Phone:</label>
-                              <input bind:value={phone} type="number" class="form-control" id="recipient-name">
+                          </form>
+                          <div class="text-center mt-4 mb-4" style="margin-top: 9px;">
+                            <button type="submit" class="btn btn-cyan mt-1">LOGIN<i class="fas fa-sign-in ml-1"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <div class="modal fade bd-example-modal-register" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true" style="padding-top: 80px;">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content-singIn">
+                    <div class="modal-header-singIn">
+                        <img class="rounded-circle" src="img/goeat.png">
+                    </div>
+                      
+                    <div class="modal-body">
+                        <h5 class="mt-1 mb-4" style="text-align: center;">Registro de Usuario</h5>
+                        <form>
+                            <div class="mb-4 mt-1">
+                                <input bind:value={user.firstname} type="email" class="form-control input-sign" id="recipient-name" placeholder="Nombre">
+                              </div>
+                            <div class="mb-4 mt-1">
+                              <input bind:value={user.email} type="email" class="form-control input-sign" id="recipient-name" placeholder="Email">
+                            </div>
+                            <div class="mb-4 mt-1">
+                              <input bind:value={user.phone} type="text" class="form-control input-sign" id="recipient-name"  placeholder="Phone">
                             </div>
                           </form>
                           <div class="text-center mt-4 mb-4">
-                            <button type="submit" class="btn btn-cyan mt-1">Registrar <i class="fas fa-sign-in ml-1"></i></button>
+                            <button type="submit" class="btn btn-cyan mt-1" data-dismiss="modal" on:click={save}>Registrar<i class="fas fa-sign-in ml-1"></i></button>
+                            <span class="alert-register">
+                                Para obtener su usuario y contraseña ingrese a su correo ingresado.
+                            </span>
                         </div>
                     </div>
                 </div>
@@ -766,6 +807,18 @@
         font-size: medium;
         height: 40vh;
         width: 40vw;
+    }
+
+    .input-sign{
+        border: none;
+        border-bottom:1px solid rgb(218, 209, 209);
+    }
+
+    .alert-register{
+        display: block;
+        font-size: 11px;
+        margin-top: 15px;
+        color:rgb(161, 158, 158);
     }
 
 </style>

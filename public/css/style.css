@@ -9735,3 +9735,46 @@ a.text-dark:hover, a.text-dark:focus {
     transform: translateY(-15px);
   }
 }
+
+.notifyjs-bootstrap-shadow{
+	box-shadow:1px 3px 3px #ccc;
+}
+
+.notifyjs-bootstrap-base{
+    border: solid 1px grey !important;
+    margin: 70px 0px;
+}
+
+.btn:focus, .alertify button:focus, .ajs-button:focus{
+	box-shadow:1px 5px 5px #ffd974;
+	position:relative;
+	
+}
+
+
+@keyframes downup_focus_indicator {
+  from {bottom: -25px;}
+  to {bottom: -20px;}
+}
+@keyframes flash_focus_indicator {
+	from{opacity: 1;}
+	to{opacity:0.3;}
+}
+input.form-control{
+	box-shadow:none !important;
+	transition: border-radius 0.5s, box-shadow 1s;
+	
+}
+input.form-control:focus, textarea.form-control:focus{
+	border:1px solid #ffd974 !important;
+	box-shadow:1px 1px 5px #aaa !important;
+	border-radius:10px;
+}
+.btn:focus::after {
+	content:"\01F53A";
+	position: absolute;
+	bottom:-22px;
+	right:0px;
+	font-size:15px;
+	animation: flash_focus_indicator 1.5s infinite;
+}

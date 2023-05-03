@@ -38,7 +38,11 @@ const ServerConnection = ( ()=>{
        return httpGetPromise(`${conf.API}/businessobject/list`, params);
     }
 
-    return {getproductos}
+    const saveUser=(payload)=>{
+        return httpPostPromise(`${conf.API}/user/oauth2/save`, payload);
+    }
+
+    return {getproductos,saveUser}
 } ) ()
 
 export default ServerConnection
