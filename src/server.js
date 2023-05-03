@@ -42,7 +42,11 @@ const ServerConnection = ( ()=>{
         return httpPostPromise(`${conf.API}/user/oauth2/save`, payload);
     }
 
-    return {getproductos,saveUser}
+    const singIn=(payload)=>{
+        return httpPostPromise(`${conf.API}/user/login`, payload);
+    }
+
+    return {getproductos,saveUser,singIn}
 } ) ()
 
 export default ServerConnection

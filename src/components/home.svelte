@@ -17,6 +17,7 @@
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
     let product = [];
+    let token;
     let inforQR={organization:"Sazon del Pato",tables:1,code:"CO-0001"};
     let qr = QRCode(0, 'L');
     qr.addData(JSON.stringify(inforQR));
@@ -63,6 +64,7 @@
     }
  
     onMount(async () => {
+      token= sessionStorage.getItem("token");
       await getProducts();
     });
 
@@ -95,6 +97,17 @@
         
       } catch (e) {
         toast.error("Error al registrar"+e);
+      }  
+    }
+
+    const singIn=async()=>{   
+        try {
+         var data= await server.singIn(user);
+         sessionStorage.setItem("token",data.token);
+
+        
+      } catch (e) {
+        toast.error("Error al Inisiar sesion"+e);
       }  
     }
 
@@ -181,8 +194,12 @@
                 </div>
 
                 <div class="col-lg-4 col-6 text-right">
-                       <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
-                       <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
+                    {#if token}
+                        <button class="btn btn-primary">Salir</button>
+                    {:else}
+                        <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
+                        <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
+                    {/if}
                 </div>
 
 
@@ -216,8 +233,14 @@
                             <span class="navbar-toggler-icon"></span>
                         </button>
                         <div class="text-decoration-none d-block d-lg-none">
-                            <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
-                            <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
+                            {#if token}
+                               <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Salir</button>
+                                {:else}
+                                <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
+                                <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
+                            {/if}
+                           
+                            
                         </div> 
                         <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
                             <div class="navbar-nav mr-auto py-0">
@@ -365,7 +388,7 @@
                             </div>
                           </form>
                           <div class="text-center mt-4 mb-4" style="margin-top: 9px;">
-                            <button type="submit" class="btn btn-cyan mt-1">LOGIN<i class="fas fa-sign-in ml-1"></i></button>
+                            <button type="submit" class="btn btn-cyan mt-1" data-dismiss="modal" on:click={singIn}>LOGIN<i class="fas fa-sign-in ml-1"></i></button>
                         </div>
                     </div>
                 </div>

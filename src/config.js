@@ -1,13 +1,13 @@
 const Configuration = ( ()=>{
     const local = {
-        API:"https://goeat.azurewebsites.net/api/",
+        API:"https://goeat.azurewebsites.net/api",
     }
     const dev = {
         API:"http://localhost:8086/api",
     }
 
     const prod = {
-        API: "https://goeat.azurewebsites.net/api/",
+        API: "https://goeat.azurewebsites.net/api",
     }
 
     const configMap = new Map()
