@@ -87,6 +87,13 @@
     };
 
 
+    const singOut=()=>{
+        sessionStorage.clear("token");
+        sessionStorage.clear("username");
+         window.location.reload();  
+    }
+
+
     const save=async()=>{   
         try {
          var data= await server.saveUser(user);
@@ -104,8 +111,10 @@
         try {
          var data= await server.singIn(user);
          sessionStorage.setItem("token",data.token);
-
-        
+         sessionStorage.setItem("username",data.username);
+            if(data){
+                window.location.reload();
+            }
       } catch (e) {
         toast.error("Error al Inisiar sesion"+e);
       }  
@@ -165,9 +174,6 @@
 
 </script>
 
-    
-
-
 <main>
 
     <body><Toaster />
@@ -195,7 +201,7 @@
 
                 <div class="col-lg-4 col-6 text-right">
                     {#if token}
-                        <button class="btn btn-primary">Salir</button>
+                        <button class="btn btn-primary" on:click={singOut}>Salir</button>
                     {:else}
                         <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
                         <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>
@@ -206,8 +212,6 @@
             </div>
         </div>
         <!-- Topbar End -->
-    
-    
         <!-- Navbar Start -->
         <div class="container-fluid bg-dark mb-30">
             <div class="row px-xl-5">
@@ -232,9 +236,12 @@
                         <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
                             <span class="navbar-toggler-icon"></span>
                         </button>
+                        {#if token}
+                          <h6 style="color: white; font-size: 10px;">Hola, {sessionStorage.getItem("username")}</h6>
+                        {/if}
                         <div class="text-decoration-none d-block d-lg-none">
                             {#if token}
-                               <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Salir</button>
+                               <button class="btn btn-primary" style="width: 35px;height: 23px;font-size: 12px;margin-top:-9px;padding: 5px;border-radius: 3px;" on:click={singOut}><span style="padding-bottom:9px;color: white;">Salir</span></button>
                                 {:else}
                                 <button class="btn btn-secondary" data-toggle="modal" data-target=".bd-example-modal-sigIn">Login</button>
                                 <button class="btn btn-primary" data-toggle="modal" data-target=".bd-example-modal-register">Registrar</button>

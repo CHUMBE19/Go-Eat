@@ -6051,26 +6051,26 @@ var app = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[42] = list[i];
-    	child_ctx[44] = i;
+    	child_ctx[43] = list[i];
+    	child_ctx[45] = i;
     	return child_ctx;
     }
 
     function get_each_context_1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[42] = list[i];
-    	child_ctx[44] = i;
+    	child_ctx[43] = list[i];
+    	child_ctx[45] = i;
     	return child_ctx;
     }
 
     function get_each_context_2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[42] = list[i];
-    	child_ctx[44] = i;
+    	child_ctx[43] = list[i];
+    	child_ctx[45] = i;
     	return child_ctx;
     }
 
-    // (199:20) {:else}
+    // (205:20) {:else}
     function create_else_block_1(ctx) {
     	let button0;
     	let t1;
@@ -6086,17 +6086,18 @@ var app = (function () {
     			attr_dev(button0, "class", "btn btn-secondary");
     			attr_dev(button0, "data-toggle", "modal");
     			attr_dev(button0, "data-target", ".bd-example-modal-sigIn");
-    			add_location(button0, file$1, 199, 24, 6512);
+    			add_location(button0, file$1, 205, 24, 6807);
     			attr_dev(button1, "class", "btn btn-primary");
     			attr_dev(button1, "data-toggle", "modal");
     			attr_dev(button1, "data-target", ".bd-example-modal-register");
-    			add_location(button1, file$1, 200, 24, 6644);
+    			add_location(button1, file$1, 206, 24, 6939);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, button1, anchor);
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button0);
     			if (detaching) detach_dev(t1);
@@ -6108,29 +6109,71 @@ var app = (function () {
     		block,
     		id: create_else_block_1.name,
     		type: "else",
-    		source: "(199:20) {:else}",
+    		source: "(205:20) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (197:20) {#if token}
-    function create_if_block_4(ctx) {
+    // (203:20) {#if token}
+    function create_if_block_5(ctx) {
     	let button;
+    	let mounted;
+    	let dispose;
 
     	const block = {
     		c: function create() {
     			button = element("button");
     			button.textContent = "Salir";
     			attr_dev(button, "class", "btn btn-primary");
-    			add_location(button, file$1, 197, 24, 6411);
+    			add_location(button, file$1, 203, 24, 6687);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*singOut*/ ctx[11], false, false, false, false);
+    				mounted = true;
+    			}
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_if_block_5.name,
+    		type: "if",
+    		source: "(203:20) {#if token}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
+    // (239:24) {#if token}
+    function create_if_block_4(ctx) {
+    	let h6;
+
+    	const block = {
+    		c: function create() {
+    			h6 = element("h6");
+    			h6.textContent = `Hola, ${sessionStorage.getItem("username")}`;
+    			set_style(h6, "color", "white");
+    			set_style(h6, "font-size", "10px");
+    			add_location(h6, file$1, 239, 26, 8986);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_dev(target, h6, anchor);
+    		},
+    		p: noop,
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(h6);
     		}
     	};
 
@@ -6138,14 +6181,14 @@ var app = (function () {
     		block,
     		id: create_if_block_4.name,
     		type: "if",
-    		source: "(197:20) {#if token}",
+    		source: "(239:24) {#if token}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (238:32) {:else}
+    // (245:32) {:else}
     function create_else_block(ctx) {
     	let button0;
     	let t1;
@@ -6161,17 +6204,18 @@ var app = (function () {
     			attr_dev(button0, "class", "btn btn-secondary");
     			attr_dev(button0, "data-toggle", "modal");
     			attr_dev(button0, "data-target", ".bd-example-modal-sigIn");
-    			add_location(button0, file$1, 238, 32, 8969);
+    			add_location(button0, file$1, 245, 32, 9551);
     			attr_dev(button1, "class", "btn btn-primary");
     			attr_dev(button1, "data-toggle", "modal");
     			attr_dev(button1, "data-target", ".bd-example-modal-register");
-    			add_location(button1, file$1, 239, 32, 9109);
+    			add_location(button1, file$1, 246, 32, 9691);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button0, anchor);
     			insert_dev(target, t1, anchor);
     			insert_dev(target, button1, anchor);
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button0);
     			if (detaching) detach_dev(t1);
@@ -6183,31 +6227,51 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(238:32) {:else}",
+    		source: "(245:32) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (236:28) {#if token}
+    // (243:28) {#if token}
     function create_if_block_3(ctx) {
     	let button;
+    	let span;
+    	let mounted;
+    	let dispose;
 
     	const block = {
     		c: function create() {
     			button = element("button");
-    			button.textContent = "Salir";
+    			span = element("span");
+    			span.textContent = "Salir";
+    			set_style(span, "padding-bottom", "9px");
+    			set_style(span, "color", "white");
+    			add_location(span, file$1, 243, 180, 9408);
     			attr_dev(button, "class", "btn btn-primary");
-    			attr_dev(button, "data-toggle", "modal");
-    			attr_dev(button, "data-target", ".bd-example-modal-sigIn");
-    			add_location(button, file$1, 236, 31, 8790);
+    			set_style(button, "width", "35px");
+    			set_style(button, "height", "23px");
+    			set_style(button, "font-size", "12px");
+    			set_style(button, "margin-top", "-9px");
+    			set_style(button, "padding", "5px");
+    			set_style(button, "border-radius", "3px");
+    			add_location(button, file$1, 243, 31, 9259);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, button, anchor);
+    			append_dev(button, span);
+
+    			if (!mounted) {
+    				dispose = listen_dev(button, "click", /*singOut*/ ctx[11], false, false, false, false);
+    				mounted = true;
+    			}
     		},
+    		p: noop,
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(button);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -6215,14 +6279,14 @@ var app = (function () {
     		block,
     		id: create_if_block_3.name,
     		type: "if",
-    		source: "(236:28) {#if token}",
+    		source: "(243:28) {#if token}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (338:20) {#each  products.list as value , key}
+    // (345:20) {#each  products.list as value , key}
     function create_each_block_2(ctx) {
     	let div3;
     	let a;
@@ -6233,14 +6297,14 @@ var app = (function () {
     	let t0;
     	let div1;
     	let h6;
-    	let t1_value = /*value*/ ctx[42].name + "";
+    	let t1_value = /*value*/ ctx[43].name + "";
     	let t1;
     	let t2;
     	let small0;
     	let t4;
     	let small1;
     	let t5;
-    	let t6_value = /*value*/ ctx[42].totalmoney + "";
+    	let t6_value = /*value*/ ctx[43].totalmoney + "";
     	let t6;
     	let t7;
     	let t8;
@@ -6248,7 +6312,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler() {
-    		return /*click_handler*/ ctx[18](/*value*/ ctx[42]);
+    		return /*click_handler*/ ctx[19](/*value*/ ctx[43]);
     	}
 
     	const block = {
@@ -6272,28 +6336,28 @@ var app = (function () {
     			t7 = text(".00");
     			t8 = space();
     			attr_dev(img, "class", "img-fluid");
-    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			set_style(img, "height", "119px");
-    			add_location(img, file$1, 343, 40, 16513);
+    			add_location(img, file$1, 350, 40, 17095);
     			attr_dev(div0, "class", "overflow-hidden");
     			set_style(div0, "width", "120px");
     			set_style(div0, "height", "120px");
-    			add_location(div0, file$1, 342, 36, 16405);
-    			add_location(h6, file$1, 346, 40, 16738);
+    			add_location(div0, file$1, 349, 36, 16987);
+    			add_location(h6, file$1, 353, 40, 17320);
     			attr_dev(small0, "class", "text-body");
-    			add_location(small0, file$1, 347, 40, 16801);
+    			add_location(small0, file$1, 354, 40, 17383);
     			attr_dev(small1, "class", "text-price svelte-z8vot3");
-    			add_location(small1, file$1, 348, 40, 16888);
+    			add_location(small1, file$1, 355, 40, 17470);
     			attr_dev(div1, "class", "flex-fill pl-3");
-    			add_location(div1, file$1, 345, 36, 16668);
+    			add_location(div1, file$1, 352, 36, 17250);
     			attr_dev(div2, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div2, file$1, 341, 32, 16314);
+    			add_location(div2, file$1, 348, 32, 16896);
     			attr_dev(a, "href", "#");
     			attr_dev(a, "class", "text-decoration-none");
-    			add_location(a, file$1, 340, 28, 16239);
+    			add_location(a, file$1, 347, 28, 16821);
     			attr_dev(div3, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-z8vot3");
-    			add_location(div3, file$1, 339, 24, 16114);
+    			add_location(div3, file$1, 346, 24, 16696);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -6322,12 +6386,12 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty[0] & /*products*/ 8 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) {
+    			if (dirty[0] & /*products*/ 8 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty[0] & /*products*/ 8 && t1_value !== (t1_value = /*value*/ ctx[42].name + "")) set_data_dev(t1, t1_value);
-    			if (dirty[0] & /*products*/ 8 && t6_value !== (t6_value = /*value*/ ctx[42].totalmoney + "")) set_data_dev(t6, t6_value);
+    			if (dirty[0] & /*products*/ 8 && t1_value !== (t1_value = /*value*/ ctx[43].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty[0] & /*products*/ 8 && t6_value !== (t6_value = /*value*/ ctx[43].totalmoney + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div3);
@@ -6340,14 +6404,14 @@ var app = (function () {
     		block,
     		id: create_each_block_2.name,
     		type: "each",
-    		source: "(338:20) {#each  products.list as value , key}",
+    		source: "(345:20) {#each  products.list as value , key}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (442:32) {#each  product as value , key}
+    // (449:32) {#each  product as value , key}
     function create_each_block_1(ctx) {
     	let div3;
     	let a;
@@ -6358,14 +6422,14 @@ var app = (function () {
     	let t0;
     	let div1;
     	let h6;
-    	let t1_value = /*value*/ ctx[42].name + "";
+    	let t1_value = /*value*/ ctx[43].name + "";
     	let t1;
     	let t2;
     	let small0;
     	let t4;
     	let small1;
     	let t5;
-    	let t6_value = /*value*/ ctx[42].totalmoney + "";
+    	let t6_value = /*value*/ ctx[43].totalmoney + "";
     	let t6;
     	let t7;
     	let t8;
@@ -6391,28 +6455,28 @@ var app = (function () {
     			t7 = text(".00");
     			t8 = space();
     			attr_dev(img, "class", "img-fluid");
-    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			set_style(img, "height", "119px");
-    			add_location(img, file$1, 446, 52, 22610);
+    			add_location(img, file$1, 453, 52, 23192);
     			attr_dev(div0, "class", "overflow-hidden");
     			set_style(div0, "width", "120px");
     			set_style(div0, "height", "120px");
-    			add_location(div0, file$1, 445, 48, 22490);
-    			add_location(h6, file$1, 449, 52, 22871);
+    			add_location(div0, file$1, 452, 48, 23072);
+    			add_location(h6, file$1, 456, 52, 23453);
     			attr_dev(small0, "class", "text-body");
-    			add_location(small0, file$1, 450, 52, 22946);
+    			add_location(small0, file$1, 457, 52, 23528);
     			attr_dev(small1, "class", "text-price svelte-z8vot3");
-    			add_location(small1, file$1, 451, 52, 23045);
+    			add_location(small1, file$1, 458, 52, 23627);
     			attr_dev(div1, "class", "flex-fill pl-3");
-    			add_location(div1, file$1, 448, 48, 22789);
+    			add_location(div1, file$1, 455, 48, 23371);
     			attr_dev(div2, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div2, file$1, 444, 44, 22387);
+    			add_location(div2, file$1, 451, 44, 22969);
     			attr_dev(a, "href", "#");
     			attr_dev(a, "class", "text-decoration-none");
-    			add_location(a, file$1, 443, 40, 22300);
+    			add_location(a, file$1, 450, 40, 22882);
     			attr_dev(div3, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-z8vot3");
-    			add_location(div3, file$1, 442, 36, 22198);
+    			add_location(div3, file$1, 449, 36, 22780);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -6434,12 +6498,12 @@ var app = (function () {
     			append_dev(div3, t8);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty[0] & /*product*/ 128 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) {
+    			if (dirty[0] & /*product*/ 128 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty[0] & /*product*/ 128 && t1_value !== (t1_value = /*value*/ ctx[42].name + "")) set_data_dev(t1, t1_value);
-    			if (dirty[0] & /*product*/ 128 && t6_value !== (t6_value = /*value*/ ctx[42].totalmoney + "")) set_data_dev(t6, t6_value);
+    			if (dirty[0] & /*product*/ 128 && t1_value !== (t1_value = /*value*/ ctx[43].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty[0] & /*product*/ 128 && t6_value !== (t6_value = /*value*/ ctx[43].totalmoney + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div3);
@@ -6450,14 +6514,14 @@ var app = (function () {
     		block,
     		id: create_each_block_1.name,
     		type: "each",
-    		source: "(442:32) {#each  product as value , key}",
+    		source: "(449:32) {#each  product as value , key}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (491:33) {#each  productScanner.list as value , key}
+    // (498:33) {#each  productScanner.list as value , key}
     function create_each_block(ctx) {
     	let div3;
     	let a;
@@ -6468,14 +6532,14 @@ var app = (function () {
     	let t0;
     	let div1;
     	let h6;
-    	let t1_value = /*value*/ ctx[42].name + "";
+    	let t1_value = /*value*/ ctx[43].name + "";
     	let t1;
     	let t2;
     	let small0;
     	let t4;
     	let small1;
     	let t5;
-    	let t6_value = /*value*/ ctx[42].totalmoney + "";
+    	let t6_value = /*value*/ ctx[43].totalmoney + "";
     	let t6;
     	let t7;
     	let t8;
@@ -6483,7 +6547,7 @@ var app = (function () {
     	let dispose;
 
     	function click_handler_1() {
-    		return /*click_handler_1*/ ctx[24](/*value*/ ctx[42]);
+    		return /*click_handler_1*/ ctx[25](/*value*/ ctx[43]);
     	}
 
     	const block = {
@@ -6507,28 +6571,28 @@ var app = (function () {
     			t7 = text(".00");
     			t8 = space();
     			attr_dev(img, "class", "img-fluid");
-    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) attr_dev(img, "src", img_src_value);
+    			if (!src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) attr_dev(img, "src", img_src_value);
     			attr_dev(img, "alt", "");
     			set_style(img, "height", "119px");
-    			add_location(img, file$1, 495, 52, 25690);
+    			add_location(img, file$1, 502, 52, 26272);
     			attr_dev(div0, "class", "overflow-hidden");
     			set_style(div0, "width", "120px");
     			set_style(div0, "height", "120px");
-    			add_location(div0, file$1, 494, 48, 25570);
-    			add_location(h6, file$1, 498, 52, 25951);
+    			add_location(div0, file$1, 501, 48, 26152);
+    			add_location(h6, file$1, 505, 52, 26533);
     			attr_dev(small0, "class", "text-body");
-    			add_location(small0, file$1, 499, 52, 26026);
+    			add_location(small0, file$1, 506, 52, 26608);
     			attr_dev(small1, "class", "text-price svelte-z8vot3");
-    			add_location(small1, file$1, 500, 52, 26125);
+    			add_location(small1, file$1, 507, 52, 26707);
     			attr_dev(div1, "class", "flex-fill pl-3");
-    			add_location(div1, file$1, 497, 48, 25869);
+    			add_location(div1, file$1, 504, 48, 26451);
     			attr_dev(div2, "class", "cat-item d-flex align-items-center mb-4");
-    			add_location(div2, file$1, 493, 44, 25467);
+    			add_location(div2, file$1, 500, 44, 26049);
     			attr_dev(a, "href", "#");
     			attr_dev(a, "class", "text-decoration-none");
-    			add_location(a, file$1, 492, 40, 25380);
+    			add_location(a, file$1, 499, 40, 25962);
     			attr_dev(div3, "class", "col-lg-3 col-md-4 col-sm-6 pb-1 cursor-product svelte-z8vot3");
-    			add_location(div3, file$1, 491, 36, 25243);
+    			add_location(div3, file$1, 498, 36, 25825);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div3, anchor);
@@ -6557,12 +6621,12 @@ var app = (function () {
     		p: function update(new_ctx, dirty) {
     			ctx = new_ctx;
 
-    			if (dirty[0] & /*productScanner*/ 16 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[42].photo)) {
+    			if (dirty[0] & /*productScanner*/ 16 && !src_url_equal(img.src, img_src_value = /*value*/ ctx[43].photo)) {
     				attr_dev(img, "src", img_src_value);
     			}
 
-    			if (dirty[0] & /*productScanner*/ 16 && t1_value !== (t1_value = /*value*/ ctx[42].name + "")) set_data_dev(t1, t1_value);
-    			if (dirty[0] & /*productScanner*/ 16 && t6_value !== (t6_value = /*value*/ ctx[42].totalmoney + "")) set_data_dev(t6, t6_value);
+    			if (dirty[0] & /*productScanner*/ 16 && t1_value !== (t1_value = /*value*/ ctx[43].name + "")) set_data_dev(t1, t1_value);
+    			if (dirty[0] & /*productScanner*/ 16 && t6_value !== (t6_value = /*value*/ ctx[43].totalmoney + "")) set_data_dev(t6, t6_value);
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div3);
@@ -6575,14 +6639,14 @@ var app = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(491:33) {#each  productScanner.list as value , key}",
+    		source: "(498:33) {#each  productScanner.list as value , key}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (536:8) {#if gameActive}
+    // (543:8) {#if gameActive}
     function create_if_block_2(ctx) {
     	let div2;
     	let input;
@@ -6618,34 +6682,34 @@ var app = (function () {
     			attr_dev(input, "type", "checkbox");
     			attr_dev(input, "id", "btn-mas");
     			attr_dev(input, "class", "svelte-z8vot3");
-    			add_location(input, file$1, 537, 16, 27940);
+    			add_location(input, file$1, 544, 16, 28522);
     			attr_dev(img0, "class", "img-game svelte-z8vot3");
     			if (!src_url_equal(img0.src, img0_src_value = "img/casino.jpg")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "45px");
     			attr_dev(img0, "height", "45px");
     			attr_dev(img0, "alt", "");
-    			add_location(img0, file$1, 539, 34, 28049);
+    			add_location(img0, file$1, 546, 34, 28631);
     			attr_dev(a0, "href", "#");
     			attr_dev(a0, "class", "svelte-z8vot3");
-    			add_location(a0, file$1, 539, 20, 28035);
+    			add_location(a0, file$1, 546, 20, 28617);
     			attr_dev(img1, "class", "img-game svelte-z8vot3");
     			if (!src_url_equal(img1.src, img1_src_value = "img/ruleta.jpg")) attr_dev(img1, "src", img1_src_value);
     			attr_dev(img1, "width", "45px");
     			attr_dev(img1, "height", "45px");
     			attr_dev(img1, "alt", "");
-    			add_location(img1, file$1, 540, 34, 28198);
+    			add_location(img1, file$1, 547, 34, 28780);
     			attr_dev(a1, "href", "#");
     			attr_dev(a1, "class", "svelte-z8vot3");
-    			add_location(a1, file$1, 540, 20, 28184);
+    			add_location(a1, file$1, 547, 20, 28766);
     			attr_dev(div0, "class", "redes svelte-z8vot3");
-    			add_location(div0, file$1, 538, 16, 27994);
+    			add_location(div0, file$1, 545, 16, 28576);
     			attr_dev(label, "for", "btn-mas");
     			attr_dev(label, "class", "fa fa-plus svelte-z8vot3");
-    			add_location(label, file$1, 543, 20, 28402);
+    			add_location(label, file$1, 550, 20, 28984);
     			attr_dev(div1, "class", "btn-mas svelte-z8vot3");
-    			add_location(div1, file$1, 542, 16, 28359);
+    			add_location(div1, file$1, 549, 16, 28941);
     			attr_dev(div2, "class", "container svelte-z8vot3");
-    			add_location(div2, file$1, 536, 12, 27899);
+    			add_location(div2, file$1, 543, 12, 28481);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, div2, anchor);
@@ -6663,8 +6727,8 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(img0, "click", /*click_handler_3*/ ctx[26], false, false, false, false),
-    					listen_dev(img1, "click", /*click_handler_4*/ ctx[27], false, false, false, false)
+    					listen_dev(img0, "click", /*click_handler_3*/ ctx[27], false, false, false, false),
+    					listen_dev(img1, "click", /*click_handler_4*/ ctx[28], false, false, false, false)
     				];
 
     				mounted = true;
@@ -6682,14 +6746,14 @@ var app = (function () {
     		block,
     		id: create_if_block_2.name,
     		type: "if",
-    		source: "(536:8) {#if gameActive}",
+    		source: "(543:8) {#if gameActive}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (550:8) {#if gameOpen==true}
+    // (557:8) {#if gameOpen==true}
     function create_if_block_1(ctx) {
     	let i;
     	let t;
@@ -6709,13 +6773,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 550, 12, 28565);
+    			add_location(i, file$1, 557, 12, 29147);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://netent-static.casinomodule.com/games/frenchroulette3_mobile_html/game/frenchroulette3_mobile_html.xhtml?staticServer=https%3A%2F%2Fnetent-static.casinomodule.com%2F&targetElement=netentgame&flashParams.bgcolor=000000&gameId=frenchroulette3_not_mobile&mobileParams.lobbyURL=https%253A%252F%252Fgames.netent.com%252Ftable-games%252Ffrench-roulette-slot%252F&server=https%3A%2F%2Fnetent-game.casinomodule.com%2F&lang=es&sessId=DEMO-0037068596-EUR&operatorId=default")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 551, 12, 28737);
+    			add_location(iframe, file$1, 558, 12, 29319);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -6723,7 +6787,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_5*/ ctx[28], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_5*/ ctx[29], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -6741,14 +6805,14 @@ var app = (function () {
     		block,
     		id: create_if_block_1.name,
     		type: "if",
-    		source: "(550:8) {#if gameOpen==true}",
+    		source: "(557:8) {#if gameOpen==true}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (555:8) {#if gameOpencasine==true}
+    // (562:8) {#if gameOpencasine==true}
     function create_if_block(ctx) {
     	let i;
     	let t;
@@ -6768,13 +6832,13 @@ var app = (function () {
     			set_style(i, "margin", "15px");
     			set_style(i, "margin-right", "18px");
     			set_style(i, "cursor", "pointer");
-    			add_location(i, file$1, 555, 12, 29365);
+    			add_location(i, file$1, 562, 12, 29947);
     			attr_dev(iframe, "class", "back-to-iframe");
     			attr_dev(iframe, "width", "100%");
     			attr_dev(iframe, "height", "100%");
     			if (!src_url_equal(iframe.src, iframe_src_value = "https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6")) attr_dev(iframe, "src", iframe_src_value);
     			attr_dev(iframe, "frameborder", "0");
-    			add_location(iframe, file$1, 556, 12, 29543);
+    			add_location(iframe, file$1, 563, 12, 30125);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, i, anchor);
@@ -6782,7 +6846,7 @@ var app = (function () {
     			insert_dev(target, iframe, anchor);
 
     			if (!mounted) {
-    				dispose = listen_dev(i, "click", /*click_handler_6*/ ctx[29], false, false, false, false);
+    				dispose = listen_dev(i, "click", /*click_handler_6*/ ctx[30], false, false, false, false);
     				mounted = true;
     			}
     		},
@@ -6800,7 +6864,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(555:8) {#if gameOpencasine==true}",
+    		source: "(562:8) {#if gameOpencasine==true}",
     		ctx
     	});
 
@@ -6863,41 +6927,42 @@ var app = (function () {
     	let button0;
     	let span3;
     	let t23;
-    	let div11;
     	let t24;
+    	let div11;
+    	let t25;
     	let div16;
     	let div14;
     	let a7;
-    	let t26;
+    	let t27;
     	let a8;
-    	let t28;
+    	let t29;
     	let a9;
-    	let t30;
+    	let t31;
     	let div13;
     	let a10;
-    	let t31;
-    	let i3;
     	let t32;
+    	let i3;
+    	let t33;
     	let div12;
     	let a11;
-    	let t34;
+    	let t35;
     	let a12;
-    	let t36;
+    	let t37;
     	let a13;
-    	let t38;
+    	let t39;
     	let div15;
     	let a14;
     	let i4;
-    	let t39;
+    	let t40;
     	let span4;
-    	let t41;
+    	let t42;
     	let a15;
     	let i5;
-    	let t42;
-    	let span5;
-    	let t43_value = /*product*/ ctx[7].length + "";
     	let t43;
+    	let span5;
+    	let t44_value = /*product*/ ctx[7].length + "";
     	let t44;
+    	let t45;
     	let div39;
     	let div33;
     	let div32;
@@ -6905,118 +6970,118 @@ var app = (function () {
     	let div30;
     	let ol;
     	let li0;
-    	let t45;
-    	let li1;
     	let t46;
-    	let li2;
+    	let li1;
     	let t47;
+    	let li2;
+    	let t48;
     	let div29;
     	let div22;
     	let img1;
     	let img1_src_value;
-    	let t48;
+    	let t49;
     	let div21;
     	let div20;
     	let h10;
-    	let t50;
+    	let t51;
     	let p0;
-    	let t52;
+    	let t53;
     	let div25;
     	let img2;
     	let img2_src_value;
-    	let t53;
+    	let t54;
     	let div24;
     	let div23;
     	let h11;
-    	let t55;
+    	let t56;
     	let p1;
-    	let t57;
+    	let t58;
     	let div28;
     	let img3;
     	let img3_src_value;
-    	let t58;
+    	let t59;
     	let div27;
     	let div26;
     	let h12;
-    	let t60;
+    	let t61;
     	let p2;
-    	let t62;
+    	let t63;
     	let div36;
     	let div35;
     	let input1;
-    	let t63;
+    	let t64;
     	let div34;
     	let span6;
     	let i6;
-    	let t64;
+    	let t65;
     	let div38;
     	let h2;
     	let span7;
-    	let t66;
-    	let div37;
     	let t67;
+    	let div37;
+    	let t68;
     	let div40;
     	let a16;
     	let span8;
     	let i7;
-    	let t68_value = /*product*/ ctx[7].length + "";
-    	let t68;
+    	let t69_value = /*product*/ ctx[7].length + "";
     	let t69;
+    	let t70;
     	let a17;
     	let img4;
     	let img4_src_value;
-    	let t70;
+    	let t71;
     	let div48;
     	let div47;
     	let div46;
     	let div41;
     	let img5;
     	let img5_src_value;
-    	let t71;
+    	let t72;
     	let div45;
     	let h50;
-    	let t73;
+    	let t74;
     	let form0;
     	let div42;
     	let input2;
-    	let t74;
-    	let br;
     	let t75;
+    	let br;
+    	let t76;
     	let div43;
     	let input3;
-    	let t76;
+    	let t77;
     	let div44;
     	let button1;
-    	let t77;
-    	let i8;
     	let t78;
+    	let i8;
+    	let t79;
     	let div57;
     	let div56;
     	let div55;
     	let div49;
     	let img6;
     	let img6_src_value;
-    	let t79;
+    	let t80;
     	let div54;
     	let h51;
-    	let t81;
+    	let t82;
     	let form1;
     	let div50;
     	let input4;
-    	let t82;
+    	let t83;
     	let div51;
     	let input5;
-    	let t83;
+    	let t84;
     	let div52;
     	let input6;
-    	let t84;
+    	let t85;
     	let div53;
     	let button2;
-    	let t85;
-    	let i9;
     	let t86;
+    	let i9;
+    	let t87;
     	let span9;
-    	let t88;
+    	let t89;
     	let div64;
     	let div63;
     	let div62;
@@ -7024,78 +7089,79 @@ var app = (function () {
     	let h52;
     	let img7;
     	let img7_src_value;
-    	let t89;
     	let t90;
+    	let t91;
     	let button3;
     	let span10;
-    	let t92;
+    	let t93;
     	let div60;
     	let div59;
     	let div59_style_value;
-    	let t93;
+    	let t94;
     	let div61;
     	let tbody0;
     	let tr0;
     	let td0;
     	let span11;
     	let strong0;
-    	let t95;
+    	let t96;
     	let td1;
     	let span12;
     	let strong1;
-    	let t96;
     	let t97;
     	let t98;
     	let t99;
+    	let t100;
     	let button4;
-    	let t101;
+    	let t102;
     	let div71;
     	let div70;
     	let div69;
     	let div65;
     	let h53;
-    	let t103;
+    	let t104;
     	let button5;
     	let span13;
-    	let t105;
+    	let t106;
     	let div67;
     	let div66;
-    	let t106;
+    	let t107;
     	let div68;
     	let tbody1;
     	let tr1;
     	let td2;
     	let span14;
     	let strong2;
-    	let t108;
+    	let t109;
     	let td3;
     	let span15;
-    	let t110;
+    	let t111;
     	let tr2;
     	let td4;
     	let span16;
     	let strong3;
-    	let t112;
+    	let t113;
     	let td5;
     	let span17;
     	let strong4;
-    	let t114;
+    	let t115;
     	let button6;
-    	let t116;
     	let t117;
     	let t118;
+    	let t119;
     	let current;
     	let mounted;
     	let dispose;
     	toaster = new Toaster({ $$inline: true });
 
     	function select_block_type(ctx, dirty) {
-    		if (/*token*/ ctx[8]) return create_if_block_4;
+    		if (/*token*/ ctx[8]) return create_if_block_5;
     		return create_else_block_1;
     	}
 
     	let current_block_type = select_block_type(ctx);
     	let if_block0 = current_block_type(ctx);
+    	let if_block1 = /*token*/ ctx[8] && create_if_block_4(ctx);
 
     	function select_block_type_1(ctx, dirty) {
     		if (/*token*/ ctx[8]) return create_if_block_3;
@@ -7103,7 +7169,7 @@ var app = (function () {
     	}
 
     	let current_block_type_1 = select_block_type_1(ctx);
-    	let if_block1 = current_block_type_1(ctx);
+    	let if_block2 = current_block_type_1(ctx);
     	let each_value_2 = /*products*/ ctx[3].list;
     	validate_each_argument(each_value_2);
     	let each_blocks_2 = [];
@@ -7128,9 +7194,9 @@ var app = (function () {
     		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
     	}
 
-    	let if_block2 = /*gameActive*/ ctx[1] && create_if_block_2(ctx);
-    	let if_block3 = /*gameOpen*/ ctx[0] == true && create_if_block_1(ctx);
-    	let if_block4 = /*gameOpencasine*/ ctx[2] == true && create_if_block(ctx);
+    	let if_block3 = /*gameActive*/ ctx[1] && create_if_block_2(ctx);
+    	let if_block4 = /*gameOpen*/ ctx[0] == true && create_if_block_1(ctx);
+    	let if_block5 = /*gameOpencasine*/ ctx[2] == true && create_if_block(ctx);
 
     	const block = {
     		c: function create() {
@@ -7196,48 +7262,50 @@ var app = (function () {
     			button0 = element("button");
     			span3 = element("span");
     			t23 = space();
-    			div11 = element("div");
-    			if_block1.c();
+    			if (if_block1) if_block1.c();
     			t24 = space();
+    			div11 = element("div");
+    			if_block2.c();
+    			t25 = space();
     			div16 = element("div");
     			div14 = element("div");
     			a7 = element("a");
     			a7.textContent = "Home";
-    			t26 = space();
+    			t27 = space();
     			a8 = element("a");
     			a8.textContent = "Shop";
-    			t28 = space();
+    			t29 = space();
     			a9 = element("a");
     			a9.textContent = "Shop Detail";
-    			t30 = space();
+    			t31 = space();
     			div13 = element("div");
     			a10 = element("a");
-    			t31 = text("Pages ");
+    			t32 = text("Pages ");
     			i3 = element("i");
-    			t32 = space();
+    			t33 = space();
     			div12 = element("div");
     			a11 = element("a");
     			a11.textContent = "Shopping Cart";
-    			t34 = space();
+    			t35 = space();
     			a12 = element("a");
     			a12.textContent = "Checkout";
-    			t36 = space();
+    			t37 = space();
     			a13 = element("a");
     			a13.textContent = "Contact";
-    			t38 = space();
+    			t39 = space();
     			div15 = element("div");
     			a14 = element("a");
     			i4 = element("i");
-    			t39 = space();
+    			t40 = space();
     			span4 = element("span");
     			span4.textContent = "0";
-    			t41 = space();
+    			t42 = space();
     			a15 = element("a");
     			i5 = element("i");
-    			t42 = space();
+    			t43 = space();
     			span5 = element("span");
-    			t43 = text(t43_value);
-    			t44 = space();
+    			t44 = text(t44_value);
+    			t45 = space();
     			div39 = element("div");
     			div33 = element("div");
     			div32 = element("div");
@@ -7245,138 +7313,138 @@ var app = (function () {
     			div30 = element("div");
     			ol = element("ol");
     			li0 = element("li");
-    			t45 = space();
-    			li1 = element("li");
     			t46 = space();
-    			li2 = element("li");
+    			li1 = element("li");
     			t47 = space();
+    			li2 = element("li");
+    			t48 = space();
     			div29 = element("div");
     			div22 = element("div");
     			img1 = element("img");
-    			t48 = space();
+    			t49 = space();
     			div21 = element("div");
     			div20 = element("div");
     			h10 = element("h1");
     			h10.textContent = "Warmin Coffe";
-    			t50 = space();
+    			t51 = space();
     			p0 = element("p");
     			p0.textContent = "Warmi, el lugar adecuado si te encuentras en tingo maría";
-    			t52 = space();
+    			t53 = space();
     			div25 = element("div");
     			img2 = element("img");
-    			t53 = space();
+    			t54 = space();
     			div24 = element("div");
     			div23 = element("div");
     			h11 = element("h1");
     			h11.textContent = "Women Fashion";
-    			t55 = space();
+    			t56 = space();
     			p1 = element("p");
     			p1.textContent = "Lugar adecuado si te encuentras en tingo maría";
-    			t57 = space();
+    			t58 = space();
     			div28 = element("div");
     			img3 = element("img");
-    			t58 = space();
+    			t59 = space();
     			div27 = element("div");
     			div26 = element("div");
     			h12 = element("h1");
     			h12.textContent = "Kids Fashion";
-    			t60 = space();
+    			t61 = space();
     			p2 = element("p");
     			p2.textContent = "Lugar adecuado si te encuentras en tingo maría";
-    			t62 = space();
+    			t63 = space();
     			div36 = element("div");
     			div35 = element("div");
     			input1 = element("input");
-    			t63 = space();
+    			t64 = space();
     			div34 = element("div");
     			span6 = element("span");
     			i6 = element("i");
-    			t64 = space();
+    			t65 = space();
     			div38 = element("div");
     			h2 = element("h2");
     			span7 = element("span");
     			span7.textContent = "COMIDAS";
-    			t66 = space();
+    			t67 = space();
     			div37 = element("div");
 
     			for (let i = 0; i < each_blocks_2.length; i += 1) {
     				each_blocks_2[i].c();
     			}
 
-    			t67 = space();
+    			t68 = space();
     			div40 = element("div");
     			a16 = element("a");
     			span8 = element("span");
     			i7 = element("i");
-    			t68 = text(t68_value);
-    			t69 = space();
+    			t69 = text(t69_value);
+    			t70 = space();
     			a17 = element("a");
     			img4 = element("img");
-    			t70 = space();
+    			t71 = space();
     			div48 = element("div");
     			div47 = element("div");
     			div46 = element("div");
     			div41 = element("div");
     			img5 = element("img");
-    			t71 = space();
+    			t72 = space();
     			div45 = element("div");
     			h50 = element("h5");
     			h50.textContent = "Inisiar Sesion";
-    			t73 = space();
+    			t74 = space();
     			form0 = element("form");
     			div42 = element("div");
     			input2 = element("input");
-    			t74 = space();
-    			br = element("br");
     			t75 = space();
+    			br = element("br");
+    			t76 = space();
     			div43 = element("div");
     			input3 = element("input");
-    			t76 = space();
+    			t77 = space();
     			div44 = element("div");
     			button1 = element("button");
-    			t77 = text("LOGIN");
+    			t78 = text("LOGIN");
     			i8 = element("i");
-    			t78 = space();
+    			t79 = space();
     			div57 = element("div");
     			div56 = element("div");
     			div55 = element("div");
     			div49 = element("div");
     			img6 = element("img");
-    			t79 = space();
+    			t80 = space();
     			div54 = element("div");
     			h51 = element("h5");
     			h51.textContent = "Registro de Usuario";
-    			t81 = space();
+    			t82 = space();
     			form1 = element("form");
     			div50 = element("div");
     			input4 = element("input");
-    			t82 = space();
+    			t83 = space();
     			div51 = element("div");
     			input5 = element("input");
-    			t83 = space();
+    			t84 = space();
     			div52 = element("div");
     			input6 = element("input");
-    			t84 = space();
+    			t85 = space();
     			div53 = element("div");
     			button2 = element("button");
-    			t85 = text("Registrar");
+    			t86 = text("Registrar");
     			i9 = element("i");
-    			t86 = space();
+    			t87 = space();
     			span9 = element("span");
     			span9.textContent = "Para obtener su usuario y contraseña ingrese a su correo ingresado.";
-    			t88 = space();
+    			t89 = space();
     			div64 = element("div");
     			div63 = element("div");
     			div62 = element("div");
     			div58 = element("div");
     			h52 = element("h5");
     			img7 = element("img");
-    			t89 = text("Carrito");
-    			t90 = space();
+    			t90 = text("Carrito");
+    			t91 = space();
     			button3 = element("button");
     			span10 = element("span");
     			span10.textContent = "×";
-    			t92 = space();
+    			t93 = space();
     			div60 = element("div");
     			div59 = element("div");
 
@@ -7384,7 +7452,7 @@ var app = (function () {
     				each_blocks_1[i].c();
     			}
 
-    			t93 = space();
+    			t94 = space();
     			div61 = element("div");
     			tbody0 = element("tbody");
     			tr0 = element("tr");
@@ -7392,28 +7460,28 @@ var app = (function () {
     			span11 = element("span");
     			strong0 = element("strong");
     			strong0.textContent = "TOTAL:";
-    			t95 = space();
+    			t96 = space();
     			td1 = element("td");
     			span12 = element("span");
     			strong1 = element("strong");
-    			t96 = text("S/ ");
-    			t97 = text(/*totalMoney*/ ctx[5]);
-    			t98 = text(".00");
-    			t99 = space();
+    			t97 = text("S/ ");
+    			t98 = text(/*totalMoney*/ ctx[5]);
+    			t99 = text(".00");
+    			t100 = space();
     			button4 = element("button");
     			button4.textContent = "Proceder pago";
-    			t101 = space();
+    			t102 = space();
     			div71 = element("div");
     			div70 = element("div");
     			div69 = element("div");
     			div65 = element("div");
     			h53 = element("h5");
     			h53.textContent = "El sazon del pato";
-    			t103 = space();
+    			t104 = space();
     			button5 = element("button");
     			span13 = element("span");
     			span13.textContent = "×";
-    			t105 = space();
+    			t106 = space();
     			div67 = element("div");
     			div66 = element("div");
 
@@ -7421,7 +7489,7 @@ var app = (function () {
     				each_blocks[i].c();
     			}
 
-    			t106 = space();
+    			t107 = space();
     			div68 = element("div");
     			tbody1 = element("tbody");
     			tr1 = element("tr");
@@ -7429,503 +7497,503 @@ var app = (function () {
     			span14 = element("span");
     			strong2 = element("strong");
     			strong2.textContent = "Mesa:";
-    			t108 = space();
+    			t109 = space();
     			td3 = element("td");
     			span15 = element("span");
     			span15.textContent = "1";
-    			t110 = space();
+    			t111 = space();
     			tr2 = element("tr");
     			td4 = element("td");
     			span16 = element("span");
     			strong3 = element("strong");
     			strong3.textContent = "TOTAL:";
-    			t112 = space();
+    			t113 = space();
     			td5 = element("td");
     			span17 = element("span");
     			strong4 = element("strong");
     			strong4.textContent = "S/ 0.00";
-    			t114 = space();
+    			t115 = space();
     			button6 = element("button");
     			button6.textContent = "Realizar pedido";
-    			t116 = space();
-    			if (if_block2) if_block2.c();
     			t117 = space();
     			if (if_block3) if_block3.c();
     			t118 = space();
     			if (if_block4) if_block4.c();
+    			t119 = space();
+    			if (if_block5) if_block5.c();
     			attr_dev(div0, "id", "qrcode");
-    			add_location(div0, file$1, 173, 8, 5114);
+    			add_location(div0, file$1, 179, 8, 5390);
     			if (!src_url_equal(img0.src, img0_src_value = "img/goeat.png")) attr_dev(img0, "src", img0_src_value);
     			attr_dev(img0, "width", "80");
     			attr_dev(img0, "height", "80");
     			set_style(img0, "margin-top", "-26px");
-    			add_location(img0, file$1, 178, 20, 5358);
+    			add_location(img0, file$1, 184, 20, 5634);
     			attr_dev(span0, "class", "h1 text-uppercase text-primary");
-    			add_location(span0, file$1, 180, 24, 5515);
+    			add_location(span0, file$1, 186, 24, 5791);
     			attr_dev(span1, "class", "h1 text-uppercase text-dark");
-    			add_location(span1, file$1, 181, 24, 5595);
+    			add_location(span1, file$1, 187, 24, 5871);
     			attr_dev(a0, "class", "text-decoration-none");
-    			add_location(a0, file$1, 179, 20, 5456);
+    			add_location(a0, file$1, 185, 20, 5732);
     			attr_dev(div1, "class", "col-lg-4");
-    			add_location(div1, file$1, 177, 16, 5314);
+    			add_location(div1, file$1, 183, 16, 5590);
     			attr_dev(input0, "type", "text");
     			attr_dev(input0, "class", "form-control");
     			attr_dev(input0, "placeholder", "Search for products");
-    			add_location(input0, file$1, 186, 24, 5826);
+    			add_location(input0, file$1, 192, 24, 6102);
     			attr_dev(i0, "class", "fa fa-search");
-    			add_location(i0, file$1, 189, 32, 6144);
+    			add_location(i0, file$1, 195, 32, 6420);
     			attr_dev(span2, "class", "input-group-text bg-transparent text-primary");
-    			add_location(span2, file$1, 188, 28, 6051);
+    			add_location(span2, file$1, 194, 28, 6327);
     			attr_dev(div2, "class", "input-group-append");
-    			add_location(div2, file$1, 187, 24, 5989);
+    			add_location(div2, file$1, 193, 24, 6265);
     			attr_dev(div3, "class", "input-group");
-    			add_location(div3, file$1, 185, 20, 5775);
+    			add_location(div3, file$1, 191, 20, 6051);
     			attr_dev(div4, "class", "col-lg-4 col-6 text-left");
-    			add_location(div4, file$1, 184, 16, 5715);
+    			add_location(div4, file$1, 190, 16, 5991);
     			attr_dev(div5, "class", "col-lg-4 col-6 text-right");
-    			add_location(div5, file$1, 195, 16, 6313);
+    			add_location(div5, file$1, 201, 16, 6589);
     			attr_dev(div6, "class", "row align-items-center bg-light py-3 px-xl-5 d-none d-lg-flex");
-    			add_location(div6, file$1, 176, 12, 5221);
+    			add_location(div6, file$1, 182, 12, 5497);
     			attr_dev(div7, "class", "container-fluid");
-    			add_location(div7, file$1, 175, 8, 5178);
+    			add_location(div7, file$1, 181, 8, 5454);
     			attr_dev(i1, "class", "fa fa-bars mr-2");
-    			add_location(i1, file$1, 215, 50, 7310);
+    			add_location(i1, file$1, 219, 50, 7593);
     			attr_dev(h6, "class", "text-dark m-0");
-    			add_location(h6, file$1, 215, 24, 7284);
+    			add_location(h6, file$1, 219, 24, 7567);
     			attr_dev(i2, "class", "fa fa-angle-down text-dark");
-    			add_location(i2, file$1, 216, 24, 7382);
+    			add_location(i2, file$1, 220, 24, 7665);
     			attr_dev(a1, "class", "btn d-flex align-items-center justify-content-between bg-primary w-100");
     			attr_dev(a1, "data-toggle", "collapse");
     			attr_dev(a1, "href", "#navbar-vertical");
     			set_style(a1, "height", "65px");
     			set_style(a1, "padding", "0 30px");
-    			add_location(a1, file$1, 214, 20, 7090);
+    			add_location(a1, file$1, 218, 20, 7373);
     			attr_dev(a2, "href", "");
     			attr_dev(a2, "class", "nav-item nav-link");
-    			add_location(a2, file$1, 221, 28, 7805);
+    			add_location(a2, file$1, 225, 28, 8088);
     			attr_dev(a3, "href", "");
     			attr_dev(a3, "class", "nav-item nav-link");
-    			add_location(a3, file$1, 222, 28, 7886);
+    			add_location(a3, file$1, 226, 28, 8169);
     			attr_dev(a4, "href", "");
     			attr_dev(a4, "class", "nav-item nav-link");
-    			add_location(a4, file$1, 223, 28, 7963);
+    			add_location(a4, file$1, 227, 28, 8246);
     			attr_dev(a5, "href", "");
     			attr_dev(a5, "class", "nav-item nav-link");
-    			add_location(a5, file$1, 224, 28, 8043);
+    			add_location(a5, file$1, 228, 28, 8326);
     			attr_dev(a6, "href", "");
     			attr_dev(a6, "class", "nav-item nav-link");
-    			add_location(a6, file$1, 225, 28, 8123);
+    			add_location(a6, file$1, 229, 28, 8406);
     			attr_dev(div8, "class", "nav-item dropdown dropright");
-    			add_location(div8, file$1, 220, 28, 7734);
+    			add_location(div8, file$1, 224, 28, 8017);
     			attr_dev(div9, "class", "navbar-nav w-100");
-    			add_location(div9, file$1, 219, 24, 7674);
+    			add_location(div9, file$1, 223, 24, 7957);
     			attr_dev(nav0, "class", "collapse position-absolute navbar navbar-vertical navbar-light align-items-start p-0 bg-light");
     			attr_dev(nav0, "id", "navbar-vertical");
     			set_style(nav0, "width", "calc(100% - 30px)");
     			set_style(nav0, "z-index", "999");
-    			add_location(nav0, file$1, 218, 20, 7472);
+    			add_location(nav0, file$1, 222, 20, 7755);
     			attr_dev(div10, "class", "col-lg-3 d-none d-lg-block");
-    			add_location(div10, file$1, 213, 16, 7028);
+    			add_location(div10, file$1, 217, 16, 7311);
     			attr_dev(span3, "class", "navbar-toggler-icon");
-    			add_location(span3, file$1, 232, 28, 8562);
+    			add_location(span3, file$1, 236, 28, 8845);
     			attr_dev(button0, "type", "button");
     			attr_dev(button0, "class", "navbar-toggler");
     			attr_dev(button0, "data-toggle", "collapse");
     			attr_dev(button0, "data-target", "#navbarCollapse");
-    			add_location(button0, file$1, 231, 24, 8434);
+    			add_location(button0, file$1, 235, 24, 8717);
     			attr_dev(div11, "class", "text-decoration-none d-block d-lg-none");
-    			add_location(div11, file$1, 234, 24, 8664);
+    			add_location(div11, file$1, 241, 24, 9133);
     			attr_dev(a7, "href", "index.html");
     			attr_dev(a7, "class", "nav-item nav-link active");
-    			add_location(a7, file$1, 246, 32, 9556);
+    			add_location(a7, file$1, 253, 32, 10138);
     			attr_dev(a8, "href", "shop.html");
     			attr_dev(a8, "class", "nav-item nav-link");
-    			add_location(a8, file$1, 247, 32, 9652);
+    			add_location(a8, file$1, 254, 32, 10234);
     			attr_dev(a9, "href", "detail.html");
     			attr_dev(a9, "class", "nav-item nav-link");
-    			add_location(a9, file$1, 248, 32, 9740);
+    			add_location(a9, file$1, 255, 32, 10322);
     			attr_dev(i3, "class", "fa fa-angle-down mt-1");
-    			add_location(i3, file$1, 250, 110, 9980);
+    			add_location(i3, file$1, 257, 110, 10562);
     			attr_dev(a10, "href", "#");
     			attr_dev(a10, "class", "nav-link dropdown-toggle");
     			attr_dev(a10, "data-toggle", "dropdown");
-    			add_location(a10, file$1, 250, 36, 9906);
+    			add_location(a10, file$1, 257, 36, 10488);
     			attr_dev(a11, "href", "cart.html");
     			attr_dev(a11, "class", "dropdown-item");
-    			add_location(a11, file$1, 252, 40, 10162);
+    			add_location(a11, file$1, 259, 40, 10744);
     			attr_dev(a12, "href", "checkout.html");
     			attr_dev(a12, "class", "dropdown-item");
-    			add_location(a12, file$1, 253, 40, 10263);
+    			add_location(a12, file$1, 260, 40, 10845);
     			attr_dev(div12, "class", "dropdown-menu bg-primary rounded-0 border-0 m-0");
-    			add_location(div12, file$1, 251, 36, 10059);
+    			add_location(div12, file$1, 258, 36, 10641);
     			attr_dev(div13, "class", "nav-item dropdown");
-    			add_location(div13, file$1, 249, 32, 9837);
+    			add_location(div13, file$1, 256, 32, 10419);
     			attr_dev(a13, "href", "contact.html");
     			attr_dev(a13, "class", "nav-item nav-link");
-    			add_location(a13, file$1, 256, 32, 10439);
+    			add_location(a13, file$1, 263, 32, 11021);
     			attr_dev(div14, "class", "navbar-nav mr-auto py-0");
-    			add_location(div14, file$1, 245, 28, 9485);
+    			add_location(div14, file$1, 252, 28, 10067);
     			attr_dev(i4, "class", "fas fa-heart text-primary");
-    			add_location(i4, file$1, 260, 36, 10721);
+    			add_location(i4, file$1, 267, 36, 11303);
     			attr_dev(span4, "class", "badge text-secondary border border-secondary rounded-circle svelte-z8vot3");
     			set_style(span4, "padding-bottom", "2px");
-    			add_location(span4, file$1, 261, 36, 10800);
+    			add_location(span4, file$1, 268, 36, 11382);
     			attr_dev(a14, "href", "#");
     			attr_dev(a14, "class", "btn px-0");
-    			add_location(a14, file$1, 259, 32, 10654);
+    			add_location(a14, file$1, 266, 32, 11236);
     			attr_dev(i5, "class", "fas fa-shopping-cart text-primary");
-    			add_location(i5, file$1, 264, 36, 11110);
+    			add_location(i5, file$1, 271, 36, 11692);
     			attr_dev(span5, "class", "badge text-secondary border border-secondary rounded-circle svelte-z8vot3");
     			set_style(span5, "padding-bottom", "2px");
-    			add_location(span5, file$1, 265, 36, 11197);
+    			add_location(span5, file$1, 272, 36, 11779);
     			attr_dev(a15, "href", "#");
     			attr_dev(a15, "class", "btn px-0 ml-3");
     			attr_dev(a15, "data-toggle", "modal");
     			attr_dev(a15, "data-target", ".bd-example-modal-sm");
-    			add_location(a15, file$1, 263, 32, 10983);
+    			add_location(a15, file$1, 270, 32, 11565);
     			attr_dev(div15, "class", "navbar-nav ml-auto py-0 d-none d-lg-block");
-    			add_location(div15, file$1, 258, 28, 10565);
+    			add_location(div15, file$1, 265, 28, 11147);
     			attr_dev(div16, "class", "collapse navbar-collapse justify-content-between");
     			attr_dev(div16, "id", "navbarCollapse");
-    			add_location(div16, file$1, 244, 24, 9373);
+    			add_location(div16, file$1, 251, 24, 9955);
     			attr_dev(nav1, "class", "navbar-perfile navbar navbar-expand-lg bg-dark navbar-dark py-3 py-lg-0 px-0");
-    			add_location(nav1, file$1, 230, 20, 8318);
+    			add_location(nav1, file$1, 234, 20, 8601);
     			attr_dev(div17, "class", "col-lg-9");
-    			add_location(div17, file$1, 229, 16, 8274);
+    			add_location(div17, file$1, 233, 16, 8557);
     			attr_dev(div18, "class", "row px-xl-5");
-    			add_location(div18, file$1, 212, 12, 6985);
+    			add_location(div18, file$1, 216, 12, 7268);
     			attr_dev(div19, "class", "container-fluid bg-dark mb-30");
-    			add_location(div19, file$1, 211, 8, 6928);
+    			add_location(div19, file$1, 215, 8, 7211);
     			attr_dev(li0, "data-target", "#header-carousel");
     			attr_dev(li0, "data-slide-to", "0");
     			attr_dev(li0, "class", "active");
-    			add_location(li0, file$1, 282, 32, 11980);
+    			add_location(li0, file$1, 289, 32, 12562);
     			attr_dev(li1, "data-target", "#header-carousel");
     			attr_dev(li1, "data-slide-to", "1");
-    			add_location(li1, file$1, 283, 32, 12087);
+    			add_location(li1, file$1, 290, 32, 12669);
     			attr_dev(li2, "data-target", "#header-carousel");
     			attr_dev(li2, "data-slide-to", "2");
-    			add_location(li2, file$1, 284, 32, 12179);
+    			add_location(li2, file$1, 291, 32, 12761);
     			attr_dev(ol, "class", "carousel-indicators");
-    			add_location(ol, file$1, 281, 28, 11914);
+    			add_location(ol, file$1, 288, 28, 12496);
     			attr_dev(img1, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img1.src, img1_src_value = "img/carousel-1.jpg")) attr_dev(img1, "src", img1_src_value);
     			set_style(img1, "object-fit", "cover");
-    			add_location(img1, file$1, 288, 36, 12477);
+    			add_location(img1, file$1, 295, 36, 13059);
     			attr_dev(h10, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h10, file$1, 291, 44, 12832);
+    			add_location(h10, file$1, 298, 44, 13414);
     			attr_dev(p0, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p0, file$1, 292, 44, 12971);
+    			add_location(p0, file$1, 299, 44, 13553);
     			attr_dev(div20, "class", "p-3");
     			set_style(div20, "max-width", "700px");
-    			add_location(div20, file$1, 290, 40, 12743);
+    			add_location(div20, file$1, 297, 40, 13325);
     			attr_dev(div21, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div21, file$1, 289, 36, 12610);
+    			add_location(div21, file$1, 296, 36, 13192);
     			attr_dev(div22, "class", "carousel-item position-relative active");
     			set_style(div22, "height", "220px");
-    			add_location(div22, file$1, 287, 32, 12364);
+    			add_location(div22, file$1, 294, 32, 12946);
     			attr_dev(img2, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img2.src, img2_src_value = "img/carousel-2.jpg")) attr_dev(img2, "src", img2_src_value);
     			set_style(img2, "object-fit", "cover");
-    			add_location(img2, file$1, 297, 36, 13364);
+    			add_location(img2, file$1, 304, 36, 13946);
     			attr_dev(h11, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h11, file$1, 300, 44, 13719);
+    			add_location(h11, file$1, 307, 44, 14301);
     			attr_dev(p1, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p1, file$1, 301, 44, 13859);
+    			add_location(p1, file$1, 308, 44, 14441);
     			attr_dev(div23, "class", "p-3");
     			set_style(div23, "max-width", "700px");
-    			add_location(div23, file$1, 299, 40, 13630);
+    			add_location(div23, file$1, 306, 40, 14212);
     			attr_dev(div24, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div24, file$1, 298, 36, 13497);
+    			add_location(div24, file$1, 305, 36, 14079);
     			attr_dev(div25, "class", "carousel-item position-relative");
     			set_style(div25, "height", "220px");
-    			add_location(div25, file$1, 296, 32, 13258);
+    			add_location(div25, file$1, 303, 32, 13840);
     			attr_dev(img3, "class", "position-absolute w-100 h-100");
     			if (!src_url_equal(img3.src, img3_src_value = "img/carousel-3.jpg")) attr_dev(img3, "src", img3_src_value);
     			set_style(img3, "object-fit", "cover");
-    			add_location(img3, file$1, 306, 36, 14242);
+    			add_location(img3, file$1, 313, 36, 14824);
     			attr_dev(h12, "class", "display-4 text-white mb-3 animate__animated animate__fadeInDown");
-    			add_location(h12, file$1, 309, 44, 14597);
+    			add_location(h12, file$1, 316, 44, 15179);
     			attr_dev(p2, "class", "mx-md-5 px-5 animate__animated animate__bounceIn");
-    			add_location(p2, file$1, 310, 44, 14736);
+    			add_location(p2, file$1, 317, 44, 15318);
     			attr_dev(div26, "class", "p-3");
     			set_style(div26, "max-width", "700px");
-    			add_location(div26, file$1, 308, 40, 14508);
+    			add_location(div26, file$1, 315, 40, 15090);
     			attr_dev(div27, "class", "carousel-caption d-flex flex-column align-items-center justify-content-center");
-    			add_location(div27, file$1, 307, 36, 14375);
+    			add_location(div27, file$1, 314, 36, 14957);
     			attr_dev(div28, "class", "carousel-item position-relative");
     			set_style(div28, "height", "220px");
-    			add_location(div28, file$1, 305, 32, 14136);
+    			add_location(div28, file$1, 312, 32, 14718);
     			attr_dev(div29, "class", "carousel-inner");
-    			add_location(div29, file$1, 286, 28, 12302);
+    			add_location(div29, file$1, 293, 28, 12884);
     			attr_dev(div30, "id", "header-carousel");
     			attr_dev(div30, "class", "carousel slide carousel-fade mb-30 mb-lg-0");
     			attr_dev(div30, "data-ride", "carousel");
-    			add_location(div30, file$1, 280, 24, 11786);
+    			add_location(div30, file$1, 287, 24, 12368);
     			attr_dev(div31, "class", "col-lg-12");
-    			add_location(div31, file$1, 279, 20, 11737);
+    			add_location(div31, file$1, 286, 20, 12319);
     			attr_dev(div32, "class", "row px-xl-4");
-    			add_location(div32, file$1, 278, 16, 11690);
+    			add_location(div32, file$1, 285, 16, 12272);
     			attr_dev(div33, "class", "container-fluid");
-    			add_location(div33, file$1, 277, 12, 11643);
+    			add_location(div33, file$1, 284, 12, 12225);
     			attr_dev(input1, "type", "text");
     			attr_dev(input1, "class", "form-control");
     			attr_dev(input1, "placeholder", "Search for products");
-    			add_location(input1, file$1, 324, 20, 15315);
+    			add_location(input1, file$1, 331, 20, 15897);
     			attr_dev(i6, "class", "fa fa-search");
-    			add_location(i6, file$1, 327, 28, 15642);
+    			add_location(i6, file$1, 334, 28, 16224);
     			attr_dev(span6, "class", "input-group-text bg-transparent text-primary");
-    			add_location(span6, file$1, 326, 24, 15553);
+    			add_location(span6, file$1, 333, 24, 16135);
     			attr_dev(div34, "class", "input-group-append");
     			set_style(div34, "cursor", "pointer");
-    			add_location(div34, file$1, 325, 20, 15447);
+    			add_location(div34, file$1, 332, 20, 16029);
     			attr_dev(div35, "class", "input-group");
-    			add_location(div35, file$1, 323, 16, 15268);
+    			add_location(div35, file$1, 330, 16, 15850);
     			attr_dev(div36, "class", "col-lg-4 text-left buscadorMovil svelte-z8vot3");
-    			add_location(div36, file$1, 322, 12, 15203);
+    			add_location(div36, file$1, 329, 12, 15785);
     			attr_dev(span7, "class", "bg-secondary pr-3");
-    			add_location(span7, file$1, 335, 88, 15928);
+    			add_location(span7, file$1, 342, 88, 16510);
     			attr_dev(h2, "class", "section-title position-relative text-uppercase mx-xl-5 mb-4");
-    			add_location(h2, file$1, 335, 16, 15856);
+    			add_location(h2, file$1, 342, 16, 16438);
     			attr_dev(div37, "class", "row px-xl-5 pb-3");
-    			add_location(div37, file$1, 336, 16, 15997);
+    			add_location(div37, file$1, 343, 16, 16579);
     			attr_dev(div38, "class", "container-fluid");
-    			add_location(div38, file$1, 333, 12, 15791);
+    			add_location(div38, file$1, 340, 12, 16373);
     			attr_dev(div39, "class", "content-page svelte-z8vot3");
-    			add_location(div39, file$1, 275, 8, 11562);
+    			add_location(div39, file$1, 282, 8, 12144);
     			attr_dev(i7, "class", "fas fa-shopping-cart");
     			set_style(i7, "color", "red");
     			set_style(i7, "font-size", "15px");
-    			add_location(i7, file$1, 363, 78, 17456);
+    			add_location(i7, file$1, 370, 78, 18038);
     			set_style(span8, "padding-bottom", "2px");
     			set_style(span8, "color", "red");
     			set_style(span8, "font-size", "10px");
-    			add_location(span8, file$1, 363, 16, 17394);
+    			add_location(span8, file$1, 370, 16, 17976);
     			attr_dev(a16, "href", "#");
     			attr_dev(a16, "class", "btn px-0 ");
     			set_style(a16, "margin-left", "3px");
     			attr_dev(a16, "data-toggle", "modal");
     			attr_dev(a16, "data-target", ".bd-example-modal-sm");
-    			add_location(a16, file$1, 362, 12, 17263);
+    			add_location(a16, file$1, 369, 12, 17845);
     			if (!src_url_equal(img4.src, img4_src_value = "img/scanner.png")) attr_dev(img4, "src", img4_src_value);
     			attr_dev(img4, "alt", "");
     			attr_dev(img4, "width", "25");
     			attr_dev(img4, "height", "25");
-    			add_location(img4, file$1, 366, 16, 17684);
+    			add_location(img4, file$1, 373, 16, 18266);
     			attr_dev(a17, "href", "#");
     			attr_dev(a17, "class", "btn px-0 ");
     			set_style(a17, "margin-left", "3px");
-    			add_location(a17, file$1, 365, 12, 17583);
+    			add_location(a17, file$1, 372, 12, 18165);
     			attr_dev(div40, "class", "card back-to-card bg-dark svelte-z8vot3");
-    			add_location(div40, file$1, 361, 8, 17209);
+    			add_location(div40, file$1, 368, 8, 17791);
     			attr_dev(img5, "class", "rounded-circle svelte-z8vot3");
     			if (!src_url_equal(img5.src, img5_src_value = "img/goeat.png")) attr_dev(img5, "src", img5_src_value);
-    			add_location(img5, file$1, 376, 24, 18140);
+    			add_location(img5, file$1, 383, 24, 18722);
     			attr_dev(div41, "class", "modal-header-singIn svelte-z8vot3");
-    			add_location(div41, file$1, 375, 20, 18081);
+    			add_location(div41, file$1, 382, 20, 18663);
     			attr_dev(h50, "class", "mt-1 mb-4 svelte-z8vot3");
     			set_style(h50, "text-align", "center");
-    			add_location(h50, file$1, 380, 24, 18312);
+    			add_location(h50, file$1, 387, 24, 18894);
     			attr_dev(input2, "type", "text");
     			attr_dev(input2, "class", "form-control input-sign svelte-z8vot3");
     			attr_dev(input2, "id", "recipient-name");
     			attr_dev(input2, "placeholder", "Usuario");
-    			add_location(input2, file$1, 383, 32, 18500);
+    			add_location(input2, file$1, 390, 32, 19082);
     			attr_dev(div42, "class", "mb-4 mt-1");
-    			add_location(div42, file$1, 382, 28, 18443);
-    			add_location(br, file$1, 384, 36, 18658);
+    			add_location(div42, file$1, 389, 28, 19025);
+    			add_location(br, file$1, 391, 36, 19240);
     			attr_dev(input3, "type", "password");
     			attr_dev(input3, "class", "form-control input-sign svelte-z8vot3");
     			attr_dev(input3, "id", "recipient-name");
     			attr_dev(input3, "placeholder", "Contraseña");
-    			add_location(input3, file$1, 386, 30, 18747);
+    			add_location(input3, file$1, 393, 30, 19329);
     			attr_dev(div43, "class", "mb-4 mt-1");
-    			add_location(div43, file$1, 385, 28, 18692);
-    			add_location(form0, file$1, 381, 24, 18407);
+    			add_location(div43, file$1, 392, 28, 19274);
+    			add_location(form0, file$1, 388, 24, 18989);
     			attr_dev(i8, "class", "fas fa-sign-in ml-1");
-    			add_location(i8, file$1, 390, 120, 19155);
+    			add_location(i8, file$1, 397, 120, 19737);
     			attr_dev(button1, "type", "submit");
     			attr_dev(button1, "class", "btn btn-cyan mt-1 svelte-z8vot3");
     			attr_dev(button1, "data-dismiss", "modal");
-    			add_location(button1, file$1, 390, 28, 19063);
+    			add_location(button1, file$1, 397, 28, 19645);
     			attr_dev(div44, "class", "text-center mt-4 mb-4 svelte-z8vot3");
     			set_style(div44, "margin-top", "9px");
-    			add_location(div44, file$1, 389, 26, 18973);
+    			add_location(div44, file$1, 396, 26, 19555);
     			attr_dev(div45, "class", "modal-body");
-    			add_location(div45, file$1, 379, 20, 18262);
+    			add_location(div45, file$1, 386, 20, 18844);
     			attr_dev(div46, "class", "modal-content-singIn svelte-z8vot3");
-    			add_location(div46, file$1, 374, 16, 18025);
+    			add_location(div46, file$1, 381, 16, 18607);
     			attr_dev(div47, "class", "modal-dialog modal-sm svelte-z8vot3");
-    			add_location(div47, file$1, 373, 12, 17972);
+    			add_location(div47, file$1, 380, 12, 18554);
     			attr_dev(div48, "class", "modal fade bd-example-modal-sigIn");
     			attr_dev(div48, "tabindex", "-1");
     			attr_dev(div48, "role", "dialog");
     			attr_dev(div48, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div48, "aria-hidden", "true");
     			set_style(div48, "padding-top", "80px");
-    			add_location(div48, file$1, 372, 8, 17801);
+    			add_location(div48, file$1, 379, 8, 18383);
     			attr_dev(img6, "class", "rounded-circle svelte-z8vot3");
     			if (!src_url_equal(img6.src, img6_src_value = "img/goeat.png")) attr_dev(img6, "src", img6_src_value);
-    			add_location(img6, file$1, 402, 24, 19683);
+    			add_location(img6, file$1, 409, 24, 20265);
     			attr_dev(div49, "class", "modal-header-singIn svelte-z8vot3");
-    			add_location(div49, file$1, 401, 20, 19624);
+    			add_location(div49, file$1, 408, 20, 20206);
     			attr_dev(h51, "class", "mt-1 mb-4 svelte-z8vot3");
     			set_style(h51, "text-align", "center");
-    			add_location(h51, file$1, 406, 24, 19855);
+    			add_location(h51, file$1, 413, 24, 20437);
     			attr_dev(input4, "type", "email");
     			attr_dev(input4, "class", "form-control input-sign svelte-z8vot3");
     			attr_dev(input4, "id", "recipient-name");
     			attr_dev(input4, "placeholder", "Nombre");
-    			add_location(input4, file$1, 409, 32, 20048);
+    			add_location(input4, file$1, 416, 32, 20630);
     			attr_dev(div50, "class", "mb-4 mt-1");
-    			add_location(div50, file$1, 408, 28, 19991);
+    			add_location(div50, file$1, 415, 28, 20573);
     			attr_dev(input5, "type", "email");
     			attr_dev(input5, "class", "form-control input-sign svelte-z8vot3");
     			attr_dev(input5, "id", "recipient-name");
     			attr_dev(input5, "placeholder", "Email");
-    			add_location(input5, file$1, 412, 30, 20292);
+    			add_location(input5, file$1, 419, 30, 20874);
     			attr_dev(div51, "class", "mb-4 mt-1");
-    			add_location(div51, file$1, 411, 28, 20237);
+    			add_location(div51, file$1, 418, 28, 20819);
     			attr_dev(input6, "type", "text");
     			attr_dev(input6, "class", "form-control input-sign svelte-z8vot3");
     			attr_dev(input6, "id", "recipient-name");
     			attr_dev(input6, "placeholder", "Phone");
-    			add_location(input6, file$1, 415, 30, 20529);
+    			add_location(input6, file$1, 422, 30, 21111);
     			attr_dev(div52, "class", "mb-4 mt-1");
-    			add_location(div52, file$1, 414, 28, 20474);
-    			add_location(form1, file$1, 407, 24, 19955);
+    			add_location(div52, file$1, 421, 28, 21056);
+    			add_location(form1, file$1, 414, 24, 20537);
     			attr_dev(i9, "class", "fas fa-sign-in ml-1");
-    			add_location(i9, file$1, 419, 122, 20903);
+    			add_location(i9, file$1, 426, 122, 21485);
     			attr_dev(button2, "type", "submit");
     			attr_dev(button2, "class", "btn btn-cyan mt-1 svelte-z8vot3");
     			attr_dev(button2, "data-dismiss", "modal");
-    			add_location(button2, file$1, 419, 28, 20809);
+    			add_location(button2, file$1, 426, 28, 21391);
     			attr_dev(span9, "class", "alert-register svelte-z8vot3");
-    			add_location(span9, file$1, 420, 28, 20977);
+    			add_location(span9, file$1, 427, 28, 21559);
     			attr_dev(div53, "class", "text-center mt-4 mb-4 svelte-z8vot3");
-    			add_location(div53, file$1, 418, 26, 20744);
+    			add_location(div53, file$1, 425, 26, 21326);
     			attr_dev(div54, "class", "modal-body");
-    			add_location(div54, file$1, 405, 20, 19805);
+    			add_location(div54, file$1, 412, 20, 20387);
     			attr_dev(div55, "class", "modal-content-singIn svelte-z8vot3");
-    			add_location(div55, file$1, 400, 16, 19568);
+    			add_location(div55, file$1, 407, 16, 20150);
     			attr_dev(div56, "class", "modal-dialog modal-sm svelte-z8vot3");
-    			add_location(div56, file$1, 399, 12, 19515);
+    			add_location(div56, file$1, 406, 12, 20097);
     			attr_dev(div57, "class", "modal fade bd-example-modal-register");
     			attr_dev(div57, "tabindex", "-1");
     			attr_dev(div57, "role", "dialog");
     			attr_dev(div57, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div57, "aria-hidden", "true");
     			set_style(div57, "padding-top", "80px");
-    			add_location(div57, file$1, 398, 8, 19341);
+    			add_location(div57, file$1, 405, 8, 19923);
     			if (!src_url_equal(img7.src, img7_src_value = "img/goeat.png")) attr_dev(img7, "src", img7_src_value);
     			attr_dev(img7, "width", "40");
     			attr_dev(img7, "height", "40");
-    			add_location(img7, file$1, 433, 72, 21619);
+    			add_location(img7, file$1, 440, 72, 22201);
     			attr_dev(h52, "class", "modal-title svelte-z8vot3");
     			attr_dev(h52, "id", "exampleModalLabel");
-    			add_location(h52, file$1, 433, 24, 21571);
+    			add_location(h52, file$1, 440, 24, 22153);
     			attr_dev(span10, "aria-hidden", "true");
-    			add_location(span10, file$1, 435, 24, 21808);
+    			add_location(span10, file$1, 442, 24, 22390);
     			attr_dev(button3, "type", "button");
     			attr_dev(button3, "class", "close");
     			attr_dev(button3, "data-dismiss", "modal");
     			attr_dev(button3, "aria-label", "Close");
-    			add_location(button3, file$1, 434, 24, 21706);
+    			add_location(button3, file$1, 441, 24, 22288);
     			attr_dev(div58, "class", "modal-header");
-    			add_location(div58, file$1, 432, 20, 21519);
+    			add_location(div58, file$1, 439, 20, 22101);
     			attr_dev(div59, "class", "row px-xl-5 pb-3");
     			attr_dev(div59, "style", div59_style_value = "overflow: auto; " + (/*product*/ ctx[7].length > 0 ? 'height: 250px;' : ''));
-    			add_location(div59, file$1, 440, 28, 22002);
+    			add_location(div59, file$1, 447, 28, 22584);
     			attr_dev(div60, "class", "modal-body");
-    			add_location(div60, file$1, 438, 20, 21932);
-    			add_location(strong0, file$1, 464, 63, 23677);
+    			add_location(div60, file$1, 445, 20, 22514);
+    			add_location(strong0, file$1, 471, 63, 24259);
     			attr_dev(span11, "class", "span-primary svelte-z8vot3");
-    			add_location(span11, file$1, 464, 36, 23650);
-    			add_location(td0, file$1, 463, 32, 23608);
-    			add_location(strong1, file$1, 467, 63, 23849);
+    			add_location(span11, file$1, 471, 36, 24232);
+    			add_location(td0, file$1, 470, 32, 24190);
+    			add_location(strong1, file$1, 474, 63, 24431);
     			attr_dev(span12, "class", "span-primary svelte-z8vot3");
-    			add_location(span12, file$1, 467, 36, 23822);
-    			add_location(td1, file$1, 466, 32, 23780);
-    			add_location(tr0, file$1, 462, 28, 23570);
+    			add_location(span12, file$1, 474, 36, 24404);
+    			add_location(td1, file$1, 473, 32, 24362);
+    			add_location(tr0, file$1, 469, 28, 24152);
     			set_style(tbody0, "line-height", "normal");
-    			add_location(tbody0, file$1, 461, 24, 23506);
+    			add_location(tbody0, file$1, 468, 24, 24088);
     			attr_dev(button4, "type", "button");
     			attr_dev(button4, "class", "btn btn-primary btn-car svelte-z8vot3");
     			attr_dev(button4, "data-dismiss", "modal");
-    			add_location(button4, file$1, 471, 24, 24069);
+    			add_location(button4, file$1, 478, 24, 24651);
     			attr_dev(div61, "class", "modal-footer");
-    			add_location(div61, file$1, 460, 20, 23454);
+    			add_location(div61, file$1, 467, 20, 24036);
     			attr_dev(div62, "class", "modal-content");
-    			add_location(div62, file$1, 431, 16, 21470);
+    			add_location(div62, file$1, 438, 16, 22052);
     			attr_dev(div63, "class", "modal-dialog modal-xl");
-    			add_location(div63, file$1, 430, 12, 21417);
+    			add_location(div63, file$1, 437, 12, 21999);
     			attr_dev(div64, "class", "modal fade bd-example-modal-sm");
     			attr_dev(div64, "tabindex", "-1");
     			attr_dev(div64, "role", "dialog");
     			attr_dev(div64, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div64, "aria-hidden", "true");
-    			add_location(div64, file$1, 429, 8, 21276);
+    			add_location(div64, file$1, 436, 8, 21858);
     			attr_dev(h53, "class", "modal-title svelte-z8vot3");
     			attr_dev(h53, "id", "exampleModalLabel");
-    			add_location(h53, file$1, 481, 24, 24577);
+    			add_location(h53, file$1, 488, 24, 25159);
     			attr_dev(span13, "aria-hidden", "true");
-    			add_location(span13, file$1, 483, 24, 24774);
+    			add_location(span13, file$1, 490, 24, 25356);
     			attr_dev(button5, "type", "button");
     			attr_dev(button5, "class", "close");
     			attr_dev(button5, "data-dismiss", "modal");
     			attr_dev(button5, "aria-label", "Close");
-    			add_location(button5, file$1, 482, 24, 24672);
+    			add_location(button5, file$1, 489, 24, 25254);
     			attr_dev(div65, "class", "modal-header");
-    			add_location(div65, file$1, 480, 20, 24525);
+    			add_location(div65, file$1, 487, 20, 25107);
     			attr_dev(div66, "class", "row px-xl-5 pb-3");
     			set_style(div66, "overflow", "auto");
     			set_style(div66, "height", "290px");
-    			add_location(div66, file$1, 488, 28, 24968);
+    			add_location(div66, file$1, 495, 28, 25550);
     			attr_dev(div67, "class", "modal-body");
-    			add_location(div67, file$1, 486, 20, 24898);
-    			add_location(strong2, file$1, 513, 93, 26808);
+    			add_location(div67, file$1, 493, 20, 25480);
+    			add_location(strong2, file$1, 520, 93, 27390);
     			attr_dev(span14, "class", "span-primary svelte-z8vot3");
     			set_style(span14, "padding", "0");
     			set_style(span14, "margin", "0");
-    			add_location(span14, file$1, 513, 36, 26751);
-    			add_location(td2, file$1, 512, 32, 26709);
+    			add_location(span14, file$1, 520, 36, 27333);
+    			add_location(td2, file$1, 519, 32, 27291);
     			attr_dev(span15, "class", "span-primary svelte-z8vot3");
     			set_style(span15, "padding", "0");
     			set_style(span15, "margin", "0");
-    			add_location(span15, file$1, 516, 36, 26952);
-    			add_location(td3, file$1, 515, 32, 26910);
+    			add_location(span15, file$1, 523, 36, 27534);
+    			add_location(td3, file$1, 522, 32, 27492);
     			set_style(tr1, "padding", "0");
     			set_style(tr1, "margin", "0");
-    			add_location(tr1, file$1, 511, 28, 26641);
-    			add_location(strong3, file$1, 523, 63, 27276);
+    			add_location(tr1, file$1, 518, 28, 27223);
+    			add_location(strong3, file$1, 530, 63, 27858);
     			attr_dev(span16, "class", "span-primary svelte-z8vot3");
-    			add_location(span16, file$1, 523, 36, 27249);
-    			add_location(td4, file$1, 522, 32, 27207);
-    			add_location(strong4, file$1, 526, 63, 27448);
+    			add_location(span16, file$1, 530, 36, 27831);
+    			add_location(td4, file$1, 529, 32, 27789);
+    			add_location(strong4, file$1, 533, 63, 28030);
     			attr_dev(span17, "class", "span-primary svelte-z8vot3");
-    			add_location(span17, file$1, 526, 36, 27421);
-    			add_location(td5, file$1, 525, 32, 27379);
-    			add_location(tr2, file$1, 521, 28, 27169);
+    			add_location(span17, file$1, 533, 36, 28003);
+    			add_location(td5, file$1, 532, 32, 27961);
+    			add_location(tr2, file$1, 528, 28, 27751);
     			set_style(tbody1, "line-height", "normal");
-    			add_location(tbody1, file$1, 510, 24, 26577);
+    			add_location(tbody1, file$1, 517, 24, 27159);
     			attr_dev(button6, "type", "button");
     			attr_dev(button6, "class", "btn btn-primary btn-car svelte-z8vot3");
-    			add_location(button6, file$1, 530, 24, 27657);
+    			add_location(button6, file$1, 537, 24, 28239);
     			attr_dev(div68, "class", "modal-footer");
-    			add_location(div68, file$1, 509, 20, 26525);
+    			add_location(div68, file$1, 516, 20, 27107);
     			attr_dev(div69, "class", "modal-content");
-    			add_location(div69, file$1, 479, 16, 24476);
+    			add_location(div69, file$1, 486, 16, 25058);
     			attr_dev(div70, "class", "modal-dialog modal-xl");
-    			add_location(div70, file$1, 478, 12, 24423);
+    			add_location(div70, file$1, 485, 12, 25005);
     			attr_dev(div71, "class", "modal fade bd-model");
     			attr_dev(div71, "tabindex", "-1");
     			attr_dev(div71, "role", "dialog");
     			attr_dev(div71, "aria-labelledby", "mySmallModalLabel");
     			attr_dev(div71, "aria-hidden", "true");
-    			add_location(div71, file$1, 477, 8, 24293);
+    			add_location(div71, file$1, 484, 8, 24875);
     			attr_dev(body, "class", "svelte-z8vot3");
-    			add_location(body, file$1, 172, 4, 5087);
-    			add_location(main, file$1, 170, 0, 5073);
+    			add_location(body, file$1, 178, 4, 5363);
+    			add_location(main, file$1, 176, 0, 5349);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -7987,41 +8055,43 @@ var app = (function () {
     			append_dev(nav1, button0);
     			append_dev(button0, span3);
     			append_dev(nav1, t23);
-    			append_dev(nav1, div11);
-    			if_block1.m(div11, null);
+    			if (if_block1) if_block1.m(nav1, null);
     			append_dev(nav1, t24);
+    			append_dev(nav1, div11);
+    			if_block2.m(div11, null);
+    			append_dev(nav1, t25);
     			append_dev(nav1, div16);
     			append_dev(div16, div14);
     			append_dev(div14, a7);
-    			append_dev(div14, t26);
+    			append_dev(div14, t27);
     			append_dev(div14, a8);
-    			append_dev(div14, t28);
+    			append_dev(div14, t29);
     			append_dev(div14, a9);
-    			append_dev(div14, t30);
+    			append_dev(div14, t31);
     			append_dev(div14, div13);
     			append_dev(div13, a10);
-    			append_dev(a10, t31);
+    			append_dev(a10, t32);
     			append_dev(a10, i3);
-    			append_dev(div13, t32);
+    			append_dev(div13, t33);
     			append_dev(div13, div12);
     			append_dev(div12, a11);
-    			append_dev(div12, t34);
+    			append_dev(div12, t35);
     			append_dev(div12, a12);
-    			append_dev(div14, t36);
+    			append_dev(div14, t37);
     			append_dev(div14, a13);
-    			append_dev(div16, t38);
+    			append_dev(div16, t39);
     			append_dev(div16, div15);
     			append_dev(div15, a14);
     			append_dev(a14, i4);
-    			append_dev(a14, t39);
+    			append_dev(a14, t40);
     			append_dev(a14, span4);
-    			append_dev(div15, t41);
+    			append_dev(div15, t42);
     			append_dev(div15, a15);
     			append_dev(a15, i5);
-    			append_dev(a15, t42);
+    			append_dev(a15, t43);
     			append_dev(a15, span5);
-    			append_dev(span5, t43);
-    			append_dev(body, t44);
+    			append_dev(span5, t44);
+    			append_dev(body, t45);
     			append_dev(body, div39);
     			append_dev(div39, div33);
     			append_dev(div33, div32);
@@ -8029,52 +8099,52 @@ var app = (function () {
     			append_dev(div31, div30);
     			append_dev(div30, ol);
     			append_dev(ol, li0);
-    			append_dev(ol, t45);
-    			append_dev(ol, li1);
     			append_dev(ol, t46);
+    			append_dev(ol, li1);
+    			append_dev(ol, t47);
     			append_dev(ol, li2);
-    			append_dev(div30, t47);
+    			append_dev(div30, t48);
     			append_dev(div30, div29);
     			append_dev(div29, div22);
     			append_dev(div22, img1);
-    			append_dev(div22, t48);
+    			append_dev(div22, t49);
     			append_dev(div22, div21);
     			append_dev(div21, div20);
     			append_dev(div20, h10);
-    			append_dev(div20, t50);
+    			append_dev(div20, t51);
     			append_dev(div20, p0);
-    			append_dev(div29, t52);
+    			append_dev(div29, t53);
     			append_dev(div29, div25);
     			append_dev(div25, img2);
-    			append_dev(div25, t53);
+    			append_dev(div25, t54);
     			append_dev(div25, div24);
     			append_dev(div24, div23);
     			append_dev(div23, h11);
-    			append_dev(div23, t55);
+    			append_dev(div23, t56);
     			append_dev(div23, p1);
-    			append_dev(div29, t57);
+    			append_dev(div29, t58);
     			append_dev(div29, div28);
     			append_dev(div28, img3);
-    			append_dev(div28, t58);
+    			append_dev(div28, t59);
     			append_dev(div28, div27);
     			append_dev(div27, div26);
     			append_dev(div26, h12);
-    			append_dev(div26, t60);
+    			append_dev(div26, t61);
     			append_dev(div26, p2);
-    			append_dev(div39, t62);
+    			append_dev(div39, t63);
     			append_dev(div39, div36);
     			append_dev(div36, div35);
     			append_dev(div35, input1);
     			set_input_value(input1, /*products*/ ctx[3].filters.name);
-    			append_dev(div35, t63);
+    			append_dev(div35, t64);
     			append_dev(div35, div34);
     			append_dev(div34, span6);
     			append_dev(span6, i6);
-    			append_dev(div39, t64);
+    			append_dev(div39, t65);
     			append_dev(div39, div38);
     			append_dev(div38, h2);
     			append_dev(h2, span7);
-    			append_dev(div38, t66);
+    			append_dev(div38, t67);
     			append_dev(div38, div37);
 
     			for (let i = 0; i < each_blocks_2.length; i += 1) {
@@ -8083,81 +8153,81 @@ var app = (function () {
     				}
     			}
 
-    			append_dev(body, t67);
+    			append_dev(body, t68);
     			append_dev(body, div40);
     			append_dev(div40, a16);
     			append_dev(a16, span8);
     			append_dev(span8, i7);
-    			append_dev(span8, t68);
-    			append_dev(div40, t69);
+    			append_dev(span8, t69);
+    			append_dev(div40, t70);
     			append_dev(div40, a17);
     			append_dev(a17, img4);
-    			append_dev(body, t70);
+    			append_dev(body, t71);
     			append_dev(body, div48);
     			append_dev(div48, div47);
     			append_dev(div47, div46);
     			append_dev(div46, div41);
     			append_dev(div41, img5);
-    			append_dev(div46, t71);
+    			append_dev(div46, t72);
     			append_dev(div46, div45);
     			append_dev(div45, h50);
-    			append_dev(div45, t73);
+    			append_dev(div45, t74);
     			append_dev(div45, form0);
     			append_dev(form0, div42);
     			append_dev(div42, input2);
     			set_input_value(input2, /*user*/ ctx[6].username);
-    			append_dev(div42, t74);
+    			append_dev(div42, t75);
     			append_dev(form0, br);
-    			append_dev(form0, t75);
+    			append_dev(form0, t76);
     			append_dev(form0, div43);
     			append_dev(div43, input3);
     			set_input_value(input3, /*user*/ ctx[6].password);
-    			append_dev(div45, t76);
+    			append_dev(div45, t77);
     			append_dev(div45, div44);
     			append_dev(div44, button1);
-    			append_dev(button1, t77);
+    			append_dev(button1, t78);
     			append_dev(button1, i8);
-    			append_dev(body, t78);
+    			append_dev(body, t79);
     			append_dev(body, div57);
     			append_dev(div57, div56);
     			append_dev(div56, div55);
     			append_dev(div55, div49);
     			append_dev(div49, img6);
-    			append_dev(div55, t79);
+    			append_dev(div55, t80);
     			append_dev(div55, div54);
     			append_dev(div54, h51);
-    			append_dev(div54, t81);
+    			append_dev(div54, t82);
     			append_dev(div54, form1);
     			append_dev(form1, div50);
     			append_dev(div50, input4);
     			set_input_value(input4, /*user*/ ctx[6].firstname);
-    			append_dev(form1, t82);
+    			append_dev(form1, t83);
     			append_dev(form1, div51);
     			append_dev(div51, input5);
     			set_input_value(input5, /*user*/ ctx[6].email);
-    			append_dev(form1, t83);
+    			append_dev(form1, t84);
     			append_dev(form1, div52);
     			append_dev(div52, input6);
     			set_input_value(input6, /*user*/ ctx[6].phone);
-    			append_dev(div54, t84);
+    			append_dev(div54, t85);
     			append_dev(div54, div53);
     			append_dev(div53, button2);
-    			append_dev(button2, t85);
+    			append_dev(button2, t86);
     			append_dev(button2, i9);
-    			append_dev(div53, t86);
+    			append_dev(div53, t87);
     			append_dev(div53, span9);
-    			append_dev(body, t88);
+    			append_dev(body, t89);
     			append_dev(body, div64);
     			append_dev(div64, div63);
     			append_dev(div63, div62);
     			append_dev(div62, div58);
     			append_dev(div58, h52);
     			append_dev(h52, img7);
-    			append_dev(h52, t89);
-    			append_dev(div58, t90);
+    			append_dev(h52, t90);
+    			append_dev(div58, t91);
     			append_dev(div58, button3);
     			append_dev(button3, span10);
-    			append_dev(div62, t92);
+    			append_dev(div62, t93);
     			append_dev(div62, div60);
     			append_dev(div60, div59);
 
@@ -8167,32 +8237,32 @@ var app = (function () {
     				}
     			}
 
-    			append_dev(div62, t93);
+    			append_dev(div62, t94);
     			append_dev(div62, div61);
     			append_dev(div61, tbody0);
     			append_dev(tbody0, tr0);
     			append_dev(tr0, td0);
     			append_dev(td0, span11);
     			append_dev(span11, strong0);
-    			append_dev(tr0, t95);
+    			append_dev(tr0, t96);
     			append_dev(tr0, td1);
     			append_dev(td1, span12);
     			append_dev(span12, strong1);
-    			append_dev(strong1, t96);
     			append_dev(strong1, t97);
     			append_dev(strong1, t98);
-    			append_dev(div61, t99);
+    			append_dev(strong1, t99);
+    			append_dev(div61, t100);
     			append_dev(div61, button4);
-    			append_dev(body, t101);
+    			append_dev(body, t102);
     			append_dev(body, div71);
     			append_dev(div71, div70);
     			append_dev(div70, div69);
     			append_dev(div69, div65);
     			append_dev(div65, h53);
-    			append_dev(div65, t103);
+    			append_dev(div65, t104);
     			append_dev(div65, button5);
     			append_dev(button5, span13);
-    			append_dev(div69, t105);
+    			append_dev(div69, t106);
     			append_dev(div69, div67);
     			append_dev(div67, div66);
 
@@ -8202,51 +8272,51 @@ var app = (function () {
     				}
     			}
 
-    			append_dev(div69, t106);
+    			append_dev(div69, t107);
     			append_dev(div69, div68);
     			append_dev(div68, tbody1);
     			append_dev(tbody1, tr1);
     			append_dev(tr1, td2);
     			append_dev(td2, span14);
     			append_dev(span14, strong2);
-    			append_dev(tr1, t108);
+    			append_dev(tr1, t109);
     			append_dev(tr1, td3);
     			append_dev(td3, span15);
-    			append_dev(tbody1, t110);
+    			append_dev(tbody1, t111);
     			append_dev(tbody1, tr2);
     			append_dev(tr2, td4);
     			append_dev(td4, span16);
     			append_dev(span16, strong3);
-    			append_dev(tr2, t112);
+    			append_dev(tr2, t113);
     			append_dev(tr2, td5);
     			append_dev(td5, span17);
     			append_dev(span17, strong4);
-    			append_dev(div68, t114);
+    			append_dev(div68, t115);
     			append_dev(div68, button6);
-    			append_dev(body, t116);
-    			if (if_block2) if_block2.m(body, null);
     			append_dev(body, t117);
     			if (if_block3) if_block3.m(body, null);
     			append_dev(body, t118);
     			if (if_block4) if_block4.m(body, null);
+    			append_dev(body, t119);
+    			if (if_block5) if_block5.m(body, null);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[16]),
-    					listen_dev(input0, "keypress", /*prepareSearch*/ ctx[14], false, false, false, false),
-    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[17]),
+    					listen_dev(input0, "input", /*input0_input_handler*/ ctx[17]),
+    					listen_dev(input0, "keypress", /*prepareSearch*/ ctx[15], false, false, false, false),
+    					listen_dev(input1, "input", /*input1_input_handler*/ ctx[18]),
     					listen_dev(div34, "click", /*getProducts*/ ctx[10], false, false, false, false),
     					listen_dev(a17, "click", /*scannerActive*/ ctx[9], false, false, false, false),
-    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[19]),
-    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[20]),
-    					listen_dev(button1, "click", /*singIn*/ ctx[12], false, false, false, false),
-    					listen_dev(input4, "input", /*input4_input_handler*/ ctx[21]),
-    					listen_dev(input5, "input", /*input5_input_handler*/ ctx[22]),
-    					listen_dev(input6, "input", /*input6_input_handler*/ ctx[23]),
-    					listen_dev(button2, "click", /*save*/ ctx[11], false, false, false, false),
-    					listen_dev(button4, "click", /*paymentProceed*/ ctx[15], false, false, false, false),
-    					listen_dev(button6, "click", /*click_handler_2*/ ctx[25], false, false, false, false)
+    					listen_dev(input2, "input", /*input2_input_handler*/ ctx[20]),
+    					listen_dev(input3, "input", /*input3_input_handler*/ ctx[21]),
+    					listen_dev(button1, "click", /*singIn*/ ctx[13], false, false, false, false),
+    					listen_dev(input4, "input", /*input4_input_handler*/ ctx[22]),
+    					listen_dev(input5, "input", /*input5_input_handler*/ ctx[23]),
+    					listen_dev(input6, "input", /*input6_input_handler*/ ctx[24]),
+    					listen_dev(button2, "click", /*save*/ ctx[12], false, false, false, false),
+    					listen_dev(button4, "click", /*paymentProceed*/ ctx[16], false, false, false, false),
+    					listen_dev(button6, "click", /*click_handler_2*/ ctx[26], false, false, false, false)
     				];
 
     				mounted = true;
@@ -8257,7 +8327,9 @@ var app = (function () {
     				set_input_value(input0, /*products*/ ctx[3].filters.name);
     			}
 
-    			if (current_block_type !== (current_block_type = select_block_type(ctx))) {
+    			if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block0) {
+    				if_block0.p(ctx, dirty);
+    			} else {
     				if_block0.d(1);
     				if_block0 = current_block_type(ctx);
 
@@ -8267,23 +8339,38 @@ var app = (function () {
     				}
     			}
 
-    			if (current_block_type_1 !== (current_block_type_1 = select_block_type_1(ctx))) {
-    				if_block1.d(1);
-    				if_block1 = current_block_type_1(ctx);
-
+    			if (/*token*/ ctx[8]) {
     				if (if_block1) {
+    					if_block1.p(ctx, dirty);
+    				} else {
+    					if_block1 = create_if_block_4(ctx);
     					if_block1.c();
-    					if_block1.m(div11, null);
+    					if_block1.m(nav1, t24);
+    				}
+    			} else if (if_block1) {
+    				if_block1.d(1);
+    				if_block1 = null;
+    			}
+
+    			if (current_block_type_1 === (current_block_type_1 = select_block_type_1(ctx)) && if_block2) {
+    				if_block2.p(ctx, dirty);
+    			} else {
+    				if_block2.d(1);
+    				if_block2 = current_block_type_1(ctx);
+
+    				if (if_block2) {
+    					if_block2.c();
+    					if_block2.m(div11, null);
     				}
     			}
 
-    			if ((!current || dirty[0] & /*product*/ 128) && t43_value !== (t43_value = /*product*/ ctx[7].length + "")) set_data_dev(t43, t43_value);
+    			if ((!current || dirty[0] & /*product*/ 128) && t44_value !== (t44_value = /*product*/ ctx[7].length + "")) set_data_dev(t44, t44_value);
 
     			if (dirty[0] & /*products*/ 8 && input1.value !== /*products*/ ctx[3].filters.name) {
     				set_input_value(input1, /*products*/ ctx[3].filters.name);
     			}
 
-    			if (dirty[0] & /*addProduct, products*/ 8200) {
+    			if (dirty[0] & /*addProduct, products*/ 16392) {
     				each_value_2 = /*products*/ ctx[3].list;
     				validate_each_argument(each_value_2);
     				let i;
@@ -8307,7 +8394,7 @@ var app = (function () {
     				each_blocks_2.length = each_value_2.length;
     			}
 
-    			if ((!current || dirty[0] & /*product*/ 128) && t68_value !== (t68_value = /*product*/ ctx[7].length + "")) set_data_dev(t68, t68_value);
+    			if ((!current || dirty[0] & /*product*/ 128) && t69_value !== (t69_value = /*product*/ ctx[7].length + "")) set_data_dev(t69, t69_value);
 
     			if (dirty[0] & /*user*/ 64 && input2.value !== /*user*/ ctx[6].username) {
     				set_input_value(input2, /*user*/ ctx[6].username);
@@ -8357,9 +8444,9 @@ var app = (function () {
     				attr_dev(div59, "style", div59_style_value);
     			}
 
-    			if (!current || dirty[0] & /*totalMoney*/ 32) set_data_dev(t97, /*totalMoney*/ ctx[5]);
+    			if (!current || dirty[0] & /*totalMoney*/ 32) set_data_dev(t98, /*totalMoney*/ ctx[5]);
 
-    			if (dirty[0] & /*addProduct, productScanner*/ 8208) {
+    			if (dirty[0] & /*addProduct, productScanner*/ 16400) {
     				each_value = /*productScanner*/ ctx[4].list;
     				validate_each_argument(each_value);
     				let i;
@@ -8384,23 +8471,10 @@ var app = (function () {
     			}
 
     			if (/*gameActive*/ ctx[1]) {
-    				if (if_block2) {
-    					if_block2.p(ctx, dirty);
-    				} else {
-    					if_block2 = create_if_block_2(ctx);
-    					if_block2.c();
-    					if_block2.m(body, t117);
-    				}
-    			} else if (if_block2) {
-    				if_block2.d(1);
-    				if_block2 = null;
-    			}
-
-    			if (/*gameOpen*/ ctx[0] == true) {
     				if (if_block3) {
     					if_block3.p(ctx, dirty);
     				} else {
-    					if_block3 = create_if_block_1(ctx);
+    					if_block3 = create_if_block_2(ctx);
     					if_block3.c();
     					if_block3.m(body, t118);
     				}
@@ -8409,17 +8483,30 @@ var app = (function () {
     				if_block3 = null;
     			}
 
-    			if (/*gameOpencasine*/ ctx[2] == true) {
+    			if (/*gameOpen*/ ctx[0] == true) {
     				if (if_block4) {
     					if_block4.p(ctx, dirty);
     				} else {
-    					if_block4 = create_if_block(ctx);
+    					if_block4 = create_if_block_1(ctx);
     					if_block4.c();
-    					if_block4.m(body, null);
+    					if_block4.m(body, t119);
     				}
     			} else if (if_block4) {
     				if_block4.d(1);
     				if_block4 = null;
+    			}
+
+    			if (/*gameOpencasine*/ ctx[2] == true) {
+    				if (if_block5) {
+    					if_block5.p(ctx, dirty);
+    				} else {
+    					if_block5 = create_if_block(ctx);
+    					if_block5.c();
+    					if_block5.m(body, null);
+    				}
+    			} else if (if_block5) {
+    				if_block5.d(1);
+    				if_block5 = null;
     			}
     		},
     		i: function intro(local) {
@@ -8435,13 +8522,14 @@ var app = (function () {
     			if (detaching) detach_dev(main);
     			destroy_component(toaster);
     			if_block0.d();
-    			if_block1.d();
+    			if (if_block1) if_block1.d();
+    			if_block2.d();
     			destroy_each(each_blocks_2, detaching);
     			destroy_each(each_blocks_1, detaching);
     			destroy_each(each_blocks, detaching);
-    			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
     			if (if_block4) if_block4.d();
+    			if (if_block5) if_block5.d();
     			mounted = false;
     			run_all(dispose);
     		}
@@ -8570,6 +8658,12 @@ var app = (function () {
     		}
     	};
 
+    	const singOut = () => {
+    		sessionStorage.clear("token");
+    		sessionStorage.clear("username");
+    		window.location.reload();
+    	};
+
     	const save = async () => {
     		try {
     			var data = await ServerConnection.saveUser(user);
@@ -8587,6 +8681,11 @@ var app = (function () {
     		try {
     			var data = await ServerConnection.singIn(user);
     			sessionStorage.setItem("token", data.token);
+    			sessionStorage.setItem("username", data.username);
+
+    			if (data) {
+    				window.location.reload();
+    			}
     		} catch(e) {
     			toast.error("Error al Inisiar sesion" + e);
     		}
@@ -8736,6 +8835,7 @@ var app = (function () {
     		resultscanner,
     		showQRCode,
     		getProducts,
+    		singOut,
     		save,
     		singIn,
     		addProduct,
@@ -8780,6 +8880,7 @@ var app = (function () {
     		token,
     		scannerActive,
     		getProducts,
+    		singOut,
     		save,
     		singIn,
     		addProduct,
