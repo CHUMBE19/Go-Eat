@@ -9,13 +9,10 @@
     let gameActive=false;
     let gameOpencasine=false;
     let products={list:[],pages:[],filters:{}};
-
-
     let productScanner={list:[],pages:[],filters:{}};
-
-
-
     let totalMoney=0;
+
+    let categories=["ALITAS","SANDWICHES","POSTRES","LUNCH","BOCADILLOS","COMPLEMENTOS","BEBIDAS","HAMBURGUESA","GUARNICION"];
     
     //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
     let scanner = null;
@@ -74,6 +71,9 @@
     const getProducts= async ()=>{
       try {
          var data= await server.getproductos(products.filters);
+         //for (let i = 0; i < categories.length; i++) {
+          //  products.list[i] = data.filter(e=>e.nameconcat==categories[i])
+        // }
          products.xpagina=data.xpagina;
          products.pagina=data.pagina;
          products.total=data.total;
