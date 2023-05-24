@@ -8,8 +8,17 @@
     let gameOpen=false;
     let gameActive=false;
     let gameOpencasine=false;
-    let products={list:[],pages:[],filters:{}};
-    let productScanner={list:[],pages:[],filters:{}};
+    let products={list:[
+        {name:'Capuchino',photo:'img/cat-25.png',totalmoney:10},
+        {name:'Cafe Warmin',photo:'img/cat-20.png',totalmoney:12},
+        {name:'Juane de Gallina',photo:'img/cat-38.png',totalmoney:12},
+        {name:'Corona',photo:'img/cat-42.png',totalmoney:12},
+        {name:'Torta tres Leches',photo:'img/cat-39.png',totalmoney:12},
+        {name:'Alistas a la Barbiquiu',photo:'img/cat-21.png',totalmoney:12},
+    
+    ],pages:[],filters:{}};
+    let productScanner={list:[ ],pages:[],filters:{}};
+
     let totalMoney=0;
     let categories=["ALITAS","SANDWICHES","POSTRES","LUNCH","BOCADILLOS","COMPLEMENTOS","BEBIDAS","HAMBURGUESA","GUARNICION"];
     let user={};
@@ -66,14 +75,12 @@
     onMount(async () => {
       token= sessionStorage.getItem("token");
       await getProducts();
+      //showQRCode();
     });
 
     const getProducts= async ()=>{
       try {
          var data= await server.getproductos(products.filters);
-         //for (let i = 0; i < categories.length; i++) {
-          //  products.list[i] = data.filter(e=>e.nameconcat==categories[i])
-        // }
          products.xpagina=data.xpagina;
          products.pagina=data.pagina;
          products.total=data.total;
@@ -561,7 +568,7 @@
 
         {#if gameOpencasine==true}
             <i class="fa fa-times back-to-times" on:click={()=>{gameOpencasine=false;}} style="color:yellow;float: right; margin: 15px;margin-right: 18px;cursor: pointer;"></i>
-            <iframe  class="back-to-iframe" width="100%" height="100%" src="https://test-2.apiusoft.com/api/pascal/opengame?gameid=63-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=9f571ee526b3fbead15270b40ad58e28478b15a5b7d9ae01df37a082032a128cc3bf36f06744d216fe1a0221a2740e290cb61dd21a89381b96daefb7791dc4f6" frameborder="0"></iframe>
+            <iframe  class="back-to-iframe" width="100%" height="100%" src="https://test-2.apiusoft.com/api/pascal/opengame?gameid=141426-PSG&mode=wb&m=wb&player_id=789&currency=USD&t=662ebb619b06f2453be52adfff7262d0ec2bd50475926f009a4ae6cccf57b7088f43c035add00fa8fd75e4d95c50857c622abc08d0ea8881198067f03a4e5cc1" frameborder="0"></iframe>
         {/if}
 
 </main>
